@@ -7,19 +7,19 @@ import { customElement, property } from 'lit/decorators.js'
 export class SeedSynopsisText extends LitElement {
 
     @property({ type: String })
-    content: string;
+    content: string = "";
 
     @property({ type: String })
-    source: string;
+    source: string = "";
 
     @property({ type: String })
-    id: string;
+    id: string = "";
 
     @property({ type: String })
-    position: string;
+    position: string = "";
 
     @property({ type: String })
-    displayType: string;
+    displayType: string = "";
 
     connectedCallback() {
 	super.connectedCallback();

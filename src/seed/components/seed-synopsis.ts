@@ -8,10 +8,10 @@ import { customElement, property } from 'lit/decorators.js'
 export class SeedSynopsis extends LitElement {
 
     @property({ type: String })
-    id: string;
+    id: string = "";
 
     @property({ type: String })
-    alignment: string;
+    alignment: string = "";
 
     connectedCallback() {
 	super.connectedCallback();
