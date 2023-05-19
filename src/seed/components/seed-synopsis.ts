@@ -13,6 +13,13 @@ export class SeedSynopsis extends LitElement {
     @property({ type: String })
     alignment: string;
 
+    connectedCallback() {
+	super.connectedCallback();
+	if (this.shadowRoot !== null) {
+	    this.shadowRoot.addEventListener("seed-synopsis-sync-scroll", this.propagateSync);
+	}
+    }
+
     getHeight = () => {
 	return window.innerHeight * 0.8;
     }
@@ -28,8 +35,11 @@ export class SeedSynopsis extends LitElement {
     @queryAssignedElements({ flatten: true, selector: "seed-synopsis-text" })
     synopsisTexts!: Array<LitElement>;
 
-    propagateSync = (msg: Object) => {
+    propagateSync = (e: Event) => {
 	console.log("propagating sync event to " + this.synopsisTexts.length + " iframes");
+
+	var msg: Object = (e as CustomEvent).detail;
+	console.log(e);
 	for (var i = 0; i < this.synopsisTexts.length; i++) {
 	    var iframe = this.synopsisTexts[i].renderRoot.querySelector("iframe");
 	    if (iframe !== null) {

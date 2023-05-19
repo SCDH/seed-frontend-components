@@ -1,5 +1,6 @@
-import {html, css, LitElement} from 'lit'
-import {customElement, property} from 'lit/decorators.js'
+import { html, css, LitElement } from 'lit'
+import { CSSResult } from 'lit-element'
+import { customElement, property } from 'lit/decorators.js'
 
 // define the web component
 @customElement("seed-synopsis-text")
@@ -62,13 +63,12 @@ export class SeedSynopsisText extends LitElement {
 	}
     }
 
-    syncOthers = (e: Event) => {
+    syncOthers = (_e: Event) => {
 	console.log("syncing others");
 	var msg = { "event": "sync", "filename": this.content, "source": this.source, "id": this.id, "position": this.position };
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
-	var synopsis = this.parentElement;
-	synopsis.propagateSync(msg);
+	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: msg, bubbles: true, composed: true }));
     }
 
 
