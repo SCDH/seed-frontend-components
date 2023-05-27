@@ -11,7 +11,6 @@ pages:
   script:
     - npm install
     - npm run build
-    - # cd ..
     - ls -l
     - ls -l dist
     - mkdir -p public
