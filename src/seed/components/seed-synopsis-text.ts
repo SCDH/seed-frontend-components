@@ -15,11 +15,14 @@ export class SeedSynopsisText extends LitElement {
     @property({ type: String })
     id: string = "";
 
-    @property({ type: String })
-    position: string = "";
+    @property({ type: String, attribute: false })
+    position!: string;
 
     @property({ type: String })
     displayType: string = "";
+
+    @property({ type: Object, attribute: false })
+    contentMeta!: Object;
 
     connectedCallback() {
 	super.connectedCallback();
@@ -44,7 +47,7 @@ export class SeedSynopsisText extends LitElement {
     }
 
     footerTemplate() {
-	return html`<div>Position: <span>${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
+	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
     }
 
     render() {
@@ -60,26 +63,38 @@ export class SeedSynopsisText extends LitElement {
 
     getContentUrl() : URL {
 	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
-	if (iframe !== null) {
-	    return new URL(this.content, iframe.contentWindow?.location.href);
+	let url: string | null = iframe?.contentWindow?.location.href ?? null;
+	if (url !== null) {
+	    return new URL(url);
 	} else {
+	    console.log("no valid location in iframe, using parent location");
 	    return new URL(this.content, window.location.href);
 	}
     }
 
     handleMessage=(e: MessageEvent) => {
-	if (e.data?.href == this.getContentUrl().toString()) {
-	    console.log("text in " + this.id + " was scrolled: " + e.data);
-	    this.position = e.data?.top;
+	// console.log("filtering message: ", e, this.getContentUrl().toString());
+	if (this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
+	    console.log("text in " + this.id + " was scrolled: ", e.data);
+	    this.contentMeta = e.data;
+	    this.position = e.data.top;
+	}
+    }
+
+    stripFragment(url: string): string {
+	let pos = url.indexOf("#");
+	if (pos >= 0) {
+	    return url.substring(0, pos);
+	} else {
+	    return url;
 	}
     }
 
     syncOthers = (_e: Event) => {
 	console.log("syncing others");
-	var msg = { "event": "sync", "filename": this.content, "source": this.source, "id": this.id, "position": this.position };
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
-	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: msg, bubbles: true, composed: true }));
+	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: { ...this.contentMeta, "event": "sync" }, bubbles: true, composed: true }));
     }
 
 
