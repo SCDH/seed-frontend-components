@@ -39,12 +39,11 @@ export class SeedSynopsis extends LitElement {
 	console.log("propagating sync event to " + this.synopsisTexts.length + " iframes");
 
 	var msg: Object = (e as CustomEvent).detail;
-	console.log(e);
 	for (var i = 0; i < this.synopsisTexts.length; i++) {
 	    var iframe = this.synopsisTexts[i].renderRoot.querySelector("iframe");
 	    if (iframe !== null) {
 		if (iframe.contentWindow !== null) {
-		    iframe.contentWindow.postMessage(msg, window.location.protocol + window.location.host);
+		    iframe.contentWindow.postMessage(msg, window.location.href);
 		}
 	    }
 	}

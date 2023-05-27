@@ -29,7 +29,7 @@ function notifyScrolled() {
         if (scrollBlocksY[i] >= y && scrollBlocks[i].id != "") {
             console.log("scrolled to " + i + "th div: " + scrollBlocks[i].id);
             // pass a message using the postMessage channel, cf. https://davidwalsh.name/window-iframe
-            parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.location.protocol + window.location.host);
+            parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.location.href);
             break;
         }
     }
