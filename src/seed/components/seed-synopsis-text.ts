@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit'
-import { CSSResult } from 'lit-element'
+import { CSSResult, query } from 'lit-element'
 import { customElement, property } from 'lit/decorators.js'
 
 // define the web component
@@ -55,9 +55,20 @@ export class SeedSynopsisText extends LitElement {
 	return "inline-block";
     }
 
+    @query("iframe")
+    iframes!: Array<HTMLIFrameElement>;
+
+    getContentUrl() : URL {
+	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
+	if (iframe !== null) {
+	    return new URL(this.content, iframe.contentWindow?.location.href);
+	} else {
+	    return new URL(this.content, window.location.href);
+	}
+    }
+
     handleMessage=(e: MessageEvent) => {
-	console.log("source: " + this.source);
-	if (e.data?.filename == this.source) {
+	if (e.data?.href == this.getContentUrl().toString()) {
 	    console.log("text in " + this.id + " was scrolled: " + e.data);
 	    this.position = e.data?.top;
 	}
