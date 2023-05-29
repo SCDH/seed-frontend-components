@@ -30,11 +30,11 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 
     connectedCallback() {
 	super.connectedCallback();
-	window.addEventListener("message", this.handleMessage);
+	window.addEventListener("message", this.handleScrolled);
     }
 
     disconnectedCallback() {
-	window.removeEventListener("message", this.handleMessage);
+	window.removeEventListener("message", this.handleScrolled);
 	super.disconnectedCallback();
     }
 
@@ -76,9 +76,9 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	}
     }
 
-    handleMessage=(e: MessageEvent) => {
+    protected handleScrolled = (e: MessageEvent) => {
 	// console.log("filtering message: ", e, this.getContentUrl().toString());
-	if (this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
+	if (e.data?.event == "scrolled" && this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
 	    console.log("text in " + this.id + " was scrolled: ", e.data);
 	    this.contentMeta = e.data as IContentMeta;
 	    this.position = e.data.top;
