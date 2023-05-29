@@ -35,16 +35,16 @@ export class SeedSynopsis extends LitElement {
     @queryAssignedElements({ flatten: true, selector: "seed-synopsis-text" })
     synopsisTexts!: Array<LitElement>;
 
+    // pass a sync event down by setting the syncTarget property on synoposis components
     propagateSync = (e: Event) => {
-	console.log("propagating sync event to " + this.synopsisTexts.length + " iframes");
-
+	console.log("propagating sync event to " + this.synopsisTexts.length + " children");
 	var msg: Object = (e as CustomEvent).detail;
 	for (var i = 0; i < this.synopsisTexts.length; i++) {
-	    var iframe = this.synopsisTexts[i].renderRoot.querySelector("iframe");
-	    if (iframe !== null) {
-		if (iframe.contentWindow !== null) {
-		    iframe.contentWindow.postMessage(msg, window.location.href);
-		}
+	    if ("syncTarget" in (this.synopsisTexts[i] as any)) {
+		// we observe the "properties down" principle
+		(this.synopsisTexts[i] as any).syncTarget = msg;
+	    } else {
+		console.log("not a sync component");
 	    }
 	}
     }

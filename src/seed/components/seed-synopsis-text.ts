@@ -21,8 +21,11 @@ export class SeedSynopsisText extends LitElement {
     @property({ type: String })
     displayType: string = "";
 
-    @property({ type: Object, attribute: false })
-    contentMeta!: Object;
+    @property({ state: true })
+    protected contentMeta: Object = {};
+
+    @property({ type: Boolean })
+    hasSyncManager: boolean = false;
 
     connectedCallback() {
 	super.connectedCallback();
@@ -59,7 +62,7 @@ export class SeedSynopsisText extends LitElement {
     }
 
     @query("iframe")
-    iframes!: Array<HTMLIFrameElement>;
+    protected iframe!: HTMLIFrameElement;
 
     getContentUrl() : URL {
 	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
@@ -95,6 +98,31 @@ export class SeedSynopsisText extends LitElement {
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
 	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: { ...this.contentMeta, "event": "sync" }, bubbles: true, composed: true }));
+    }
+
+    // the reactive property syncTarget has a custom setter and getter
+    private _syncTarget: Object = {};
+
+    set syncTarget(target: Object) {
+	// do the sync by posting a message to the iframe
+	if (this.stripFragment((target as any).href) !== this.stripFragment(this.getContentUrl().toString())) {
+	    console.log("sync-ing " + (this.contentMeta as any).href + ", scrolling to element aligned to: " + (target as any).top);
+	    if (this.hasSyncManager) {
+		// TODO
+	    } else {
+		// the document in the iframe must get the scroll target on its own
+		this.iframe.contentWindow?.postMessage(target, window.location.href);
+	    }
+	}
+	// see https://lit.dev/docs/components/properties/#accessors-custom
+	let oldTarget: Object = this._syncTarget;
+	this._syncTarget = target;
+	this.requestUpdate('syncTarget', oldTarget);
+    }
+
+    @property({ attribute: false })
+    get syncTarget(): Object {
+	return this._syncTarget;
     }
 
 
