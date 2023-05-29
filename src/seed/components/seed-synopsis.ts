@@ -2,11 +2,11 @@ import { html, css, LitElement } from 'lit'
 import { queryAssignedElements, CSSResult } from 'lit-element'
 import { TemplateResult } from 'lit-html'
 import { customElement, property } from 'lit/decorators.js'
-import { IContentMeta } from './isynopsis'
+import { IContentMeta, SeedSynopsisSyncComponent } from './isynopsis'
 
 // define the web component
 @customElement("seed-synopsis")
-export class SeedSynopsis extends LitElement {
+export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     id: string = "";
@@ -17,7 +17,10 @@ export class SeedSynopsis extends LitElement {
     connectedCallback() {
 	super.connectedCallback();
 	if (this.shadowRoot !== null) {
-	    this.shadowRoot.addEventListener("seed-synopsis-sync-scroll", this.propagateSync);
+	    this.shadowRoot.addEventListener("seed-synopsis-sync-scroll", (e: Event) => {
+		console.log("propagating sync event to " + this.synopsisTexts.length + " children");
+		this.propagateSync((e as CustomEvent).detail as IContentMeta);
+	    });
 	}
     }
 
@@ -33,21 +36,35 @@ export class SeedSynopsis extends LitElement {
 	return html`${this.styleTemplate()}<div class="synopsis"><slot></slot></div>`;
     }
 
-    @queryAssignedElements({ flatten: true, selector: "seed-synopsis-text" })
-    synopsisTexts!: Array<LitElement>;
+    @queryAssignedElements({ flatten: true, selector: "*" })
+    synopsisTexts!: Array<Element>;
 
     // pass a sync event down by setting the syncTarget property on synoposis components
-    propagateSync = (e: Event) => {
-	console.log("propagating sync event to " + this.synopsisTexts.length + " children");
-	var msg: IContentMeta = (e as CustomEvent).detail as IContentMeta;
+    protected propagateSync = (msg: IContentMeta) => {
 	for (var i = 0; i < this.synopsisTexts.length; i++) {
+	    // test if element is a SeedSynopsisSyncComponent by using type guard
 	    if ("syncTarget" in (this.synopsisTexts[i] as any)) {
-		// we observe the "properties down" principle
+		// following the "properties down" principle
+		// information is passed by setting a property
 		(this.synopsisTexts[i] as any).syncTarget = msg;
-	    } else {
-		console.log("not a sync component");
 	    }
 	}
+    }
+
+    // the syncTarget property has a custom setter and getter
+    private _syncTarget!: IContentMeta;
+
+    set syncTarget(target: IContentMeta) {
+	this.propagateSync(target);
+	// see https://lit.dev/docs/components/properties/#accessors-custom
+	let oldTarget: Object = this._syncTarget;
+	this._syncTarget = target;
+	this.requestUpdate('syncTarget', oldTarget);
+    }
+
+    @property({ attribute: false })
+    get syncTarget(): IContentMeta {
+	return this._syncTarget;
     }
 
 
