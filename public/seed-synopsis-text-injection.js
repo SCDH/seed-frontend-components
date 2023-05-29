@@ -41,7 +41,7 @@ window.addEventListener("scroll", (event) => {
     scrollTimeout = setTimeout(notifyScrolled, 250);
 });
 
-// call back for scroll-sync message
+// callback for scroll-sync message
 function notifySyncScroll(e) {
     if (e.data?.event == "sync" && e.data?.href !== msg.href) {
         let newPos =  makeScrollTarget(e.data?.top);
