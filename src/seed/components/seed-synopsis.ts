@@ -24,11 +24,11 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
 	}
     }
 
-    getHeight = () => {
+    protected getHeight = () => {
 	return window.innerHeight * 0.8;
     }
 
-    styleTemplate(): TemplateResult<1> {
+    protected styleTemplate(): TemplateResult<1> {
 	return html`<style>:host { display: block; } div.synopsis { height: ${this.getHeight()}px; }</style>`;
     }
 

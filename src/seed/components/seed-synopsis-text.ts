@@ -38,19 +38,19 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	super.disconnectedCallback();
     }
 
-    styleTemplate() {
+    protected styleTemplate() {
 	return html`<style>:host { display: inline-block; width: 33%; height: 100%; }</style>`;
     }
 
-    headerTemplate() {
+    protected headerTemplate() {
 	return html`<div><span>${this.id}:</span> <span>${this.source}</span>`;
     }
 
-    iframeTemplate() {
+    protected iframeTemplate() {
 	return html`<div class="content-container" id="${this.id}-content-container"><iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe></div>`;
     }
 
-    footerTemplate() {
+    protected footerTemplate() {
 	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
     }
 
@@ -58,14 +58,14 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	return html`${this.styleTemplate()}<div class="synopsis-text-container">${this.headerTemplate()}${this.iframeTemplate()}${this.footerTemplate()}</div>`;
     }
 
-    getDisplayType() : String {
+    protected getDisplayType() : String {
 	return "inline-block";
     }
 
     @query("iframe")
     protected iframe!: HTMLIFrameElement;
 
-    getContentUrl() : URL {
+    protected getContentUrl() : URL {
 	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
 	let url: string | null = iframe?.contentWindow?.location.href ?? null;
 	if (url !== null) {
@@ -85,7 +85,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	}
     }
 
-    stripFragment(url: string): string {
+    protected stripFragment(url: string): string {
 	let pos = url.indexOf("#");
 	if (pos >= 0) {
 	    return url.substring(0, pos);
@@ -94,7 +94,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	}
     }
 
-    syncOthers = (_e: Event) => {
+    protected syncOthers = (_e: Event) => {
 	console.log("syncing others");
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
