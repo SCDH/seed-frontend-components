@@ -2,6 +2,7 @@ import { html, css, LitElement } from 'lit'
 import { queryAssignedElements, CSSResult } from 'lit-element'
 import { TemplateResult } from 'lit-html'
 import { customElement, property } from 'lit/decorators.js'
+import { IContentMeta } from './isynopsis'
 
 // define the web component
 @customElement("seed-synopsis")
@@ -38,7 +39,7 @@ export class SeedSynopsis extends LitElement {
     // pass a sync event down by setting the syncTarget property on synoposis components
     propagateSync = (e: Event) => {
 	console.log("propagating sync event to " + this.synopsisTexts.length + " children");
-	var msg: Object = (e as CustomEvent).detail;
+	var msg: IContentMeta = (e as CustomEvent).detail as IContentMeta;
 	for (var i = 0; i < this.synopsisTexts.length; i++) {
 	    if ("syncTarget" in (this.synopsisTexts[i] as any)) {
 		// we observe the "properties down" principle

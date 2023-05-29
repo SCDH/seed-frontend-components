@@ -1,10 +1,11 @@
 import { html, css, LitElement } from 'lit'
 import { CSSResult, query } from 'lit-element'
 import { customElement, property } from 'lit/decorators.js'
+import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends LitElement {
+export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -22,7 +23,7 @@ export class SeedSynopsisText extends LitElement {
     displayType: string = "";
 
     @property({ state: true })
-    protected contentMeta: Object = {};
+    protected contentMeta!: IContentMeta;
 
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
@@ -79,7 +80,7 @@ export class SeedSynopsisText extends LitElement {
 	// console.log("filtering message: ", e, this.getContentUrl().toString());
 	if (this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
 	    console.log("text in " + this.id + " was scrolled: ", e.data);
-	    this.contentMeta = e.data;
+	    this.contentMeta = e.data as IContentMeta;
 	    this.position = e.data.top;
 	}
     }
@@ -101,12 +102,12 @@ export class SeedSynopsisText extends LitElement {
     }
 
     // the reactive property syncTarget has a custom setter and getter
-    private _syncTarget: Object = {};
+    private _syncTarget!: IContentMeta;
 
-    set syncTarget(target: Object) {
+    set syncTarget(target: IContentMeta) {
 	// do the sync by posting a message to the iframe
-	if (this.stripFragment((target as any).href) !== this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("sync-ing " + (this.contentMeta as any).href + ", scrolling to element aligned to: " + (target as any).top);
+	if (this.stripFragment(target.href) !== this.stripFragment(this.getContentUrl().toString())) {
+	    console.log("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
 	    if (this.hasSyncManager) {
 		// TODO
 	    } else {
@@ -121,7 +122,7 @@ export class SeedSynopsisText extends LitElement {
     }
 
     @property({ attribute: false })
-    get syncTarget(): Object {
+    get syncTarget(): IContentMeta {
 	return this._syncTarget;
     }
 
