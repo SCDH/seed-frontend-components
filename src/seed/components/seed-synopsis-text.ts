@@ -16,11 +16,17 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     @property({ type: String })
     id: string = "";
 
-    @property({ type: String, attribute: false })
-    position!: string;
+    @property({ attribute: false, state: true })
+    protected position!: string;
 
     @property({ type: String })
-    displayType: string = "";
+    alignment: string = "horizontal";
+
+    @property({ type: String })
+    width!: string; // = "100%";
+
+    @property({ type: String })
+    height!: string; // = "100%";
 
     @property({ state: true })
     protected contentMeta!: IContentMeta;
@@ -39,7 +45,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     }
 
     protected styleTemplate() {
-	return html`<style>:host { display: inline-block; width: 33%; height: 100%; }</style>`;
+	return html`<style>:host { display: ${this.getHostDisplay()}; width: ${this.width}; height: ${this.height}; }</style>`;
     }
 
     protected headerTemplate() {
@@ -58,8 +64,12 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	return html`${this.styleTemplate()}<div class="synopsis-text-container">${this.headerTemplate()}${this.iframeTemplate()}${this.footerTemplate()}</div>`;
     }
 
-    protected getDisplayType() : String {
-	return "inline-block";
+    protected getHostDisplay() : String {
+	if (this.alignment == "horizontal") {
+	    return "inline-block";
+	} else {
+	    return "block";
+	}
     }
 
     @query("iframe")

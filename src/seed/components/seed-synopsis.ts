@@ -11,8 +11,14 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
     @property({ type: String })
     id: string = "";
 
-    @property({ type: String })
-    alignment: string = "";
+    @property({ type: String, attribute: true, reflect: true })
+    alignment: string = "horizontal";
+
+    @property({ type: String, reflect: true })
+    width: string = "100%";
+
+    @property({ type: String, reflect: true })
+    height: string = Math.floor(window.innerHeight * 0.8).toString() + "px";
 
     connectedCallback() {
 	super.connectedCallback();
@@ -22,20 +28,24 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
 		this.propagateSync((e as CustomEvent).detail as IContentMeta);
 	    });
 	}
+	// Would there be a better event to register this alignChildren method to?
+	window.addEventListener("load", this.alignChildren);
     }
 
-    protected getHeight = () => {
-	return window.innerHeight * 0.8;
+    disconnectedCallback() {
+	window.removeEventListener("load", this.alignChildren);
+	super.disconnectedCallback();
     }
 
     protected styleTemplate(): TemplateResult<1> {
-	return html`<style>:host { display: block; } div.synopsis { height: ${this.getHeight()}px; }</style>`;
+	return html`<style>:host { display: block; width: ${this.width}; height: ${this.height} } div.synopsis { width: 100%; height: 100% }</style>`;
     }
 
     render(): TemplateResult<1> {
 	return html`${this.styleTemplate()}<div class="synopsis"><slot></slot></div>`;
     }
 
+    @property({ attribute: false, state: true })
     @queryAssignedElements({ flatten: true, selector: "*" })
     synopsisTexts!: Array<Element>;
 
@@ -67,6 +77,26 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
 	return this._syncTarget;
     }
 
+
+    /**
+     * Set alignment, width, and height properties on children.
+     */
+    protected alignChildren = (_e: Event) => {
+	let countOfChildren = this.synopsisTexts.length;
+	let childWidth: number = 100;
+	let childHeight: number = 100;
+	if (this.alignment == "horizontal") {
+	    childWidth = Math.floor(childWidth / countOfChildren);
+	} else {
+	    childHeight = Math.floor(childHeight / countOfChildren);
+	}
+	console.log("aligning " + countOfChildren + " children:", this.alignment, childWidth, childHeight);
+	for (let i = 0; i < countOfChildren; i++) {
+	    (this.synopsisTexts[i] as any).alignment = this.alignment;
+	    (this.synopsisTexts[i] as any).width = childWidth.toString() + "%";
+	    (this.synopsisTexts[i] as any).height = childHeight.toString() + "%";
+	}
+    }
 
     static styles: CSSResult = css`
 :host {
