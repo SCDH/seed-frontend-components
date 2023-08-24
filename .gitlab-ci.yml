@@ -1,6 +1,11 @@
-image: node:16.5.0
-pages:
-  stage: deploy
+image: harbor.uni-muenster.de/proxy-docker/library/node:latest
+
+stages:
+  - test
+  - deploy
+
+build:
+  stage: test
   cache:
     key:
       files:
@@ -11,6 +16,22 @@ pages:
   script:
     - npm install
     - npm run build
+  artifacts:
+    - dist
+
+# push to npm package registry
+deploy:
+  stage: deploy
+  script:
+    - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" > .npmrc
+    - npm publish
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+
+pages:
+  stage: deploy
+  script:
     - ls -l
     - ls -l dist
     - mkdir -p public
