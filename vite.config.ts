@@ -9,7 +9,7 @@ export default defineConfig(({ command, mode }) => {
 	    lib: {
 		entry: ["src/seed/components/seed-synopsis.ts",
 			"src/seed/components/seed-synopsis-text.ts"],
-		// fileName: "seed-synopsis-components",
+		// fileName: "seed-frontend-components",
 		// formats: ["es", "cjs"],
 	    },
 	    // rollupOptions: {
