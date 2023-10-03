@@ -4,16 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/public/scdh.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Synopsis</title>
+    <title>Test</title>
     <script type="module" src="/src/seed/components/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed/components/seed-choose-transform-rest.ts"></script>
   </head>
   <body>
+    <seed-choose-transform-rest
+      apiBase="http://localhost:8080" OFFtransformations="[param-integer]">
+      
+    </seed-choose-transform-rest>
+
+    <!--
     <seed-synopsis alignment="horizontal">
       <seed-synopsis-text content="/public/doc1.html" id="LXX" source="LXX.words.tei.xml"></seed-synopsis-text>
       <seed-synopsis-text content="/public/doc2.html" id="MT" source="MT.words.tei.xml"></seed-synopsis-text>
       <seed-synopsis-text content="/public/doc3.html" id="TG" source="TG.words.tei.xml"></seed-synopsis-text>
     </seed-synopsis>
+    -->
   </body>
   <script>
     // Create IE + others compatible event handler
