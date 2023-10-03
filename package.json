@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lit": "^2.6.1"
+      "lit": "^2.6.1",
+      "seed-xml-transformer-ts-client": "0.1.0"
   },
   "devDependencies": {
     "typescript": "^5.0.2",
