@@ -33,14 +33,14 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
 
     render(): HTMLTemplateResult {
-	return html`<div class="transformation-container"><form @submit="${this.submit}" autocomplete="off">${this.renderTransformationChooser()}${this.renderError()}${this.renderTransformationInfo()}${this.renderSourceForm()}${this.renderSubmit()}</form></div><slot></slot>`;
+	return html`<div class="transformation-chooser">${this.renderTransformationInfo()}<div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}${this.renderSubmit()}</form></div></div><slot></slot>`;
     }
 
     renderSubmit(): HTMLTemplateResult {
 	if (this._transformation == null) {
-	    return html`<div class="inputfield source"><input type="submit" disabled="true" value="Transform"/></div>`;
+	    return html`<div class="inputfield submit"><input type="submit" disabled="true" value="Transform"/></div>`;
 	} else {
-	    return html`<div class="inputfield source"><input type="submit" value="Transform"/></div>`;
+	    return html`<div class="inputfield submit"><input type="submit" value="Transform"/></div>`;
 	}
     }
 
@@ -240,8 +240,45 @@ color: red;
 }
 select:invalid { color: darkgray; }
 div.transformation-info-container {
-  border: 1px solid lightblue;
+border: 1px solid lightblue;
+padding: 10px;
 }
+div.inputfield {
+margin-bottom: 2ex;
+}
+div.inputfield label {
+display: block;
+font-weight: 600;
+}
+div.inputfield.submit input {
+font-size:1em;
+padding:5px;
+}
+div.inputfield.submit input:not([disabled]) {
+color:white;
+background-color:green;
+border:1px solid #336600;
+}
+
+div.transformation-chooser {
+height: auto;
+overflow: hidden;
+}
+div.transformation-chooser div.form {
+display: block;
+width: auto;
+overflow: hidden;
+float: none;
+}
+div.transformation-info-container {
+float: right;
+width: auto;
+overflow: scroll;
+}
+div.clear {
+clear: both;
+}
+
 div.transformation-info {
   height: 100%;
   font-family: monospace;
