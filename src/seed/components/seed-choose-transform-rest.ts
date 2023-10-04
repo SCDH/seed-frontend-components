@@ -1,14 +1,11 @@
-import { html, css, LitElement, HTMLTemplateResult, CSSResult } from 'lit'
+import { html, css, HTMLTemplateResult, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import { Configuration } from 'seed-xml-transformer-ts-client/configuration.ts'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from 'seed-xml-transformer-ts-client/api.ts'
+import { TransformRESTElement } from './transform-rest.ts'
 
 // define the web component
 @customElement("seed-choose-transform-rest")
-export class SeedChooseTransformREST extends LitElement {
-
-    @property({ type: String })
-    apiBase: string = "";
+export class SeedChooseTransformREST extends TransformRESTElement {
 
     @property() // { type: Array<String> })
     transformations: Array<String> = [];
@@ -94,12 +91,6 @@ export class SeedChooseTransformREST extends LitElement {
     }
 
 
-
-    protected getConfiguration(): Configuration {
-	return new Configuration({
-	    basePath: this.apiBase
-	});
-    }
 
     protected async notifySelect(e: Event) {
 	let transformation = (e?.target as HTMLSelectElement)?.value;
