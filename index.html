@@ -8,11 +8,12 @@
     <script type="module" src="/src/seed/components/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed/components/seed-choose-transform-rest.ts"></script>
+    <script type="module" src="/src/seed/components/seed-transform-rest.ts"></script>
   </head>
   <body>
     <seed-choose-transform-rest
       apiBase="http://localhost:8080" OFFtransformations="[param-integer]">
-      
+      <seed-transform-rest apiBase="http://localhost:8080"/>
     </seed-choose-transform-rest>
 
     <!--
