@@ -2,6 +2,7 @@ import { html, css, HTMLTemplateResult, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from 'seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
+import { SeedTransformREST } from './seed-transform-rest.ts'
 
 // define the web component
 @customElement("seed-choose-transform-rest")
@@ -27,13 +28,24 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
     protected noPrintTransformationInfo: Array<String> = ["parameterDescriptors"];
 
+    @state()
+    protected _formError: string | null = null;
+
 
     render(): HTMLTemplateResult {
-	return html`<div class="transformation-container">${this.renderTransformationChooser()}${this.renderError()}${this.renderTransformationInfo()}</div>`;
+	return html`<div class="transformation-container"><form @submit="${this.submit}" autocomplete="off">${this.renderTransformationChooser()}${this.renderError()}${this.renderTransformationInfo()}${this.renderSourceForm()}${this.renderSubmit()}</form></div><slot></slot>`;
+    }
+
+    renderSubmit(): HTMLTemplateResult {
+	if (this._transformation == null) {
+	    return html`<div class="inputfield source"><input type="submit" disabled="true" value="Transform"/></div>`;
+	} else {
+	    return html`<div class="inputfield source"><input type="submit" value="Transform"/></div>`;
+	}
     }
 
     renderTransformationChooser(): HTMLTemplateResult {
-	return html`<label for="transformations" @change="${this.notifySelect}">Choose a transformation:<label><select name="transformations" id="transformations">${this._transformations.map(t => html`<option value="${t}">${t}</option>`)}${this.renderTransformationInfo()}</select>`;
+	return html`<div class="inputfield transformation"><label for="transformation">Transformation ID<label><select name="transformation" id="transformation" @change="${this.transformationSelected}" required><option value="" disabled selected hidden>Please choose...</option>${this._transformations.map(t => html`<option value="${t}">${t}</option>`)}${this.renderTransformationInfo()}</select></div>`;
     }
 
     renderError(): HTMLTemplateResult {
@@ -90,13 +102,62 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 	}
     }
 
+    renderSourceForm(): HTMLTemplateResult {
+	return html`<div class="inputfield source"><label for="source">XML Source Document</label><input type="file" id="source" name="source" accept="text/xml, application/xml, text/xhtml"/></div><div class="inputfield systemId"><label for="systemId">URL / System ID</label><input type="text" id="systemId" name="systemId"/></div>${this.renderSourceFormError()}`;
+    }
+
+    renderSourceFormError(): HTMLTemplateResult {
+	if (this._formError === null) {
+	    return html``;
+	} else {
+	    return html`<div class="error">${this._formError}</div>`;
+	}
+    }
 
 
-    protected async notifySelect(e: Event) {
+
+
+    protected async transformationSelected(e: Event) {
 	let transformation = (e?.target as HTMLSelectElement)?.value;
 	console.log("selected", transformation);
-	// this._transformation = transformation;
+	this._transformation = transformation;
+	this._formError = null;
 	this.collectTransformationInformation(transformation);
+    }
+
+    protected async submit(e: SubmitEvent) {
+	console.log("form submitted");
+	// we stop default handling of the submit event, i.e. sending
+	// form data to the server
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+	e.preventDefault();
+	// get the form data from the shadow dom
+	const systemId: string = (this.shadowRoot?.querySelector("#systemId") as HTMLInputElement)?.value;
+	console.log("systemId", systemId);
+	const files: FileList | null = (this.shadowRoot?.querySelector("#source") as HTMLInputElement)?.files;
+	console.log("files", files);
+
+	// validate input
+	if ((this._transformationInfo?.requiresSource ?? false) && systemId.length === 0 && files !== null && files[0] === undefined) {
+	    console.log("either URL or file must be entered");
+	    this._formError = "An XML source file or an URL is required.";
+	} else {
+
+	    // run the transformation
+	    const slot = this.shadowRoot?.querySelector("slot");
+	    console.log(slot?.assignedElements({flatten: true}));
+	    const transformer: SeedTransformREST | null = slot?.assignedElements({flatten: true})?.[0] as SeedTransformREST;
+	    console.log(transformer);
+	    if (transformer === null) {
+		console.log("no rest transformer in slotted children");
+		this._error = "HTML Error: no transformer in slotted children";
+	    } else {
+		// properties down
+		transformer["transformation"] = this._transformation;
+		transformer.href = systemId;
+		transformer.src = files?.[0] ?? null;
+	    }
+	}
     }
 
     protected async collectTransformationInformation(transformation: string) {
@@ -177,6 +238,7 @@ font-style: italic;
 .error {
 color: red;
 }
+select:invalid { color: darkgray; }
 div.transformation-info-container {
   border: 1px solid lightblue;
 }
