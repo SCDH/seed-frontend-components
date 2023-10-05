@@ -33,7 +33,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
 
     render(): HTMLTemplateResult {
-	return html`<div class="transformation-chooser">${this.renderTransformationInfo()}<div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}${this.renderSubmit()}</form></div></div><slot></slot>`;
+	return html`<div class="transformation-chooser"><div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}${this.renderSubmit()}</form></div></div><slot></slot>`;
     }
 
     renderSubmit(): HTMLTemplateResult {
@@ -45,7 +45,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     }
 
     renderTransformationChooser(): HTMLTemplateResult {
-	return html`<div class="inputfield transformation"><label for="transformation">Transformation ID<label><select name="transformation" id="transformation" @change="${this.transformationSelected}" required><option value="" disabled selected hidden>Please choose...</option>${this._transformations.map(t => html`<option value="${t}">${t}</option>`)}${this.renderTransformationInfo()}</select></div>`;
+	return html`<div class="inputfield transformation"><label for="transformation">Transformation ID<label><select name="transformation" id="transformation" @change="${this.transformationSelected}" required><option value="" disabled selected hidden>Please choose...</option>${this._transformations.map(t => html`<option value="${t}">${t}</option>`)}${this.renderTransformationInfo()}</select>${this.renderTransformationInfo()}</div>`;
     }
 
     renderError(): HTMLTemplateResult {
