@@ -24,9 +24,19 @@ Install from the [npm registry](-/packages/6733)!
 
 ### Registry set up
 
+Put this into your packages [`.npmrc`](https://docs.npmjs.com/cli/v9/configuring-npm/npmrc):
+
 ```shell
-echo @scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/projects/6840/packages/npm/ >> .npmrc
+# 805 is the group ID of SCDH toplevel group
+@scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/projects/805/packages/npm/
 ```
+
+Downstream packages should always use the 805 as project ID.
+
+Reason: This package has dependencies on other packages prefixed with
+`@scdh` in the SCDH toplevel group. By using the toplevel group ID,
+npm will be forwarded to the right projects by gitlab.
+
 
 ### Install
 
