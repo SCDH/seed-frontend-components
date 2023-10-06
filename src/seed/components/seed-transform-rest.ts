@@ -1,4 +1,4 @@
-import { html, HTMLTemplateResult, PropertyValues } from 'lit'
+import { html, css, HTMLTemplateResult, PropertyValues, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
 import { DefaultApiFactory } from '@scdh/seed-xml-transformer-ts-client/api.ts'
@@ -72,10 +72,36 @@ export class SeedTransformREST extends TransformRESTElement {
 	}
     }
 
-    render(): HTMLTemplateResult {
-	return html`<div>${this._result}</div>`;
+    override async updated(changedProperties: PropertyValues<this>) {
+	if (this._result != null && changedProperties.has("_result")) {
+	    // pass result down to slotted children
+	    const slot = this.shadowRoot?.querySelector("slot");
+	    console.log("slotted", slot?.assignedElements({flatten: true}));
+	    // filter for elements with @srcdoc, e.g. iframe
+	    // this is ductyping
+	    const consumer: HTMLIFrameElement | null =
+		slot?.assignedElements({flatten: true})?.filter(e => "srcdoc" in e)?.[0] as HTMLIFrameElement;
+	    console.log("consumer", consumer);
+	    if (consumer === null || consumer === undefined) {
+		console.log("no rest transformer in slotted children");
+		this._error = "HTML Error: no consumer in slotted children";
+	    } else {
+		// properties down
+		// TODO: how to get contents of file object?
+		consumer.srcdoc = await this._result as unknown as string;
+	    }
+	}
     }
 
+    render(): HTMLTemplateResult {
+	if (this._error === null) {
+	    return html`<slot></slot>`;
+	} else {
+	    return html`<div class="error">${this._error}</div><slot></slot>`;
+	}
+    }
+
+    static styles : CSSResult = css`.error { color: red; }`;
 
 }
 
