@@ -1,6 +1,6 @@
 import { LitElement } from 'lit'
 import { property } from 'lit/decorators.js'
-import { Configuration } from 'seed-xml-transformer-ts-client/configuration.ts'
+import { Configuration } from '@scdh/seed-xml-transformer-ts-client/configuration.ts'
 //import { DefaultApiFactory } from 'seed-xml-transformer-ts-client/api.ts'
 
 

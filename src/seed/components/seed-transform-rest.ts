@@ -1,7 +1,7 @@
 import { html, HTMLTemplateResult, PropertyValues } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
-import { DefaultApiFactory } from 'seed-xml-transformer-ts-client/api.ts'
+import { DefaultApiFactory } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 
 // define the web component
 @customElement("seed-transform-rest")

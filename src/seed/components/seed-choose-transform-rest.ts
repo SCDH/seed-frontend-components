@@ -1,6 +1,6 @@
 import { html, css, HTMLTemplateResult, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from 'seed-xml-transformer-ts-client/api.ts'
+import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 
