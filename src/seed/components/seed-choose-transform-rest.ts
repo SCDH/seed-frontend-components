@@ -26,7 +26,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     @state()
     protected _parameterDetails: { [key: string]: XsltParameterDetailsValue; } | null = null;
 
-    protected noPrintTransformationInfo: Array<String> = ["parameterDescriptors"];
+    protected noPrintTransformationInfo: Array<String> = ["parameterDescriptors", "libraries"];
 
     @state()
     protected _formError: string | null = null;
@@ -61,7 +61,15 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 	    return html``;
 	} else {
 	    const keys: Array<String> = Object.keys(this._transformationInfo).filter(k => !this.noPrintTransformationInfo.includes(k));
-	    return html`<div class="transformation-info-container"><div class="heading">About this transformation</div><div class="transformation-info">${keys.map(k => html`<div class="property ${k}"><span class="key">${k}</span> <span class="value">${this._transformationInfo?.[k as keyof TransformationInfo]}</span></div>`)}</div>${this.renderParameterDescriptions()}</div>`;
+	    return html`<div class="transformation-info-container"><div class="heading">About this transformation</div><div class="transformation-info">${keys.map(k => html`<div class="property ${k}"><span class="key">${k}</span> <span class="value">${this._transformationInfo?.[k as keyof TransformationInfo]}</span></div>`)}${this.renderLibraries()}</div>${this.renderParameterDescriptions()}</div>`;
+	}
+    }
+
+    renderLibraries(): HTMLTemplateResult {
+	if (this._transformationInfo?.libraries === null) {
+	    return html``;
+	} else {
+	    return html`<div class="property libraries"><span class="key">libraries</span> ${this._transformationInfo?.libraries?.map(l => html`<span class="value library">${l.location}</span> `)}</div>`;
 	}
     }
 
@@ -286,6 +294,9 @@ div.transformation-info {
 div.transformation-info .key {
   font-weight: 900;
   color: darkgray;
+}
+div.transformation-info div.libraries span.library {
+display: block;
 }
 div.parameters div.parameter {
   height: 100%;
