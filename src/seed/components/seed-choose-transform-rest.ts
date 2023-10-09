@@ -1,4 +1,4 @@
-import { html, css, HTMLTemplateResult, CSSResult } from 'lit'
+import { html, css, LitElement, HTMLTemplateResult, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
@@ -328,5 +328,60 @@ color: darkgray;
 declare global {
     interface HTMLElementTagNameMap {
 	"seed-choose-transform-rest": SeedChooseTransformREST;
+    }
+}
+
+@customElement("seed-transform-rest-params")
+export class SeedTransformRestParams extends LitElement {
+
+    @property()
+    public formId: string | undefined;
+
+    @property()
+    public transformation: string | undefined;
+
+    @property()
+    public transformationInfo: TransformationInfo | undefined;
+
+    @property()
+    public parameterDetails: { [key: string]: XsltParameterDetailsValue; } | undefined;
+
+    @property()
+    public includes: Array<string> = [];
+
+    @property()
+    public excludes: Array<string> = [];
+
+    @state()
+    protected _error: string | null = null;
+
+    render(): HTMLTemplateResult {
+	if (this.transformation === undefined || this.transformationInfo === undefined) {
+	    return html`<slot></slot>`;
+	} else {
+	    let params: Array<string> = Object.keys(this.parameterDetails ?? {});
+	    if (this.excludes.length > 0 && this.includes.length > 0) {
+		this._error = "Configuration Error: excludes and includes are both set";
+	    } else if (this.excludes.length > 0) {
+		params = params.filter(k => !this.excludes.includes(k));
+	    } else if (this.includes.length > 0) {
+		params = params.filter(k => this.includes.includes(k));
+	    }
+	    if (params.length === 0) {
+		return html`<div class="no-parameters">No params</div><slot></slot>`;
+	    } else {
+		return html`<div class="parameters-form">${params.map(p => this.renderParameterForm(p))}<div><slot></slot>`;
+	    }
+	}
+    }
+
+    renderParameterForm(param: string): HTMLTemplateResult {
+	return html`<div class="parameter input ${param}"><span class="parameter-name">${param}</span><div class="input-field ${param}"><input name="parameter.${param}" id="parameter.${param}"></input></div>`;
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+	"seed-transform-rest-params": SeedTransformRestParams;
     }
 }
