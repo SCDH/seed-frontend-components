@@ -15,6 +15,9 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     @property() // { type: Array<String> })
     transformations: Array<String> = [];
 
+    @property({ attribute: "form-id", reflect: true })
+    public formId: string = "seed-transform-rest-form";
+
     @state()
     protected _error: any | null = null;
 
@@ -40,7 +43,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
 
     render(): HTMLTemplateResult {
-	return html`<div class="transformation-chooser"><div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}<seed-transform-rest-params></seed-transform-rest-params>${this.renderSubmit()}</form></div></div><slot></slot>`;
+	return html`<div class="transformation-chooser"><div class="form"><form name="${this.formId}" id="${this.formId}" @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}<seed-transform-rest-params></seed-transform-rest-params>${this.renderSubmit()}</form></div></div><slot></slot>`;
     }
 
     renderSubmit(): HTMLTemplateResult {
@@ -250,6 +253,11 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     async connectedCallback() {
 	super.connectedCallback();
 	this._transformations = await this.getTransformations() ?? [];
+	// pass setup information down to descendants
+	if (this._parametersForm != undefined) {
+	    this._parametersForm.formId = this.formId;
+	}
+
     }
 
 }
@@ -265,7 +273,7 @@ export class SeedTransformRestParams extends LitElement {
 
     static styles: CSSResult = unsafeCSS(styles);
 
-    @property()
+    @property({ attribute: "form-id", reflect: true })
     public formId: string | undefined;
 
     @property()
@@ -307,7 +315,7 @@ export class SeedTransformRestParams extends LitElement {
     }
 
     renderParameterForm(param: string): HTMLTemplateResult {
-	return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input name="parameter.${param}" id="parameter.${param} form="${this.formId}"></input></div>`;
+	return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="parameter.${param}" id="parameter.${param}"></input></div>`;
     }
 }
 
