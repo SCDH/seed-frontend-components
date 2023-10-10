@@ -1,12 +1,16 @@
-import { html, css, LitElement, HTMLTemplateResult, CSSResult } from 'lit'
+import { html, LitElement, HTMLTemplateResult, CSSResult, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 
+import styles from './seed-transform-forms.css?inline'
+
 // define the web component
 @customElement("seed-choose-transform-rest")
 export class SeedChooseTransformREST extends TransformRESTElement {
+
+    static styles: CSSResult = unsafeCSS(styles);
 
     @property() // { type: Array<String> })
     transformations: Array<String> = [];
@@ -232,97 +236,6 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 	this._transformations = await this.getTransformations() ?? [];
     }
 
-    static styles : CSSResult = css`
-:host {
-  border: 1px solid lightblue;
-}
-div.heading {
-font-size: 1.2em;
-text-decoration: underline 1px lightblue;
-}
-.not-available {
-font-style: italic;
-}
-.error {
-color: red;
-}
-select:invalid { color: darkgray; }
-div.transformation-info-container {
-border: 1px solid lightblue;
-padding: 10px;
-}
-div.inputfield {
-margin-bottom: 2ex;
-}
-div.inputfield label {
-display: block;
-font-weight: 600;
-}
-div.inputfield.submit input {
-font-size:1em;
-padding:5px;
-}
-div.inputfield.submit input:not([disabled]) {
-color:white;
-background-color:green;
-border:1px solid #336600;
-}
-
-div.transformation-chooser {
-height: auto;
-overflow: hidden;
-}
-div.transformation-chooser div.form {
-display: block;
-width: auto;
-overflow: hidden;
-float: none;
-}
-div.transformation-info-container {
-float: right;
-width: auto;
-overflow: scroll;
-}
-div.clear {
-clear: both;
-}
-
-div.transformation-info {
-  height: 100%;
-  font-family: monospace;
-}
-div.transformation-info .key {
-  font-weight: 900;
-  color: darkgray;
-}
-div.transformation-info div.libraries span.library {
-display: block;
-}
-div.parameters div.parameter {
-  height: 100%;
-  font-family: monospace;
-}
-div.parameters div.parameter span {
-display: block;
-}
-div.parameter .name {
-font-weight: 900;
-}
-div.parameter span.name .required {
-color: red;
-}
-div.parameter .type:before {
-content: "Type: ";
-font-weight: 900;
-color: darkgray;
-}
-div.parameter .description:before {
-content: "Description: ";
-font-weight: 900;
-color: darkgray;
-}
-`
-
 }
 
 declare global {
@@ -333,6 +246,8 @@ declare global {
 
 @customElement("seed-transform-rest-params")
 export class SeedTransformRestParams extends LitElement {
+
+    static styles: CSSResult = unsafeCSS(styles);
 
     @property()
     public formId: string | undefined;
