@@ -4,7 +4,7 @@ import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from
 import { TransformRESTElement } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 
-import styles from './seed-transform-forms.css?inline'
+import styles from './seed-transform-forms.css'
 
 // define the web component
 @customElement("seed-choose-transform-rest")
