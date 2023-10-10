@@ -301,13 +301,13 @@ export class SeedTransformRestParams extends LitElement {
 	    if (params.length === 0) {
 		return html`<div class="no-parameters">No params</div><slot></slot>`;
 	    } else {
-		return html`<div class="parameters-form">${params.map(p => this.renderParameterForm(p))}<div><slot></slot>`;
+		return html`<div class="inputfield parameters parameters-form"><label>Parameters</label>${params.map(p => this.renderParameterForm(p))}<div><slot></slot>`;
 	    }
 	}
     }
 
     renderParameterForm(param: string): HTMLTemplateResult {
-	return html`<div class="parameter input ${param}"><span class="parameter-name">${param}</span><div class="input-field ${param}"><input name="parameter.${param}" id="parameter.${param}"></input></div>`;
+	return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input name="parameter.${param}" id="parameter.${param} form="${this.formId}"></input></div>`;
     }
 }
 
