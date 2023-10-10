@@ -1,5 +1,5 @@
 import { html, LitElement, HTMLTemplateResult, CSSResult, unsafeCSS } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, property, state, query } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
@@ -35,9 +35,12 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     @state()
     protected _formError: string | null = null;
 
+    @query("seed-transform-rest-params")
+    protected _parametersForm: SeedTransformRestParams | undefined;
+
 
     render(): HTMLTemplateResult {
-	return html`<div class="transformation-chooser"><div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}${this.renderSubmit()}</form></div></div><slot></slot>`;
+	return html`<div class="transformation-chooser"><div class="form"><form @submit="${this.submit}" autocomplete="off" method="post">${this.renderTransformationChooser()}${this.renderError()}${this.renderSourceForm()}<seed-transform-rest-params></seed-transform-rest-params>${this.renderSubmit()}</form></div></div><slot></slot>`;
     }
 
     renderSubmit(): HTMLTemplateResult {
@@ -135,6 +138,10 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 	this._transformation = transformation;
 	this._formError = null;
 	this.collectTransformationInformation(transformation);
+	// pass properties down
+	if (this._parametersForm != undefined) {
+	    this._parametersForm.transformation = transformation;
+	}
     }
 
     protected async submit(e: SubmitEvent) {
@@ -175,6 +182,11 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     protected async collectTransformationInformation(transformation: string) {
 	this._transformationInfo = await this.getTransformationInfo(transformation);
 	this._parameterDetails = await this.getTransformationParameterDescriptors(transformation) ?? {};
+	// pass properties down
+	if (this._parametersForm != undefined) {
+	    this._parametersForm.transformationInfo = this._transformationInfo ?? undefined;
+	    this._parametersForm.parameterDetails = this._parameterDetails;
+	}
     }
 
     protected async getTransformations(): Promise<Array<String>> {
@@ -193,6 +205,10 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
 	    if (ts.length == 1) {
 		this._transformation = ts[0];
+		// pass properties down
+		if (this._parametersForm != undefined) {
+		    this._parametersForm.transformation = ts[0];
+		}
 		this.collectTransformationInformation(ts[0]);
 	    }
 	    return ts;
