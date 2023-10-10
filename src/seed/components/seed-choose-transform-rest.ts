@@ -95,7 +95,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     }
 
     renderParameterDescription(name: string): HTMLTemplateResult {
-	return html`<div class="parameter ${name}">${this.renderParameterName(name)}${this.renderParameterType(name)}${this.renderParameterDescriptionText(name)}</div>`;
+	return html`<div class="parameter ${name}">${this.renderParameterName(name)}${this.renderParameterType(name)}${this.renderParameterDescriptionText(name)}${this.renderParameterDefaultValue(name)}</div>`;
     }
 
     renderParameterName(name: string): HTMLTemplateResult {
@@ -113,10 +113,20 @@ export class SeedChooseTransformREST extends TransformRESTElement {
     }
 
     renderParameterDescriptionText(name: string): HTMLTemplateResult {
-	if (this?._transformationInfo?.parameterDescriptors?.[name]?.description) {
-	    return html`<span class="description ${name}">${this._transformationInfo.parameterDescriptors[name].description}</span>`;
+	const desc: string | null = this._transformationInfo?.parameterDescriptors?.[name]?.["description"] ?? null;
+	if (desc != null) {
+	    return html`<span class="description ${name}">${desc}</span>`;
 	} else {
 	    return html`<span class="description not-available ${name}">not available</span>`;
+	}
+    }
+
+    renderParameterDefaultValue(name: string): HTMLTemplateResult {
+	const dflt: string | null = this._transformationInfo?.parameterDescriptors?.[name]?.["default"] ?? null;
+	if (dflt != null) {
+	    return html`<span class="default-value ${name}">${dflt}</span>`;
+	} else {
+	    return html`<span class="default-value not-available ${name}">not available</span>`;
 	}
     }
 
@@ -315,8 +325,14 @@ export class SeedTransformRestParams extends LitElement {
     }
 
     renderParameterForm(param: string): HTMLTemplateResult {
-	return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="parameter.${param}" id="parameter.${param}"></input></div>`;
+	const dflt: string | null = this.transformationInfo?.parameterDescriptors?.[param]?.["default"] ?? null;
+	if (dflt === null) {
+	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="parameter.${param}" id="parameter.${param}"></input></div>`;
+	} else {
+	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input type="text" form="${this.formId}" name="parameter.${param}" id="parameter.${param}" value="${dflt}"></input></div>`;
+	}
     }
+
 }
 
 declare global {
