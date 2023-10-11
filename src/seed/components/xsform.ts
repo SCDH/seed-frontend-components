@@ -6,19 +6,19 @@ export interface DefaultValueConverter {
 
 export class XSFormFieldFactory {
 
-    static defaultValueConverters: { [key: string]: Array<DefaultValueConverter> } = {};
+    static defaultValueConverters: { [key: string]: DefaultValueConverter } = {};
 
     static addDefaultValueConverter(itemType:string, occurrenceIndicator: string, converter: DefaultValueConverter) {
-	const key: string = this.getKey(itemType, occurrenceIndicator);
-	this.defaultValueConverters[key] = converter;
+	const key: string = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator);
+	XSFormFieldFactory.defaultValueConverters[key] = converter;
     }
     
     static getDefaultValueConverter(itemType: string, occurrenceIndicator: string) {
-	const key: string = this.getKey(itemType, occurrenceIndicator);
-	return this.defaultValuesConverters[key];
+	const key: string = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator);
+	return XSFormFieldFactory.defaultValueConverters?.[key];
     }
 
-    protected getKey(itemType: string, occurrenceIndicator): string {
+    protected static mkKey(itemType: string, occurrenceIndicator: string): string {
 	return itemType + occurrenceIndicator;
     }
 
