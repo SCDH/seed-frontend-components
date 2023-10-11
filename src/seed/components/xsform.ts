@@ -37,6 +37,23 @@ export class StringDefaultValueConverter implements DefaultValueConverter {
 
 }
 
+export class BooleanDefaultValueConverter implements DefaultValueConverter {
+
+    convert(value: string): string {
+	if (value == "true()") {
+	    return "true";
+	} else if (value == "false()") {
+	    return "false";
+	} else if (value == "") {
+	    return "";
+	} else {
+	    console.log("unknown xs:boolean default value", value);
+	    return value;
+	}
+    }
+
+}
+
 export class PassDefaultValueConverter implements DefaultValueConverter {
 
     convert(value: string): string {
