@@ -86,3 +86,8 @@ div.parameter .description:before {
     font-weight: 900;
     color: darkgray;
 }
+.default-value:before {
+    content: "Default value: ";
+    font-weight: 900;
+    color: darkgray;
+}

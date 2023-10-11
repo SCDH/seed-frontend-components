@@ -4,7 +4,7 @@ stages:
   - test
   - deploy
 
-build:
+build-and-run-tests:
   stage: test
   cache:
     key:
@@ -16,6 +16,7 @@ build:
   script:
     - npm install
     - npm run build
+    - npm run test
   artifacts:
     paths:
       - dist
