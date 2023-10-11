@@ -109,7 +109,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 
     renderParameterType(name: string): HTMLTemplateResult {
 	let p = this?._parameterDetails?.[name];
-	return html`<span class="type">${p?.underlyingDeclaredType}${p?.occurrenceIndicator}</span>`;
+	return html`<span class="type">${p?.underlyingDeclaredType}</span>`;
     }
 
     renderParameterDescriptionText(name: string): HTMLTemplateResult {
