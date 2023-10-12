@@ -92,7 +92,7 @@ export class XSFormFieldFactory {
      * A static method for registering converters for default values.
      */
     static addDefaultValueConverter(itemType:string, occurrenceIndicator: string, converter: DefaultValueConverter) {
-	const key: string = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator);
+	const key: string = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator) ?? "null";
 	XSFormFieldFactory.defaultValueConverters[key] = converter;
     }
 
@@ -104,9 +104,11 @@ export class XSFormFieldFactory {
      * @param occurrenceIndicator {string} - the sequence indicator, e.g. empty string or "*"
      * @returns The registered converter or a fallback converter
      */
-    static getDefaultValueConverter(itemType: string, occurrenceIndicator: string) {
-	const key: string = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator);
-	if (key in XSFormFieldFactory.defaultValueConverters) {
+    static getDefaultValueConverter(itemType?: string, occurrenceIndicator?: string) {
+	const key: string | null = XSFormFieldFactory.mkKey(itemType, occurrenceIndicator);
+	if (key === null) {
+	    return XSFormFieldFactory.fallbackDefaultValueConverter;
+	} else if (key in XSFormFieldFactory.defaultValueConverters) {
 	    return XSFormFieldFactory.defaultValueConverters[key];
 	} else if ("all"+occurrenceIndicator in XSFormFieldFactory.defaultValueConverters) {
 	    return XSFormFieldFactory.defaultValueConverters["all" + occurrenceIndicator];
@@ -115,8 +117,12 @@ export class XSFormFieldFactory {
 	}
     }
 
-    protected static mkKey(itemType: string, occurrenceIndicator: string): string {
-	return itemType + occurrenceIndicator;
+    protected static mkKey(itemType?: string, occurrenceIndicator?: string): string | null {
+	if (itemType === undefined || occurrenceIndicator === undefined) {
+	    return null;
+	} else {
+	    return itemType + occurrenceIndicator;
+	}
     }
 
     /**
