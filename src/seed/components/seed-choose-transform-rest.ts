@@ -1,8 +1,9 @@
 import { html, LitElement, HTMLTemplateResult, CSSResult, unsafeCSS } from 'lit'
-import { customElement, property, state, query } from 'lit/decorators.js'
+import { customElement, property, state, query, queryAll } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import { TransformRESTElement } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
+import { XSFormFieldFactory, registerDefaultValueConverters, DefaultValueConverter } from './xsform'
 
 import styles from './seed-transform-forms.css'
 
@@ -283,6 +284,8 @@ export class SeedTransformRestParams extends LitElement {
 
     static styles: CSSResult = unsafeCSS(styles);
 
+    public inputFormPrefix: string = "parameter.";
+
     @property({ attribute: "form-id", reflect: true })
     public formId: string | undefined;
 
@@ -303,6 +306,9 @@ export class SeedTransformRestParams extends LitElement {
 
     @state()
     protected _error: string | null = null;
+
+    @queryAll("input")
+    protected _inputFields!: NodeListOf<HTMLInputElement>;
 
     render(): HTMLTemplateResult {
 	if (this.transformation === undefined || this.transformationInfo === undefined) {
@@ -327,10 +333,37 @@ export class SeedTransformRestParams extends LitElement {
     renderParameterForm(param: string): HTMLTemplateResult {
 	const dflt: string | null = this.transformationInfo?.parameterDescriptors?.[param]?.["default"] ?? null;
 	if (dflt === null) {
-	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="parameter.${param}" id="parameter.${param}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}"></input></div>`;
 	} else {
-	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input type="text" form="${this.formId}" name="parameter.${param}" id="parameter.${param}" value="${dflt}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input type="text" form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}" value="${this.convertDefaultValue(param, dflt)}"></input></div>`;
 	}
+    }
+
+    convertDefaultValue(param: string, value: string): string {
+	const paramDetails: XsltParameterDetailsValue | undefined = this.parameterDetails?.[param];
+	if (paramDetails != undefined) {
+	    const converter: DefaultValueConverter = XSFormFieldFactory.getDefaultValueConverter(paramDetails.itemType, paramDetails.occurrenceIndicator);
+	    return converter.convert(value);
+	} else {
+	    console.log("no parameter details for", param);
+	    return value;
+	}
+    }
+
+    /**
+     * Get the an plain (json) object from form input.
+     */
+    public getFormInput(): { [key: string]: string } {
+	let rc: { [key: string]: string } = {};
+	for (var inputField of this._inputFields) {
+	    // only add changed values to return object
+	    if (inputField.value != inputField.defaultValue) {
+		const name: string = inputField.name.substring(this.inputFormPrefix.length);
+		console.log("input field changed", name, inputField.value);
+		rc[name] = inputField.value as string;
+	    }
+	}
+	return rc;
     }
 
 }
