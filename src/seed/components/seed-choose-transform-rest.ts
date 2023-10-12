@@ -185,10 +185,14 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 		console.log("no rest transformer in slotted children");
 		this._error = "HTML Error: no transformer in slotted children";
 	    } else {
+		// get input data from for data. This violates the events up principle! TODO
+		const params = this._parametersForm?.getFormInput() ?? {};
+		console.log("parameters from parameters form", params);
 		// properties down
 		transformer["transformation"] = this._transformation;
 		transformer.href = systemId;
 		transformer.src = files?.[0] ?? null;
+		transformer.parameters = params;
 	    }
 	}
     }
