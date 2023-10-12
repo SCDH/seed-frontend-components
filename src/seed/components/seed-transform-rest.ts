@@ -2,6 +2,7 @@ import { html, css, HTMLTemplateResult, PropertyValues, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
 import { DefaultApiFactory } from '@scdh/seed-xml-transformer-ts-client/api.ts'
+import axios, { AxiosError } from 'axios';
 
 // define the web component
 @customElement("seed-transform-rest")
@@ -45,11 +46,10 @@ export class SeedTransformREST extends TransformRESTElement {
 		console.log("from URL, POST parameters");
 		try {
 		    const api = DefaultApiFactory(this.getConfiguration());
-		    const response = await api.transformTransformationUrlPost(this.transformation, this.href, this.parameters);
+		    const response = await api.transformTransformationUrlPost(this.transformation, this.href, this.makeRuntimePayload());
 		    this._result = response.data;
 		} catch (err) {
-		    console.log("transformTransformationUrlGet failed", err);
-		    this._error = err;
+		    this.reportError(err);
 		}
 	    } else if (this.src != null) {
 		// POST
@@ -62,15 +62,31 @@ export class SeedTransformREST extends TransformRESTElement {
 			systemId = undefined;
 		    }
 		    const api = DefaultApiFactory(this.getConfiguration());
-		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, this.parameters);
+		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, this.makeRuntimePayload());
 		    this._result = response.data;
 		} catch (err) {
-		    console.log("transformTransformationUrlGet failed", err);
-		    this._error = err;
+		    this.reportError(err);
 		}
 	    }
 	}
     }
+
+    makeRuntimePayload(): { [key: string]: {} } {
+	let rc: { [key: string]: {} } = {};
+	rc["globalParameters"] = this.parameters;
+	return rc;
+    }
+
+    reportError(err:any): void {
+	console.log("transformTransformationUrlGet failed", err);
+	if (axios.isAxiosError(err)) {
+	    this._error = err + ". " + (err as AxiosError).response?.data;
+	} else {
+	    this._error = err;
+	}
+    }
+
+
 
     override async updated(changedProperties: PropertyValues<this>) {
 	if (this._result != null && changedProperties.has("_result")) {
