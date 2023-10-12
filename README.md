@@ -44,6 +44,22 @@ npm will be forwarded to the right projects by gitlab.
 npm i @scdh/seed-frontend-components
 ```
 
+## Development
+
+Run a development server, accessible through `http://localhost:5173`:
+
+```shell
+npm run dev
+```
+
+This will serve pages like `index.html`.
+
+Run tests:
+
+```shell
+npm run test
+```
+
 ## Design Principles / Contributing
 
 1. Follow the **events up; properies down** principle.
