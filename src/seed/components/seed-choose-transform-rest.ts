@@ -283,6 +283,11 @@ declare global {
     }
 }
 
+
+registerDefaultValueConverters(); // TODO: how to do this in page html?
+
+
+
 @customElement("seed-transform-rest-params")
 export class SeedTransformRestParams extends LitElement {
 
