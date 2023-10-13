@@ -1,7 +1,7 @@
 import { html, css, HTMLTemplateResult, PropertyValues, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
-import { DefaultApiFactory } from '@scdh/seed-xml-transformer-ts-client/api.ts'
+import { DefaultApiFactory, RuntimeParameters } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import axios, { AxiosError } from 'axios';
 
 // define the web component
@@ -54,7 +54,8 @@ export class SeedTransformREST extends TransformRESTElement {
 	    } else if (this.src != null) {
 		// POST
 		console.log("POST file and parameters")
-		console.log("src", this.src, this.src.text());
+		const params: RuntimeParameters = this.makeRuntimePayload();
+		console.log("parameters", params, "source", this.src, this.src.text());
 		try {
 		    // systemId has to be a valid URL, if empty string, we pass undefined instead
 		    let systemId: string | undefined = this.href ?? undefined;
@@ -62,7 +63,7 @@ export class SeedTransformREST extends TransformRESTElement {
 			systemId = undefined;
 		    }
 		    const api = DefaultApiFactory(this.getConfiguration());
-		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, this.makeRuntimePayload());
+		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, params, {});
 		    this._result = response.data;
 		} catch (err) {
 		    this.reportError(err);
@@ -71,7 +72,7 @@ export class SeedTransformREST extends TransformRESTElement {
 	}
     }
 
-    makeRuntimePayload(): { [key: string]: {} } {
+    makeRuntimePayload(): RuntimeParameters {
 	let rc: { [key: string]: {} } = {};
 	rc["globalParameters"] = this.parameters;
 	return rc;
