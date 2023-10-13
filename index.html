@@ -7,13 +7,15 @@
     <title>Test</title>
     <script type="module" src="/src/seed/components/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
-    <script type="module" src="/src/seed/components/seed-choose-transform-rest.ts"></script>
+    <script type="module" src="/src/seed/components/seed-transform-forms-rest.ts"></script>
     <script type="module" src="/src/seed/components/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed/components/xsform.ts">registerDefaultValueConverters();</script>
+    <script></script>
   </head>
   <body>
     <seed-choose-transform-rest
       apiBase="http://localhost:8080" OFFtransformations="[param-integer]">
-      <seed-transform-rest apiBase="http://localhost:8080">
+      <seed-transform-rest apiBase="http://localhost:8080" formid="balg">
 	<iframe></iframe>
       </seed-transform-rest>
     </seed-choose-transform-rest>
