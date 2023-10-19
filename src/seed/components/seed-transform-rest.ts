@@ -4,6 +4,8 @@ import { TransformRESTElement } from './transform-rest.ts'
 import { DefaultApiFactory, RuntimeParameters } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import axios, { AxiosError } from 'axios';
 
+import { WorkaroundApiFactory } from './workaround-transformer-api'
+
 // define the web component
 @customElement("seed-transform-rest")
 export class SeedTransformREST extends TransformRESTElement {
@@ -62,7 +64,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		    if (this.href?.length === 0 || this.href === null) {
 			systemId = undefined;
 		    }
-		    const api = DefaultApiFactory(this.getConfiguration());
+		    const api = WorkaroundApiFactory(this.getConfiguration());
 		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, params, {});
 		    this._result = response.data;
 		} catch (err) {
