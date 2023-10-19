@@ -50,6 +50,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		    const api = DefaultApiFactory(this.getConfiguration());
 		    const response = await api.transformTransformationUrlPost(this.transformation, this.href, this.makeRuntimePayload());
 		    this._result = response.data;
+		    this._error = null;
 		} catch (err) {
 		    this.reportError(err);
 		}
@@ -67,6 +68,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		    const api = WorkaroundApiFactory(this.getConfiguration());
 		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, params, {});
 		    this._result = response.data;
+		    this._error = null;
 		} catch (err) {
 		    this.reportError(err);
 		}
