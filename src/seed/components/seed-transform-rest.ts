@@ -2,8 +2,10 @@ import { html, css, HTMLTemplateResult, PropertyValues, CSSResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
 import { DefaultApiFactory, RuntimeParameters } from '@scdh/seed-xml-transformer-ts-client/api.ts'
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+
 import { SeedTextViewElement, seedTextViewElementIsAssignableBy } from './itextview.ts'
+import { SeedTypedTextViewElement, seedTypedTextViewElementIsAssignableBy } from './itextview.ts'
 
 import { WorkaroundApiFactory } from './workaround-transformer-api'
 
@@ -24,6 +26,9 @@ export class SeedTransformREST extends TransformRESTElement {
     src: File | null = null;
 
     @state()
+    _response: AxiosResponse<File, any> | null = null;
+
+    @state()
     _result: File | null = null;
 
     @state()
@@ -40,6 +45,7 @@ export class SeedTransformREST extends TransformRESTElement {
 	    if (this.src === null && this.href === null) {
 		console.log("not enough information");
 		// TODO: nothing
+		this._response = null;
 		this._result = null;
 	    } else if (this.src === null && this.href != null) {
 		// GET
@@ -48,6 +54,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		    const api = DefaultApiFactory(this.getConfiguration());
 		    const response = await api.transformTransformationUrlPost(this.transformation, this.href, this.makeRuntimePayload());
 		    this._result = response.data;
+		    this._response = response;
 		    this._error = null;
 		} catch (err) {
 		    this.reportError(err);
@@ -65,6 +72,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		    }
 		    const api = WorkaroundApiFactory(this.getConfiguration());
 		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, params, {});
+		    console.log(response);
 		    this._result = response.data;
 		    this._error = null;
 		} catch (err) {
@@ -99,7 +107,22 @@ export class SeedTransformREST extends TransformRESTElement {
 	    for (var consumer of
 		 slot?.assignedElements({flatten: true})?.filter(e => seedTextViewElementIsAssignableBy(e)) ?? []) {
 		// properties down
+		if (seedTypedTextViewElementIsAssignableBy(consumer)) {
+		    (consumer as unknown as SeedTypedTextViewElement).mediaType = this._response?.headers?.["content-type"] ?? "";
+		}
 		(consumer as unknown as SeedTextViewElement).srcdoc = await this._result;
+	    }
+	} else if (this._error != null && changedProperties.has("_error")) {
+	    // cause slotted children to no longer show results from successful transformations before
+	    const slot = this.shadowRoot?.querySelector("slot");
+	    // filter for text view elements
+	    for (var consumer of
+		 slot?.assignedElements({flatten: true})?.filter(e => seedTextViewElementIsAssignableBy(e)) ?? []) {
+		// properties down
+		if (seedTypedTextViewElementIsAssignableBy(consumer)) {
+		    (consumer as unknown as SeedTypedTextViewElement).mediaType = undefined;
+		}
+		(consumer as unknown as SeedTextViewElement).srcdoc = "";
 	    }
 	}
     }
