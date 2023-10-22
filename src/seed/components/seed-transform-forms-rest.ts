@@ -190,6 +190,7 @@ export class SeedChooseTransformREST extends TransformRESTElement {
 		console.log("parameters from parameters form", params);
 		// properties down
 		transformer["transformation"] = this._transformation;
+		this.propagateApiInformation(transformer);
 		transformer.href = systemId;
 		transformer.src = files?.[0] ?? null;
 		transformer.parameters = params;

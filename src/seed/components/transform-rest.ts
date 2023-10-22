@@ -7,12 +7,15 @@ import { Configuration } from '@scdh/seed-xml-transformer-ts-client/configuratio
 export abstract class TransformRESTElement extends LitElement {
 
     @property({ type: String })
-    apiBase: string = "";
+    transformationApi!: string;
 
     protected getConfiguration(): Configuration {
 	return new Configuration({
-	    basePath: this.apiBase
+	    basePath: this.transformationApi
 	});
     }
 
+    propagateApiInformation(element: TransformRESTElement):void  {
+	element.transformationApi = this.transformationApi;
+    }
 }

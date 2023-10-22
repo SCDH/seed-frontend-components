@@ -11,9 +11,6 @@ import { WorkaroundApiFactory } from './workaround-transformer-api'
 @customElement("seed-transform-rest")
 export class SeedTransformREST extends TransformRESTElement {
 
-    @property({ type: String })
-    apiBase: string = "";
-
     @property() // { type: Array<String> })
     transformation: string | null = null;
 
