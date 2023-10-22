@@ -333,7 +333,7 @@ export class SeedTransformRestParams extends LitElement {
 		params = params.filter(k => this.includes.includes(k));
 	    }
 	    if (params.length === 0) {
-		return html`<div class="no-parameters">No params</div><slot></slot>`;
+		return html`<div class="no-parameters"></div><slot></slot>`;
 	    } else {
 		return html`<div class="inputfield parameters parameters-form"><label>Parameters</label>${params.map(p => this.renderParameterForm(p))}<div><slot></slot>`;
 	    }
