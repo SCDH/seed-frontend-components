@@ -3,6 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js'
 import { TransformRESTElement } from './transform-rest.ts'
 import { DefaultApiFactory, RuntimeParameters } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 import axios, { AxiosError } from 'axios';
+import { SeedTextViewElement, seedTextViewElementIsAssignableBy } from './itextview.ts'
 
 import { WorkaroundApiFactory } from './workaround-transformer-api'
 
@@ -95,21 +96,13 @@ export class SeedTransformREST extends TransformRESTElement {
 
     override async updated(changedProperties: PropertyValues<this>) {
 	if (this._result != null && changedProperties.has("_result")) {
-	    // pass result down to slotted children
+	    // pass result down to slotted children that are text view elements
 	    const slot = this.shadowRoot?.querySelector("slot");
-	    console.log("slotted", slot?.assignedElements({flatten: true}));
-	    // filter for elements with @srcdoc, e.g. iframe
-	    // this is ductyping
-	    const consumer: HTMLIFrameElement | null =
-		slot?.assignedElements({flatten: true})?.filter(e => "srcdoc" in e)?.[0] as HTMLIFrameElement;
-	    console.log("consumer", consumer);
-	    if (consumer === null || consumer === undefined) {
-		console.log("no rest transformer in slotted children");
-		this._error = "HTML Error: no consumer in slotted children";
-	    } else {
+	    // filter for text view elements
+	    for (var consumer of
+		 slot?.assignedElements({flatten: true})?.filter(e => seedTextViewElementIsAssignableBy(e)) ?? []) {
 		// properties down
-		// TODO: how to get contents of file object?
-		consumer.srcdoc = await this._result as unknown as string;
+		(consumer as unknown as SeedTextViewElement).srcdoc = await this._result;
 	    }
 	}
     }
