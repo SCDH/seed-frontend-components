@@ -9,13 +9,14 @@
     <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed/components/seed-transform-forms-rest.ts"></script>
     <script type="module" src="/src/seed/components/seed-transform-rest.ts"></script>
-    <script type="module" src="/src/seed/components/xsform.ts">registerDefaultValueConverters();</script>
+    <script type="module" src="/src/seed/components/seed-download-link.ts"></script>
     <script></script>
   </head>
   <body>
     <seed-choose-transform-rest
-      apiBase="http://localhost:8080" OFFtransformations="[param-integer]">
-      <seed-transform-rest apiBase="http://localhost:8080" formid="balg">
+      transformationApi="http://localhost:8080" OFFtransformations="[param-integer]">
+      <seed-transform-rest>
+	<seed-download-link>download</seed-download-link>
 	<iframe></iframe>
       </seed-transform-rest>
     </seed-choose-transform-rest>
