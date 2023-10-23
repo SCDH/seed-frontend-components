@@ -9,31 +9,76 @@ import { SeedTypedTextViewElement, seedTypedTextViewElementIsAssignableBy } from
 
 import { WorkaroundApiFactory } from './workaround-transformer-api'
 
-// define the web component
+/**
+ * The <seed-transform-rest> web component performs a transformation
+ * by sending a request to the TrensformerAPI implemented by the SEED
+ * XML Transformer.
+ *
+ * The component is designed to get its relevant input for making the
+ * request from elements containing it, be it a dynamic for choosing a
+ * transformation like <seed-choose-transform-rest> or a more complex
+ * web application like a digital edition's web site.
+ */
+
+
 @customElement("seed-transform-rest")
 export class SeedTransformREST extends TransformRESTElement {
 
+    /**
+     * The identifier of the transformation resource to use for
+     * transforming the resource.
+     */
     @property() // { type: Array<String> })
-    transformation: string | null = null;
+    public transformation: string | null = null;
 
+    /**
+     * The runtime parameters (stylesheet parameters) to be passed to
+     * the transformation resource.
+     */
     @property()
-    parameters: { [key: string]: string } = {};
+    public parameters: { [key: string]: string } = {};
 
+    /**
+     * The URL or systemId of the input file to be transformed. If
+     * {@link src} is not set, then the transformation will query this
+     * URL to get the source document to transform. If {@link src} is
+     * set, the URL may still be relevant for resolving relative
+     * paths, e.g., in XIncludes.
+     */
     @property()
-    href: string | null = null;
+    public href: string | null = null;
 
+    /**
+     * The source document serving as input to be transformed. This
+     * may be null, but then the {@link href} has to point to the URL
+     * of the source document.
+     */
     @property()
-    src: File | null = null;
+    public src: File | null = null;
 
     @state()
-    _response: AxiosResponse<File, any> | null = null;
+    private _response: AxiosResponse<File, any> | null = null;
 
+    /**
+     * The result of the transformation as the {@link File} object
+     * returned by the TransformationAPI.
+     */
     @state()
     _result: File | null = null;
 
+    /**
+     * An error message displayed in the UI if the transformation
+     * request failed.
+     */
     @state()
     _error: any = null;
 
+    /**
+     * In the willUpdate() hook we watch out for changes of the
+     * reactive properties that are set by the containing element
+     * (e.g. an input form). Changes will trigger a request to the
+     * TransformationAPI.
+     */
     override async willUpdate(changedProperties: PropertyValues<this>) {
 	console.log("will update called");
 	if (this.transformation != null &&
@@ -48,7 +93,7 @@ export class SeedTransformREST extends TransformRESTElement {
 		this._response = null;
 		this._result = null;
 	    } else if (this.src === null && this.href != null) {
-		// GET
+		// POST
 		console.log("from URL, POST parameters");
 		try {
 		    const api = DefaultApiFactory(this.getConfiguration());
@@ -82,6 +127,11 @@ export class SeedTransformREST extends TransformRESTElement {
 	}
     }
 
+    /**
+     * A helper method that wraps the runtime parameters in the {@link
+     * RuntimeParameters} object which is specified by the
+     * TransformationAPI.
+     */
     makeRuntimePayload(): RuntimeParameters {
 	let rc: { [key: string]: {} } = {};
 	rc["globalParameters"] = this.parameters;
@@ -98,7 +148,11 @@ export class SeedTransformREST extends TransformRESTElement {
     }
 
 
-
+    /**
+     * In the update() hook, we watch out for changes in the reactive
+     * properties that are set when sending the transformation
+     * request and getting its response.
+     */
     override async updated(changedProperties: PropertyValues<this>) {
 	if (this._result != null && changedProperties.has("_result")) {
 	    // pass result down to slotted children that are text view elements
