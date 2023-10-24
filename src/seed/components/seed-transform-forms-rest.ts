@@ -1,7 +1,7 @@
 import { html, LitElement, HTMLTemplateResult, CSSResult, unsafeCSS } from 'lit'
 import { customElement, property, state, query, queryAll } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
-import { TransformRESTElement } from './transform-rest.ts'
+import { TransformationAPIClient } from './transform-rest.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 import { XSFormFieldFactory, registerDefaultValueConverters, DefaultValueConverter } from './xsform'
 
@@ -9,7 +9,7 @@ import styles from './seed-transform-forms.css'
 
 // define the web component
 @customElement("seed-choose-transform-rest")
-export class SeedChooseTransformREST extends TransformRESTElement {
+export class SeedChooseTransformREST extends TransformationAPIClient {
 
     static styles: CSSResult = unsafeCSS(styles);
 
