@@ -1,5 +1,5 @@
 import { LitElement, HTMLTemplateResult, html } from 'lit'
-import { customElement, property, queryAssignedNodes } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
 
 import { SeedTypedTextViewElement } from './itextview.ts'
 
@@ -28,16 +28,13 @@ export class SeedDownloadLink extends LitElement implements SeedTypedTextViewEle
     @property()
     public mediaType: string | undefined;
 
-    @queryAssignedNodes()
-    private _link!: Array<Node>;
-
     render(): HTMLTemplateResult {
 	if (this.srcdoc === undefined || this.srcdoc === null) {
 	    return html``;
 	} else {
 	    // create the blob object and an object URL
 	    const url: string = URL.createObjectURL(new Blob([this.srcdoc], {type: this.mediaType}));
-	    if (this._link === undefined || this._link === null || this._link.length == 0) {
+	    if (this.innerHTML === "") {
 		return html`<div class="download-link"><a href="${url}">${url}</a></div>`;
 	    } else {
 		return html`<div class="download-link"><a href="${url}"><slot></slot></a></div>`;
