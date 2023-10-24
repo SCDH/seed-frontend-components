@@ -1,7 +1,7 @@
 import { html, LitElement, HTMLTemplateResult, CSSResult, unsafeCSS } from 'lit'
 import { customElement, property, state, query, queryAll } from 'lit/decorators.js'
 import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from '@scdh/seed-xml-transformer-ts-client/api.ts'
-import { TransformationAPIClient } from './transform-rest.ts'
+import { TransformationAPIClient } from './transformation-api-client.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 import { XSFormFieldFactory, registerDefaultValueConverters, DefaultValueConverter } from './xsform'
 

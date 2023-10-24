@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 import { DefaultApiFactory, RuntimeParameters } from '@scdh/seed-xml-transformer-ts-client/api.ts'
 
 import { WorkaroundApiFactory } from './workaround-transformer-api'
-import { SeedTransformer } from './transform-rest.ts'
+import { SeedTransformer } from './transformation-api-client.ts'
 
 
 /**
