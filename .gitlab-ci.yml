@@ -4,6 +4,10 @@ stages:
   - test
   - deploy
 
+.default_rules_tag:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+.\d+.\d+/ # describe how your version tags look like!
+
 build-and-run-tests:
   stage: test
   cache:
@@ -30,7 +34,7 @@ deploy:
     - cat .npmrc
     - npm publish
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - !reference [ .default_rules_tag, rules ]
 
 
 pages:
@@ -46,4 +50,4 @@ pages:
       - public
       - public/*
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - !reference [ .default_rules_tag, rules ]
