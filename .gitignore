@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tgz
 
 # Editor directories and files
 *~
@@ -23,3 +24,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# dev material
+/public/*.html
+/public/transformation-api
+/public/resources
