@@ -5,16 +5,16 @@
     <link rel="icon" type="image/png" href="/public/scdh.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test</title>
-    <script type="module" src="/src/seed/components/seed-synopsis.ts"></script>
-    <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
-    <script type="module" src="/src/seed/components/seed-transform-forms.ts"></script>
-    <script type="module" src="/src/seed/components/seed-transform-rest.ts"></script>
-    <script type="module" src="/src/seed/components/seed-download-link.ts"></script>
+    <script type="module" src="/src/seed-synopsis.ts"></script>
+    <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-transform-forms.ts"></script>
+    <script type="module" src="/src/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed-download-link.ts"></script>
     <script></script>
   </head>
   <body>
     <seed-choose-transform-rest
-      transformationApi="http://localhost:8080" OFFtransformations="[param-integer]">
+      transformationApi="http://localhost:5173/public/transformation-api/" OFFtransformations="[param-integer]">
       <seed-transform-rest>
 	<seed-download-link></seed-download-link>
 	<iframe></iframe>

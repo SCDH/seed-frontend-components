@@ -7,8 +7,8 @@ export default defineConfig(({ command, mode }) => {
     return {
 	build: {
 	    lib: {
-		entry: ["src/seed/components/seed-synopsis.ts",
-			"src/seed/components/seed-synopsis-text.ts"],
+		entry: ["src/seed-synopsis.ts",
+			"src/seed-synopsis-text.ts"],
 		// fileName: "seed-frontend-components",
 		// formats: ["es", "cjs"],
 	    },
