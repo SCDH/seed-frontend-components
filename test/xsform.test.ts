@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
-import { DefaultValueConverter, XSFormFieldFactory, registerDefaultValueConverters } from './xsform';
-import { StringDefaultValueConverter, PassDefaultValueConverter, BooleanDefaultValueConverter } from './xsform';
+import { DefaultValueConverter, XSFormFieldFactory, registerDefaultValueConverters } from '../src/xsform';
+import { StringDefaultValueConverter, PassDefaultValueConverter, BooleanDefaultValueConverter } from '../src/xsform';
 
 
 test("string default value converter", () => {
