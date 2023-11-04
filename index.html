@@ -9,16 +9,17 @@
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed-transform-forms.ts"></script>
     <script type="module" src="/src/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed-transform-sef.ts"></script>
     <script type="module" src="/src/seed-download-link.ts"></script>
     <script></script>
   </head>
   <body>
     <seed-choose-transform-rest
       transformationApi="http://localhost:5173/public/transformation-api/" OFFtransformations="[param-integer]">
-      <seed-transform-rest>
+      <seed-transform-sef>
 	<seed-download-link></seed-download-link>
 	<iframe></iframe>
-      </seed-transform-rest>
+      </seed-transform-sef>
     </seed-choose-transform-rest>
 
     <!--
