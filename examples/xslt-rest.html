@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XSLT on RESTful webservice</title>
+
+    <!-- loading modules for web components -->
+    <script type="module" src="/src/seed-transform-forms.ts"></script>
+    <script type="module" src="/src/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed-download-link.ts"></script>
+
+  </head>
+  <body>
+    <seed-choose-transform-rest
+      transformationApi="http://localhost:8080"
+      OFFtransformations="[param-integer]">
+      <seed-transform-rest>
+        <seed-download-link></seed-download-link>
+        <iframe></iframe>
+      </seed-transform-rest>
+    </seed-choose-transform-rest>
+  </body>
+</html>
