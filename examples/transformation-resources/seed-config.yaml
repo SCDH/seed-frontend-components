@@ -1,0 +1,20 @@
+identity:
+  description: The identity transformation.
+  class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+  location: id.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+plaintext:
+  description: Extract text nodes from the XML source document.
+  class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+  location: plaintext.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+param-integer:
+  description: a template with a required integer parameter
+  class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+  location: param-integer.xsl
+  requiresSource: true
+  mediaType: text/xml

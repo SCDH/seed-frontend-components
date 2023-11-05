@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XSLT with SaxonJS</title>
+
+    <!-- loading modules for web components -->
+    <script type="module" src="/src/seed-synopsis.ts"></script>
+    <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-transform-forms.ts"></script>
+    <script type="module" src="/src/seed-transform-rest.ts"></script>
+    <script type="module" src="/src/seed-transform-sef.ts"></script>
+    <script type="module" src="/src/seed-download-link.ts"></script>
+    
+  </head>
+  <body>
+    <seed-choose-transform-rest
+      transformationApi="/examples/transformation-api/"
+      OFFtransformations="[param-integer]">
+      <seed-transform-sef id="sef-transformer">
+        <seed-download-link></seed-download-link>
+        <iframe></iframe>
+      </seed-transform-sef>
+    </seed-choose-transform-rest>
+  </body>
+
+  <!--
+      Workaround for saxon-js:
+      We have to pass the SaxonJS object into the custom element because
+      loading of SaxonJS as a module is broken.
+
+      See https://saxonica.plan.io/issues/6233
+    -->
+  <script src="saxon-js/SaxonJS2.rt.js"></script>
+  <script>
+    // set SaxonJS as engine of seed-transform-sef element
+    var transformer = document.getElementById("sef-transformer");
+    transformer.engine = SaxonJS;
+  </script>
+  
+</html>

@@ -1,0 +1,7 @@
+{
+    "description": "Extract text nodes from the XML source document.",
+    "class": "de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation",
+    "location": "plaintext.xsl",
+    "requiresSource": true,
+    "mediaType": "text/plain"
+}
