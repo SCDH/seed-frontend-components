@@ -1,0 +1,14 @@
+{
+    "description": "a stylesheet with a required integer parameter",
+    "class": "de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation",
+    "location": "param-integer.xsl",
+    "requiresSource": true,
+    "mediaType": "text/xml",
+    "parameterDescriptors": {
+	"times": {
+	    "default": "",
+	    "type": "xs:integer",
+	    "required": "true"
+	}
+    }
+}
