@@ -64,7 +64,16 @@ export class SeedTransformREST extends SeedTransformer {
 			systemId = undefined;
 		    }
 		    const api = WorkaroundApiFactory(this.getConfiguration());
-		    const response = await api.transformTransformationPost(this.transformation, this.src, systemId, params, {});
+
+		    // assert that we have a File object
+		    var source: File;
+		    if (this.src instanceof Blob) {
+			source = new File([this.src], systemId ?? "uploaded");
+		    } else {
+			source = this.src;
+		    }
+
+		    const response = await api.transformTransformationPost(this.transformation, source, systemId, params, {});
 		    console.log(response);
 		    this._result = response.data;
 		    this._mediaType = response?.headers?.["content-type"];
