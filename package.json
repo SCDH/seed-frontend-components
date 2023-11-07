@@ -6,10 +6,10 @@
   "main": "./dist/seed-frontend-components.cjs",
   "module": "./dist/seed-frontend-components.js",
   "exports": {
-      ".": {
-	  "import": "./dist/seed-frontend-components.js",
-	  "require": "./dist/seed-frontend-components.cjs"
-      }
+    ".": {
+      "import": "./dist/seed-frontend-components.js",
+      "require": "./dist/seed-frontend-components.cjs"
+    }
   },
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@scdh/seed-xml-transformer-ts-client": "0.1.0",
+    "jszip": "^3.10.1",
     "lit": "^2.6.1"
   },
   "devDependencies": {
