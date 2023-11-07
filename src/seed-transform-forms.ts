@@ -4,6 +4,8 @@ import { DefaultApiFactory, TransformationInfo, XsltParameterDetailsValue } from
 import { TransformationAPIClient } from './transformation-api-client.ts'
 import { SeedTransformREST } from './seed-transform-rest.ts'
 import { XSFormFieldFactory, registerDefaultValueConverters, DefaultValueConverter } from './xsform'
+import { FileExtractor, FileExtractorFactory } from './fileextractor'
+
 
 import styles from './seed-transform-forms.css'
 
@@ -188,12 +190,22 @@ export class SeedChooseTransformREST extends TransformationAPIClient {
 		// get input data from for data. This violates the events up principle! TODO
 		const params = this._parametersForm?.getFormInput() ?? {};
 		console.log("parameters from parameters form", params);
-		// properties down
-		transformer["transformation"] = this._transformation;
-		this.propagateApiInformation(transformer);
-		transformer.href = systemId;
-		transformer.src = files?.[0] ?? null;
-		transformer.parameters = params;
+
+		// use file extractor
+		var file = files?.[0] ?? null;
+		if (file != null) {
+		    var extractor: FileExtractor = FileExtractorFactory.getFileExtractor(file);
+		    extractor.extract(file).then((file) => {
+		    console.log("extracted object", file);
+
+		    // properties down
+		    transformer["transformation"] = this._transformation;
+		    this.propagateApiInformation(transformer);
+		    transformer.href = systemId;
+		    transformer.src = file;
+		    transformer.parameters = params;
+		    });
+		}
 	    }
 	}
     }
