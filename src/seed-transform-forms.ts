@@ -355,9 +355,18 @@ export class SeedTransformRestParams extends LitElement {
     renderParameterForm(param: string): HTMLTemplateResult {
 	const dflt: string | null = this.transformationInfo?.parameterDescriptors?.[param]?.["default"] ?? null;
 	if (dflt === null) {
-	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}<div class="input-field ${param}"><input form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}"></input></div>`;
 	} else {
-	    return html`<div class="inputfield parameter ${param}"><label class="parameter-name">${param}</span><div class="input-field ${param}"><input type="text" form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}" value="${this.convertDefaultValue(param, dflt)}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}<div class="input-field ${param}"><input type="text" form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}" value="${this.convertDefaultValue(param, dflt)}"></input></div>`;
+	}
+    }
+
+    renderParameterName(name: string): HTMLTemplateResult {
+	console.log("name", name);
+	if (this?.parameterDetails?.[name]?.isRequired) {
+	    return html`<span class="name ${name}">${name}<sup class="required">*</sup></span>`;
+	} else {
+	    return html`<span class="name ${name}">${name}</span>`;
 	}
     }
 
