@@ -355,20 +355,32 @@ export class SeedTransformRestParams extends LitElement {
     renderParameterForm(param: string): HTMLTemplateResult {
 	const dflt: string | null = this.transformationInfo?.parameterDescriptors?.[param]?.["default"] ?? null;
 	if (dflt === null) {
-	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}<div class="input-field ${param}"><input form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}${this.renderParameterDescription(param)}<input form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}"></input></div>`;
 	} else {
-	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}<div class="input-field ${param}"><input type="text" form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}" value="${this.convertDefaultValue(param, dflt)}"></input></div>`;
+	    return html`<div class="inputfield parameter ${param}">${this.renderParameterName(param)}${this.renderParameterDescription(param)}<input type="text" form="${this.formId}" name="${this.inputFormPrefix + param}" id="${this.inputFormPrefix + param}" value="${this.convertDefaultValue(param, dflt)}"></input></div>`;
 	}
     }
 
     renderParameterName(name: string): HTMLTemplateResult {
 	console.log("name", name);
+	const typ:string = this?.parameterDetails?.[name]?.underlyingDeclaredType ?? "";
 	if (this?.parameterDetails?.[name]?.isRequired) {
-	    return html`<span class="name ${name}">${name}<sup class="required">*</sup></span>`;
+	    return html`<label for="${this.inputFormPrefix + name}" class="name ${name}">${name}<sup class="required">*</sup> <span class="xs-type">as ${typ}</span></label>`;
 	} else {
-	    return html`<span class="name ${name}">${name}</span>`;
+	    return html`<label for="${this.inputFormPrefix + name}" class="name ${name}">${name} <span class="xs-type">as ${typ}</span></label>`;
 	}
     }
+
+    renderParameterDescription(name: string): HTMLTemplateResult {
+	const desc: string | null = this.transformationInfo?.parameterDescriptors?.[name]?.["description"] ?? null;
+	if (desc != null) {
+	    return html`<span class="description ${name}">${desc}</span>`;
+	} else {
+	    return html``; // <span class="description not-available ${name}">not available</span>`;
+	}
+    }
+
+
 
     convertDefaultValue(param: string, value: string): string {
 	const paramDetails: XsltParameterDetailsValue | undefined = this.parameterDetails?.[param];
