@@ -109,6 +109,10 @@ pages with usage examples. They are contained in the
   synoptically. The presented files need some internal JS to make the
   synchronized scrolling work.
 
+### API Docs
+
+[https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/](https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/)
+
 
 ## Design Principles / Contributing
 
