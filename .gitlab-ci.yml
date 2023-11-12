@@ -2,6 +2,7 @@ image: harbor.uni-muenster.de/proxy-docker/library/node:latest
 
 stages:
   - test
+  - build
   - deploy
 
 .default_rules_tag:
@@ -25,6 +26,21 @@ build-and-run-tests:
     paths:
       - dist
 
+docs:
+  stage: build
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: npm
+    paths:
+      - node_modules/
+  script:
+    - npm run docs
+  artifacts:
+    paths:
+      - docs
+
 # push to npm package registry
 deploy:
   stage: deploy
@@ -45,10 +61,14 @@ pages:
     - ls -l dist
     - mkdir -p public
     - cp -av --recursive dist/* public/
+    - cp -av --recursive docs public/
     - ls -lR public
   artifacts:
     paths:
       - public
       - public/*
+  needs:
+    - docs
+    - build-and-run-tests
   rules:
     - !reference [ .default_rules_tag, rules ]
