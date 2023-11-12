@@ -36,7 +36,7 @@ docs:
     paths:
       - node_modules/
   script:
-    - npm run docs
+    - npm run doc
   artifacts:
     paths:
       - docs
