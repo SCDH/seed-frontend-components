@@ -15,7 +15,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "webjar": "./mkwebjar.sh"
   },
   "dependencies": {
     "@scdh/seed-xml-transformer-ts-client": "0.1.0",

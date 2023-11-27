@@ -37,6 +37,13 @@ deploy:
   rules:
     - !reference [ .default_rules_tag, rules ]
 
+deploy webjar:
+  stage: deploy
+  script:
+    - npm run webjar
+    - curl --request PUT --upload-file target/seed-frontend-components-webjar-$CI_COMMIT_TAG.jar --header "Job-Token: $CI_JOB_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven/de/wwu/scdh/seed/seed-frontend-components-webjar/$CI_COMMIT_TAG/seed-frontend-components-webjar-$CI_COMMIT_TAG.jar"
+  rules:
+    - !reference [ .default_rules_tag, rules ]
 
 pages:
   stage: deploy
