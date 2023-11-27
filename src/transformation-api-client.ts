@@ -70,7 +70,7 @@ export abstract class SeedTransformer extends TransformationAPIClient {
      * of the source document.
      */
     @property()
-    public src: File | null = null;
+    public src: File | Blob | null = null;
 
     /**
      * The result of the transformation as the {@link File} object

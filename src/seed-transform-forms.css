@@ -73,8 +73,13 @@ div.parameters div.parameter span {
 div.parameter .name {
     font-weight: 900;
 }
-div.parameter span.name .required {
+div.parameter span.name .required,
+div.parameter label.name .required {
     color: red;
+}
+div.parameter span.xs-type {
+    color: darkgray;
+    display: inline !important;
 }
 div.parameter .type:before {
     content: "Type: ";

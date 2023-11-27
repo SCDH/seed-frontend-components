@@ -12,6 +12,7 @@ dist
 dist-ssr
 META-INF
 target
+docs
 *.local
 *.tgz
 
