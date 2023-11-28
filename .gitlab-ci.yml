@@ -58,7 +58,7 @@ deploy webjar:
   variables:
     UPLOAD_LOCATION: $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven/de/wwu/scdh/seed/seed-frontend-components-webjar/$CI_COMMIT_TAG/seed-frontend-components-webjar-$CI_COMMIT_TAG.jar
     UPLOAD_FILE: target/seed-frontend-components-webjar-$CI_COMMIT_TAG.jar
-    HEADER: "Job-Token: $CI_JOB_TOKEN"
+    HEADER: "JOB-TOKEN: $CI_JOB_TOKEN"
   before_script:
     - apt-get update
     - apt-get -y install zip
