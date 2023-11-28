@@ -62,9 +62,12 @@ deploy webjar:
   before_script:
     - apt-get update
     - apt-get -y install zip
+    - echo "upload location: $UPLOAD_LOCATION"
+    - echo "upload file: $UPLOAD_FILE"
+    - echo "header: $HEADER"
   script:
     - npm run webjar
-    - curl --request PUT --upload-file $UPLOAD_FILE --header $HEADER $UPLOAD_LOCATION
+    - 'curl --request PUT --upload-file $UPLOAD_FILE --header $HEADER $UPLOAD_LOCATION'
   rules:
     - !reference [ .default_rules_tag, rules ]
 
