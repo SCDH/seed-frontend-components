@@ -132,4 +132,6 @@ pages with usage examples. They are contained in the
 
 ## Use Cases
 
-- [Jiob Frontend](https://zivgitlab.uni-muenster.de/SCDH/schnocks-ijob/hiob-synopsis-frontend)
+- [Jiob Frontend](https://zivgitlab.uni-muenster.de/SCDH/schnocks-ijob/hiob-synopsis-frontend): a synoptical view of different versions of the book of Jiob
+- [ALEA Transformations](https://zivgitlab.uni-muenster.de/SCDH/hees-alea/alea-transformations): a bundle of XSLT transformations with a simple frontend for converting DOCX and ODT to TEI
+
