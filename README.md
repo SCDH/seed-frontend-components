@@ -40,7 +40,7 @@ page nor the `examples`.
 
 ### Registry set up
 
-Put this into your packages [`.npmrc`](https://docs.npmjs.com/cli/v9/configuring-npm/npmrc):
+Put this into your package's [`.npmrc`](https://docs.npmjs.com/cli/v9/configuring-npm/npmrc):
 
 ```shell
 # 805 is the group ID of SCDH toplevel group
@@ -59,6 +59,23 @@ npm will be forwarded to the right projects by gitlab.
 ```shell
 npm i @scdh/seed-frontend-components
 ```
+
+## Using the Compiled Library of Web Components
+
+Instead adding this package to the dependencies of your project, you
+can simply load the compiled library of web components. The latest
+version is only at
+
+```
+https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/seed-frontend-components.js
+```
+
+or
+
+```
+https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/seed-frontend-components.cjs
+```
+
 
 ## Development
 
