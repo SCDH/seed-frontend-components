@@ -4,26 +4,33 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/public/scdh.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Synopsis</title>
-    <script type="module" src="/src/seed/components/seed-synopsis.ts"></script>
-    <script type="module" src="/src/seed/components/seed-synopsis-text.ts"></script>
+    <title>Examples :: SEED Frontend Components</title>
   </head>
   <body>
-    <seed-synopsis alignment="horizontal">
-      <seed-synopsis-text content="/public/doc1.html" id="LXX" source="LXX.words.tei.xml"></seed-synopsis-text>
-      <seed-synopsis-text content="/public/doc2.html" id="MT" source="MT.words.tei.xml"></seed-synopsis-text>
-      <seed-synopsis-text content="/public/doc3.html" id="TG" source="TG.words.tei.xml"></seed-synopsis-text>
-    </seed-synopsis>
-  </body>
-  <script>
-    // Create IE + others compatible event handler
-    var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-    var eventer = window[eventMethod];
-    var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+    <h1>Example Usage of the <i>SEED Frontend Components</i></h1>
+    <ul>
 
-    // Listen to message from child window
-    eventer(messageEvent,function(e) {
-	console.log("parent received message from " + e.origin + ": ", e.data);
-    },false);
-    </script>
+      <li>
+	<a href="examples/xslt-sef.html"
+	   style="font-family:monospace;">examples/xslt-sef.html</a>:
+	   Running XSLT in the browser using SaxonJS.
+      </li>
+
+      <li>
+	<a href="examples/xslt-rest.html"
+	   style="font-family:monospace;">examples/xslt-rest.html</a>:
+	   Running XSLT on a RESTful webservice implementing
+	   the <i>Transformation API</i>. This example requires the
+	   service running
+	   on <a href="http://localhost:8080">http://localhost:8080</a>.
+      </li>
+
+      <li>
+	<a href="examples/synopsis.html"
+	   style="font-family:monospace;">examples/synopsis.html</a>:
+	   Synoptical presentation of texts.
+      </li>
+
+    </ul>
+  <body>
 </html>
