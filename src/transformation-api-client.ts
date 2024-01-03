@@ -9,7 +9,7 @@ import { SeedTypedTextViewElement, seedTypedTextViewElementIsAssignableBy } from
 export abstract class TransformationAPIClient extends LitElement {
 
     @property({ type: String })
-    transformationApi!: string;
+    transformationApi: string = window.location.origin;
 
     protected getConfiguration(): Configuration {
 	return new Configuration({
