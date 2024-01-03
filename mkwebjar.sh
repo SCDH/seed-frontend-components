@@ -9,7 +9,14 @@ else
     REVISION=$(npm pkg get version | tr -d \")
 fi
 
-WEBJAR=seed-frontend-components-webjar-$REVISION.jar
+MVN_GROUP=de.wwu.scdh.seed
+MVN_ARTIFACT=seed-frontend-components-webjar
+
+WEBJAR=$MVN_ARTIFACT-$REVISION.jar
+POM=$MVN_ARTIFACT-$REVISION.pom
+
+REPO_URL=https://zivgitlab.uni-muenster.de/SCDH/tei-processing/seed-frontend-components
+
 
 cat >  META-INF/MANIFEST.MF <<EOF
 Manifest-Version: 1.0
@@ -21,9 +28,35 @@ Specification-Vendor: SCDH
 Implementation-Title: SEED Fontend Components
 Implementation-Version: $REVISION
 Implementation-Vendor: SCDH, ULB Münster
-XWiki-Extension-Id: de.wwu.scdh.seed.seed-frontend-components
+XWiki-Extension-Id: $MVN_GROUP.$MVN_ARTIFACT
 EOF
 
 mkdir -p target
 
 zip -r target/$WEBJAR META-INF
+
+
+cat > target/$POM <<EOF
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>$MVN_GROUP</groupId>
+  <artifactId>$MVN_ARTIFACT</artifactId>
+  <version>$REVISION</version>
+  <name>SEED Frontend Components</name>
+  <url>$REPO_URL</url>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:$REPO_URL.git</connection>
+    <developerConnection>scm:git:$REPO_URL.git</developerConnection>
+    <url>scm:git:$REPO_URL.git</url>
+    <tag>HEAD</tag>
+  </scm>
+</project>
+EOF
