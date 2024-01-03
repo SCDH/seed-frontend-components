@@ -1,8 +1,5 @@
 #!/bin/sh
 
-mkdir -p META-INF/resources
-cp dist/* META-INF/resources
-
 if [ -n "$CI_COMMIT_TAG" ]; then
     REVISION=$CI_COMMIT_TAG
 else
@@ -11,6 +8,14 @@ fi
 
 MVN_GROUP=de.wwu.scdh.seed
 MVN_ARTIFACT=seed-frontend-components-webjar
+
+# internal directory structure of the web jar
+INTERNAL_DIR=META-INF/resources/webjars/$MVN_ARTIFACT/$REVISION
+
+mkdir -p $INTERNAL_DIR
+cp dist/* $INTERNAL_DIR
+
+
 
 WEBJAR=$MVN_ARTIFACT-$REVISION.jar
 POM=$MVN_ARTIFACT-$REVISION.pom
