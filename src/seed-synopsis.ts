@@ -83,7 +83,7 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
      */
     protected alignChildren = (_e: Event) => {
 	let countOfChildren = this.synopsisTexts.length;
-	let childWidth: number = 100;
+	let childWidth: number = 99;
 	let childHeight: number = 100;
 	if (this.alignment == "horizontal") {
 	    childWidth = Math.floor(childWidth / countOfChildren);
