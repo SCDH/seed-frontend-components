@@ -53,6 +53,17 @@ Reason: This package has dependencies on other packages prefixed with
 `@scdh` in the SCDH toplevel group. By using the toplevel group ID,
 npm will be forwarded to the right projects by gitlab.
 
+Alternatively, you can use the 7934 group and [configure
+npm](https://docs.gitlab.com/ee/user/packages/npm_registry/#publishing-a-package-via-the-command-line)
+to use this one:
+
+```
+rm .npmrc
+npm config set @scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/groups/7934/-/packages/npm/
+npm config set -- //zivgitlab.uni-muenster.de/api/v4/groups/7934/-/packages/npm/:_authToken=YOUR_API_READ_TOKEN 
+```
+
+
 
 ### Install
 
