@@ -20,9 +20,11 @@
     "doc": "typedoc"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.2.1",
     "@scdh/seed-xml-transformer-ts-client": "0.1.0",
     "jszip": "^3.10.1",
-    "lit": "^2.6.1"
+    "lit": "^2.6.1",
+    "pwa-helpers": "^0.9.1"
   },
   "devDependencies": {
     "saxon-js": "^2.6.0",
