@@ -24,7 +24,7 @@ export interface TextState {
  * candidate.
  */
 interface TextsSlice {
-    texts: { [key: string]: TextState };
+    [key: string]: TextState
 }
 
 
@@ -33,7 +33,6 @@ interface TextsSlice {
  * object).
  */
 const initialState: TextsSlice = {
-    texts: {},
 };
 
 const textsSlice = createSlice({
@@ -41,12 +40,10 @@ const textsSlice = createSlice({
     initialState,
     reducers: {
 	addText: (state, action: PayloadAction<{id: string, text: TextState}>) => {
-	    const singleton: {[key: string]: TextState} = {};
-	    singleton[action.payload.id] = action.payload.text;
-	    state.texts = {...state.texts, ...singleton};
+	    state[action.payload.id] = action.payload.text;
 	},
 	scrolledTo: (state, action: PayloadAction<{id: string, position: string}>) => {
-	    state.texts[action.payload.id].scrollPosition = action.payload.position;
+	    state[action.payload.id].scrollPosition = action.payload.position;
 	},
     },
 });
