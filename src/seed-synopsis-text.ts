@@ -43,8 +43,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 
     stateChanged(_state: RootState) {
 	// this is called by the redux store to pass in state
-	if (_state.texts.texts.hasOwnProperty(this.id)) {
-	    const s: TextState = _state.texts.texts[this.id];
+	if (_state.texts.hasOwnProperty(this.id)) {
+	    const s: TextState = _state.texts[this.id];
 	    this.position = s.scrollPosition;
 	}
     };
