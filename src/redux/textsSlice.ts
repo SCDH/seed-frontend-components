@@ -3,13 +3,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 /*
  * The state of a single text widget.
  */
-interface TextState {
+export interface TextState {
 
     /*
      * The position (id of a fragment) which the text is actually
      * scrolled to.
      */
-    scrollPosition: string | null;
+    scrollPosition: string;
 }
 
 /*
@@ -24,7 +24,7 @@ interface TextState {
  * candidate.
  */
 interface TextsSlice {
-    texts: { [id: string]: TextState };
+    texts: { [key: string]: TextState };
 }
 
 
