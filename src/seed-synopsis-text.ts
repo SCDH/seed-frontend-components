@@ -3,9 +3,13 @@ import { CSSResult, query } from 'lit-element'
 import { customElement, property } from 'lit/decorators.js'
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
+import { connect } from 'pwa-helpers';
+import { addText, scrolledTo, TextState } from "./redux/textsSlice";
+import { store, RootState } from "./redux/store";
+
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends connect(store)(LitElement) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -13,8 +17,8 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     @property({ type: String })
     source: string = "";
 
-    @property({ type: String })
-    id: string = "";
+    @property({ attribute: true, type: String})
+    id!: string;
 
     @property({ attribute: false, state: true })
     protected position!: string;
@@ -34,9 +38,28 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
 
+
+
+
+    stateChanged(_state: RootState) {
+	// this is called by the redux store to pass in state
+	if (_state.texts.texts.hasOwnProperty(this.id)) {
+	    const s: TextState = _state.texts.texts[this.id];
+	    this.position = s.scrollPosition;
+	}
+    };
+
+
     connectedCallback() {
+	// this is called when the component has been added to the DOM
 	super.connectedCallback();
+	// set the event listener for scroll events on the post message channel
 	window.addEventListener("message", this.handleScrolled);
+	// dispatch addText event to the redux state store
+	const textState: TextState = {
+	    scrollPosition: this.id,
+	};
+	store.dispatch(addText({id: this.id, text: textState}));
     }
 
     disconnectedCallback() {
@@ -91,7 +114,8 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	if (e.data?.event == "scrolled" && this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
 	    console.log("text in " + this.id + " was scrolled: ", e.data);
 	    this.contentMeta = e.data as IContentMeta;
-	    this.position = e.data.top;
+	    // this.position = e.data.top; // replaced by redux stuff:
+	    store.dispatch(scrolledTo({id: this.id, position: e.data.top}));
 	}
     }
 
