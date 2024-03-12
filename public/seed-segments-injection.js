@@ -5,21 +5,21 @@ function postMessageOnSegmentEvent() {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "mouse-over-segment", "segment-id": targetElement.id }, window.location.href);
+	    parent.postMessage({ ...msg, "event": "mouse-over-segment", "segmentId": targetElement.id }, window.location.href);
 	}
     });
     document.body.addEventListener("mouseout", function(e) {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "mouse-out-segment", "segment-id": targetElement.id }, window.location.href);
+	    parent.postMessage({ ...msg, "event": "mouse-out-segment", "segmentId": targetElement.id }, window.location.href);
 	}
     });
     document.body.addEventListener("click", function(e) {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "click-segment", "segment-id": targetElement.id }, window.location.href);
+	    parent.postMessage({ ...msg, "event": "click-segment", "segmentId": targetElement.id }, window.location.href);
 	}
     });
 }
