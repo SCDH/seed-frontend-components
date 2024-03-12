@@ -16,11 +16,28 @@ export interface SegmentsState {
  * The segments state slice stores SegmentStates per text widget.
  */
 export interface SegmentsSlice {
-    [textWidgetId: string]: SegmentsState
+    annotationsPerSegment: { [textWidgetId: string]: SegmentsState },
+
+    annotationSelected: string | null,
+
+    annotationsSelected: Array<string>,
+
+    annotationsTransient: Array<string>,
+
 }
 
 
-const initialState: SegmentsSlice = {}
+const initialState: SegmentsSlice = {
+
+    annotationsPerSegment: {},
+
+    annotationSelected: null,
+
+    annotationsSelected: [],
+
+    annotationsTransient: [],
+
+}
 
 /*
  * A helper interface to access the {TextsSlice} of the redux store.
@@ -57,6 +74,22 @@ const segmentsSlice = createSlice({
     name: "segments",
     initialState,
     reducers: {
+	selectAnnotationsAtSegment: (state, action: PayloadAction<{textWidgetId: string, segmentId: string}>) => {
+	    var annots: Array<string> = state.annotationsPerSegment?.[action.payload.textWidgetId]?.[action.payload.segmentId] ?? [];
+	    if (annots.length > 0) {
+		state.annotationsSelected = annots;
+		// if none is selected or if previously selected is not in set of selected: show the first in detail
+		if (state.annotationSelected == null || (state.annotationSelected != null && annots.indexOf(state.annotationSelected) === -1)) {
+		    state.annotationSelected = annots[0];
+		}
+	    } else {
+		state = state;
+	    }
+	},
+	transientAnnotationsAtSegment: (state, action: PayloadAction<{textWidgetId: string, segmentId: string}>) => {
+	    state.annotationsTransient =
+		state.annotationsPerSegment?.[action.payload.textWidgetId]?.[action.payload.segmentId] ?? [];
+	},
     },
     extraReducers: (builder) => {
 	// Note: When using addCase, the type parameter of the promise
@@ -65,10 +98,11 @@ const segmentsSlice = createSlice({
 	builder.addCase(
 	    getAnnotationsPerSegment.fulfilled,
 	    (state, action: PayloadAction<{textWidgetId: string, segments: SegmentsState}>) => {
-		state[action.payload.textWidgetId] = action.payload.segments;
+		state.annotationsPerSegment[action.payload.textWidgetId] = action.payload.segments;
 	    });
     },
 });
 
+export const { selectAnnotationsAtSegment, transientAnnotationsAtSegment } = segmentsSlice.actions;
 
 export default segmentsSlice.reducer;
