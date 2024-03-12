@@ -5,7 +5,7 @@ import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { connect } from 'pwa-helpers';
 import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
-import { getAnnotationsPerSegment } from "./redux/segmentsSlice";
+import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment } from "./redux/segmentsSlice";
 import { store, RootState } from "./redux/store";
 
 // define the web component
@@ -133,17 +133,16 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		    break;
 		case "scrolled":
 		    this.contentMeta = e.data as IContentMeta;
-		    // this.position = e.data.top; // replaced by redux stuff:
 		    store.dispatch(scrolledTo({id: this.id, position: e.data.top}));
 		    break;
 		case "mouse-over-segment":
-		    // TODO
+		    store.dispatch(transientAnnotationsAtSegment({textWidgetId: this.id, segmentId: e.data.segmentId}));
 		    break;
 		case "mouse-out-segment":
 		    // TODO
 		    break;
 		case "click-segment":
-		    // TODO
+		    store.dispatch(selectAnnotationsAtSegment({textWidgetId: this.id, segmentId: e.data.segmentId}));
 		    break;
 		default:
 		    console.log("unknown event: ", e);
