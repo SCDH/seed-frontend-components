@@ -5,6 +5,7 @@ import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { connect } from 'pwa-helpers';
 import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
+import { getAnnotationsPerSegment } from "./redux/segmentsSlice";
 import { store, RootState } from "./redux/store";
 
 // define the web component
@@ -128,6 +129,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 			scrollPosition: null
 		    };
 		    store.dispatch(addText({id: this.id, text: txt}));
+		    store.dispatch(getAnnotationsPerSegment(this.id));
 		    break;
 		case "scrolled":
 		    this.contentMeta = e.data as IContentMeta;
