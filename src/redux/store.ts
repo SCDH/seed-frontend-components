@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import textsReducer from "./textsSlice";
+import segmentsReducer from "./segmentsSlice";
 
 export const store = configureStore({
     reducer: {
 	texts: textsReducer,
+	segments: segmentsReducer,
     },
 });
 
