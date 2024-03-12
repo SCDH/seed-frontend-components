@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js'
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { connect } from 'pwa-helpers';
-import { addText, scrolledTo, TextState } from "./redux/textsSlice";
+import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
 import { store, RootState } from "./redux/store";
 
 // define the web component
@@ -44,8 +44,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     stateChanged(_state: RootState) {
 	// this is called by the redux store to pass in state
 	if (_state.texts.hasOwnProperty(this.id)) {
-	    const s: TextState = _state.texts[this.id];
-	    this.position = s.scrollPosition;
+	    const s: TextState | null = _state.texts[this.id];
+	    this.position = s?.scrollPosition ?? "start";
 	}
     };
 
@@ -54,16 +54,15 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	// this is called when the component has been added to the DOM
 	super.connectedCallback();
 	// set the event listener for scroll events on the post message channel
-	window.addEventListener("message", this.handleScrolled);
-	// dispatch addText event to the redux state store
-	const textState: TextState = {
-	    scrollPosition: this.id,
-	};
-	store.dispatch(addText({id: this.id, text: textState}));
+	window.addEventListener("message", this.handleMessage);
+	// dispatch initTextWidget action to the redux state store:
+	// this has to be done, since addText with meta information is
+	// fired lately, only after the first scrolledTo action.
+	store.dispatch(initTextWidget({id: this.id}));
     }
 
     disconnectedCallback() {
-	window.removeEventListener("message", this.handleScrolled);
+	window.removeEventListener("message", this.handleMessage);
 	super.disconnectedCallback();
     }
 
@@ -109,15 +108,47 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	}
     }
 
-    protected handleScrolled = (e: MessageEvent) => {
-	// console.log("filtering message: ", e, this.getContentUrl().toString());
-	if (e.data?.event == "scrolled" && this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("text in " + this.id + " was scrolled: ", e.data);
-	    this.contentMeta = e.data as IContentMeta;
-	    // this.position = e.data.top; // replaced by redux stuff:
-	    store.dispatch(scrolledTo({id: this.id, position: e.data.top}));
+    /*
+     * On incoming messages via the post message channel,
+     * {handleMessage} dispatches redux store actions.
+     */
+    protected handleMessage = (e: MessageEvent) => {
+	if (e.data?.href !== undefined &&
+	    this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
+	    console.log("filtered message: ", e, this.getContentUrl().toString());
+	    switch (e.data?.event) {
+		case "meta":
+		    // We do not destructure e.data, since we have no control over it!
+		    const txt: TextState = {
+			origin: e.data.origin ?? null,
+			href: e.data.href ?? null,
+			pathname: e.data.pathname ?? null,
+			canonicalUrl: e.data.canonicalUrl ?? null,
+			title: e.data.title ?? null,
+			scrollPosition: null
+		    };
+		    store.dispatch(addText({id: this.id, text: txt}));
+		    break;
+		case "scrolled":
+		    this.contentMeta = e.data as IContentMeta;
+		    // this.position = e.data.top; // replaced by redux stuff:
+		    store.dispatch(scrolledTo({id: this.id, position: e.data.top}));
+		    break;
+		case "mouse-over-segment":
+		    // TODO
+		    break;
+		case "mouse-out-segment":
+		    // TODO
+		    break;
+		case "click-segment":
+		    // TODO
+		    break;
+		default:
+		    console.log("unknown event: ", e);
+	    }
 	}
     }
+
 
     protected stripFragment(url: string): string {
 	let pos = url.indexOf("#");
