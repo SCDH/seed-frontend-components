@@ -48,7 +48,7 @@ export interface TextState {
  * text. So the identifier of the text widget would be a better
  * candidate.
  */
-interface TextsSlice {
+export interface TextsSlice {
     [key: string]: TextState
 }
 
