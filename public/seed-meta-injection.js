@@ -7,7 +7,11 @@ let msg = { ...documentMetadata, 'origin': window.location.origin, 'href': windo
 // add canonical URL if present
 let canonicalURL = document.querySelector("link[rel='canonical']");
 if (canonicalURL) {
-    msg = { ...msg, 'canonical': canonicalURL.getAttribute("href") };
+    msg = { ...msg, 'canonicalUrl': canonicalURL.getAttribute("href") };
+}
+let title = document.querySelector("title");
+if (canonicalURL) {
+    msg = { ...msg, 'title': title.innerHTML };
 }
 
 window.addEventListener("load", (e) => {
