@@ -12,6 +12,13 @@ export interface SegmentsState {
 
 }
 
+export interface Annotation {
+
+    body: string;
+
+    tags: Array<string>;
+}
+
 /*
  * The segments state slice stores SegmentStates per text widget.
  */
@@ -23,6 +30,8 @@ export interface SegmentsSlice {
     annotationsSelected: Array<string>,
 
     annotationsTransient: Array<string>,
+
+    annotations: { [key: string]: Annotation }
 
 }
 
@@ -36,6 +45,8 @@ const initialState: SegmentsSlice = {
     annotationsSelected: [],
 
     annotationsTransient: [],
+
+    annotations: {}
 
 }
 
@@ -70,6 +81,23 @@ export const getAnnotationsPerSegment = createAsyncThunk<any, string, { state: S
     }
 )
 
+/*
+ * An async action for fetching **all** annotations from a given URL.
+ */
+export const fetchAnnotations = createAsyncThunk<any, string>(
+    "segments/fetchAnnotations",
+    async (url): Promise<{[key: string]: Annotation}> => {
+	console.log("fetching annotations from ", url);
+	const response = await fetch(url);
+	return response.json().then((result) => {
+	    return result;
+	}).catch(() => {
+	    console.log("failed to fetch annoations from ", url);
+	    return {};
+	});
+    }
+)
+
 const segmentsSlice = createSlice({
     name: "segments",
     initialState,
@@ -99,6 +127,11 @@ const segmentsSlice = createSlice({
 	    getAnnotationsPerSegment.fulfilled,
 	    (state, action: PayloadAction<{textWidgetId: string, segments: SegmentsState}>) => {
 		state.annotationsPerSegment[action.payload.textWidgetId] = action.payload.segments;
+	    });
+	builder.addCase(
+	    fetchAnnotations.fulfilled,
+	    (state, action: PayloadAction<{[key: string]: Annotation}>) => {
+		state.annotations = action.payload;
 	    });
     },
 });
