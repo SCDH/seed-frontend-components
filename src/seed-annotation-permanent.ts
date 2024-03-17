@@ -64,8 +64,9 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
 	if (this.annotation == null) {
 	    return html``;
 	} else {
-	    //return html`${this.annotation.body}`;
-	    return html`<div class="annotation-id">${this.annotation.body}</div>`;
+	    // make up an template string and evaluate it, see
+	    // https://stackoverflow.com/questions/76289568/lit-element-how-to-render-template-from-an-external-text
+	    return html`<div class="annotation-id">${eval("html`" + this.annotation.body + "`")}</div>`;
 	}
     }
 
