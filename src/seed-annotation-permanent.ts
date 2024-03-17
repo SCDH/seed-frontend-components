@@ -4,6 +4,7 @@ import { customElement, property } from 'lit/decorators.js'
 import { connect } from 'pwa-helpers';
 import { store, RootState } from "./redux/store";
 import { fetchAnnotations, Annotation } from './redux/segmentsSlice';
+import { fetchResourceCenteredJson } from './redux/ontologySlice';
 
 /*
  * The {SeedAnnotationPermanent} object is Lit web component for
@@ -25,6 +26,9 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
     @property({ state: true })
     annotation: Annotation | null = null;
 
+    @property({ attribute: "ontology-urls", type: String })
+    ontologyUrls!: string;
+
     /*
      * Pull in the state from the redux store and write them to
      * reactive properties that result in re-rendering the component
@@ -42,6 +46,9 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
     protected willUpdate(changedProperties: PropertyValues<this>): void {
 	if (changedProperties.has("annotationsUrl" as keyof SeedAnnotationPermanent)) {
 	    store.dispatch(fetchAnnotations(this.annotationsUrl));
+	}
+	if (changedProperties.has("ontologyUrls" as keyof SeedAnnotationPermanent)) {
+	    store.dispatch(fetchResourceCenteredJson(this.ontologyUrls));
 	}
     }
 
