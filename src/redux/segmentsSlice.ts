@@ -8,29 +8,105 @@ import { TextState, TextsSlice } from "./textsSlice";
  */
 export interface SegmentsState {
 
+    /*
+     * A property of the {SegmentsState} object stores an array of IDs
+     * of annotation that target a text segment/span. This serves to
+     * fast lookup of annotations when hovering etc. over
+     * text segments/spans.
+     */
     [segmentId: string]: Array<string>
 
 }
 
+/*
+ * RDF Classes predicated on the annotations at text segments. This is
+ * used for colourizing/highlighting the text and serves for fast
+ * access based on segment IDs.
+ */
+export interface ClassesPerSegment {
+
+    /*
+     * A property of the {ClassesPerSegment} object stores an array of
+     * RDF Classes for a text segment. This is to be used for styling
+     * the text segments and must provide fast access to CSS features.
+     */
+    [segmentId: string]: Array<string>
+}
+
+/*
+ * Interface for {Annotation} objects as stored in the state slice.
+ */
 export interface Annotation {
 
+    /*
+     * The annotation body (comment) as serialized HTML.
+     */
     body: string;
 
-    tags: Array<string>;
+    /*
+     * RDF predications on the annotation, i.e., classes resp. tags.
+     */
+    predications: StatementsAboutSubject;
+
+}
+
+/*
+ * {StatementsAboutSubject} stores RDF/JSON statements about a
+ * resource. This is an object the properties of which are {Array}s of
+ * the `any` type.
+ */
+export interface StatementsAboutSubject {
+
+    /*
+     * Property names represent to RDF predicates, values are an
+     * object in plural form.
+     */
+    [predicate: string]: Array<any>
+
 }
 
 /*
  * The segments state slice stores SegmentStates per text widget.
  */
 export interface SegmentsSlice {
+
+    /*
+     * Per text widget, this maps segment IDs to annotation IDs for
+     * fast lookup: Given an segment/span ID, let's have an array of IDs of
+     * annotations on that segment/span.
+     */
     annotationsPerSegment: { [textWidgetId: string]: SegmentsState },
 
+    /*
+     * Per text widget, this maps segment IDs to annotation classes
+     * for colorizing/highlighting the text. Given a segment/span ID,
+     * let's have the classes, that are asserted to this span through
+     * the annotations on it.
+     */
+    classesPerSegment: { [textWidgetId: string]: ClassesPerSegment },
+
+    /*
+     * The ID of the annotation currently selected and fully
+     * displayed. This should be persistent until an other
+     * annotation is selected.
+     */
     annotationSelected: string | null,
 
+    /*
+     * A list of IDs of annotations currently selected. This should be
+     * persistent until the next selection event.
+     */
     annotationsSelected: Array<string>,
 
+    /*
+     * A list of IDs of annotations transiently active and transiently
+     * displayed. This may vanish, when the mouse pointer moves on.
+     */
     annotationsTransient: Array<string>,
 
+    /*
+     * A JSON map of annotations.
+     */
     annotations: { [key: string]: Annotation }
 
 }
@@ -39,6 +115,8 @@ export interface SegmentsSlice {
 const initialState: SegmentsSlice = {
 
     annotationsPerSegment: {},
+
+    classesPerSegment: {},
 
     annotationSelected: null,
 
