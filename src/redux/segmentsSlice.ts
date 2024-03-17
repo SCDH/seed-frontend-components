@@ -137,12 +137,19 @@ interface StoreHelper {
 
 
 /*
- * An async action for getting the SegmentState for a text widget's
- * from the backend.
+ * DEPRECATED: An async action for getting the SegmentState for a text
+ * widget from the backend.
+ *
+ * This calculates the URL of the JSON object from the document
+ * displayed in the text widget.
  */
-export const getAnnotationsPerSegment = createAsyncThunk<any, string, { state: StoreHelper }>(
+export const getAnnotationsPerSegment = createAsyncThunk<{textWidgetId: string, segments: SegmentsState}, string, { state: StoreHelper }>(
+    // type parameters:
+    // 1: type of returned Promise
+    // 2: first argument to function, i.e., the type of the argument of the dispatch function
+    // 3: type parameter of optional GetAsyncAPI object: state is required to know because we use getState below
     "segments/getAnnotationsPerSegment",
-    async (textWidgetId_, { getState }): Promise<{textWidgetId: string, segments: SegmentsState}> => {
+    async (textWidgetId_: string, { getState }): Promise<{textWidgetId: string, segments: SegmentsState}> => {
 	const textSlice: TextsSlice = getState().texts;
 	const textState: TextState | null = textSlice[textWidgetId_];
 	const docHref: string = textState?.href ?? "";
@@ -158,6 +165,29 @@ export const getAnnotationsPerSegment = createAsyncThunk<any, string, { state: S
 	});
     }
 )
+
+/*
+ * An async action for getting the {SegmentState} for a text widget
+ * from the backend.
+ */
+export const fetchAnnotationsPerSegment = createAsyncThunk<{textWidgetId: string, segments: SegmentsState}, {textWidgetId_: string, url: string}>(
+    // type parameters:
+    // 1: type of returned Promise
+    // 2: first argument to function, i.e., the type of the argument of the dispatch function
+    "segments/fetchAnnotationsPerSegment",
+    async ({textWidgetId_, url}): Promise<{textWidgetId: string, segments: SegmentsState}> => {
+	console.log("fetching annotated segments from ", url);
+	const response = await fetch(url);
+	return response.json().then((result) => {
+	    return {textWidgetId: textWidgetId_, segments: result};
+	}).catch(() => {
+	    // If fetching failed, then let's have the empty mapping
+	    // of segment IDs to annotations IDs:
+	    return {textWidgetId: textWidgetId_, segments: {} };
+	});
+    }
+)
+
 
 /*
  * An async action for fetching **all** annotations from a given URL.
@@ -203,6 +233,11 @@ const segmentsSlice = createSlice({
 	// payload action must be the same.
 	builder.addCase(
 	    getAnnotationsPerSegment.fulfilled,
+	    (state, action: PayloadAction<{textWidgetId: string, segments: SegmentsState}>) => {
+		state.annotationsPerSegment[action.payload.textWidgetId] = action.payload.segments;
+	    });
+	builder.addCase(
+	    fetchAnnotationsPerSegment.fulfilled,
 	    (state, action: PayloadAction<{textWidgetId: string, segments: SegmentsState}>) => {
 		state.annotationsPerSegment[action.payload.textWidgetId] = action.payload.segments;
 	    });
