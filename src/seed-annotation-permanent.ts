@@ -49,18 +49,18 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
      * Render the web component.
      */
     render() {
-	return html`<div class="annotation-container annotation-permanent">${this.annotationIdTemplate()}${this.annotationBodyTemplate()}</div>`;
+	return html`<div class="annotation-container annotation-permanent">${this.renderAnnotationId()}${this.renderAnnotationBody()}</div>`;
     }
 
-    annotationIdTemplate() {
+    renderAnnotationId() {
 	if (this.annotationId == null) {
 	    return html`<div class="annotation-id empty">(no annotation selected)</div>`;
 	} else {
-	    return html`<div class="annotation-id"><span>Annotation </span>${this.annotationId}</div>`;
+	    return html`<div class="annotation-id">Annotation <span>${this.annotationId}</span></div>`;
 	}
     }
 
-    annotationBodyTemplate() {
+    renderAnnotationBody() {
 	if (this.annotation == null) {
 	    return html``;
 	} else {
