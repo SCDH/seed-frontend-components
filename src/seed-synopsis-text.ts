@@ -5,7 +5,8 @@ import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { connect } from 'pwa-helpers';
 import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
-import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment } from "./redux/segmentsSlice";
+import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment, SegmentsState } from "./redux/segmentsSlice";
+import { OntologyState } from './redux/ontologySlice';
 import { store, RootState } from "./redux/store";
 
 // define the web component
@@ -39,14 +40,33 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
 
+    ontology: OntologyState | undefined;
 
+    annotationsPerSegment: SegmentsState | undefined;
 
-
+    /*
+     * Inherited from {connect}. This method is called by the redux
+     * store to pass in state.
+     */
     stateChanged(_state: RootState) {
-	// this is called by the redux store to pass in state
+	// set scroll position from redux store (overkill)
 	if (_state.texts.hasOwnProperty(this.id)) {
 	    const s: TextState | null = _state.texts[this.id];
 	    this.position = s?.scrollPosition ?? "start";
+	}
+	// set ontology and colorize the text if all required data is present
+	if (_state.ontology !== this.ontology) {
+	    this.ontology = _state.ontology;
+	    if (this.annotationsPerSegment !== undefined) {
+		this.colorizeText(_state);
+	    }
+	}
+	// set annotationsPerSegment and colorize the text if all required data is present
+	if (_state.segments.annotationsPerSegment[this.id] !== this.annotationsPerSegment) {
+	    this.annotationsPerSegment = _state.segments.annotationsPerSegment[this.id];
+	    if (this.ontology !== undefined) {
+		this.colorizeText(_state);
+	    }
 	}
     };
 
@@ -192,6 +212,20 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	return this._syncTarget;
     }
 
+    /*
+     * Pass data for colorizing the annotations in the text via the
+     * post message channel down to the document displayed in the iframe.
+     */
+    colorizeText(_state: RootState): void {
+	console.log("colorizing text in widget " + this.id);
+	const msg = {
+	    ...this.contentMeta,
+	    "event": "colorize",
+	    "ontology": _state.ontology,
+	    "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
+	};
+	this.iframe.contentWindow?.postMessage(msg, window.location.href);
+    }
 
     static styles : CSSResult = css`
 :host {
