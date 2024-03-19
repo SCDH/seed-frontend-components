@@ -223,6 +223,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	    "event": "colorize",
 	    "ontology": _state.ontology,
 	    "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
+	    "annotations": _state.segments.annotations,
 	};
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
