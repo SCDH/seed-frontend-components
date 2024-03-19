@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { TextState, TextsSlice } from "./textsSlice";
+import { Predications } from "./rdfTypes";
 
 /*
  * A segments state is a mapping of segment IDs to annotation IDs for
@@ -46,22 +47,7 @@ export interface Annotation {
     /*
      * RDF predications on the annotation, i.e., classes resp. tags.
      */
-    predications: StatementsAboutSubject;
-
-}
-
-/*
- * {StatementsAboutSubject} stores RDF/JSON statements about a
- * resource. This is an object the properties of which are {Array}s of
- * the `any` type.
- */
-export interface StatementsAboutSubject {
-
-    /*
-     * Property names represent to RDF predicates, values are an
-     * object in plural form.
-     */
-    [predicate: string]: Array<any>
+    predications: Predications;
 
 }
 
