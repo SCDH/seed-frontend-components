@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { TextState, TextsSlice } from "./textsSlice";
 import { Predications } from "./rdfTypes";
+import { CSSDefinition } from "./cssTypes";
 
 /*
  * A segments state is a mapping of segment IDs to annotation IDs for
@@ -17,6 +18,11 @@ export interface SegmentsState {
      */
     [segmentId: string]: Array<string>
 
+}
+
+export interface SegmentsCss {
+
+    [segmentId: string]: CSSDefinition,
 }
 
 /*
@@ -63,6 +69,8 @@ export interface SegmentsSlice {
      */
     annotationsPerSegment: { [textWidgetId: string]: SegmentsState },
 
+    cssPerSegment: { [textWidgetId: string]: SegmentsCss },
+
     /*
      * Per text widget, this maps segment IDs to annotation classes
      * for colorizing/highlighting the text. Given a segment/span ID,
@@ -95,12 +103,20 @@ export interface SegmentsSlice {
      */
     annotations: { [key: string]: Annotation }
 
+    /*
+     * For each annotation given by its ID, we store a map of
+     * prioritized {CSSStyleDeclaration}s.
+     */
+    cssPerAnnotation: { [key: string]: { [priority: number]: CSSDefinition } }
+
 }
 
 
 const initialState: SegmentsSlice = {
 
     annotationsPerSegment: {},
+
+    cssPerSegment: {},
 
     classesPerSegment: {},
 
@@ -110,7 +126,9 @@ const initialState: SegmentsSlice = {
 
     annotationsTransient: [],
 
-    annotations: {}
+    annotations: {},
+
+    cssPerAnnotation: {},
 
 }
 
@@ -212,6 +230,16 @@ const segmentsSlice = createSlice({
 	    state.annotationsTransient =
 		state.annotationsPerSegment?.[action.payload.textWidgetId]?.[action.payload.segmentId] ?? [];
 	},
+	setCssForAllSegments: (state, action: PayloadAction<{textWidgetId: string, cssPerSegment: SegmentsCss}>) => {
+	    // var cssPerSegment: { [textWidgetId: string]: SegmentsCss } = {};
+	    // Object.assign(cssPerSegment, state.cssPerSegment);
+	    // cssPerSegment[action.payload.textWidgetId] = action.payload.cssPerSegment;
+	    // state = { ...state, cssPerSegment };
+	    Object.assign(state.cssPerSegment[action.payload.textWidgetId], action.payload.cssPerSegment);
+	},
+	setCssForAllAnnotations: (state, action: PayloadAction<{ [key: string]: { [priority: number]: CSSDefinition } }>) => {
+	    Object.assign(state.cssPerAnnotation, action.payload);
+	},
     },
     extraReducers: (builder) => {
 	// Note: When using addCase, the type parameter of the promise
@@ -235,6 +263,6 @@ const segmentsSlice = createSlice({
     },
 });
 
-export const { selectAnnotationsAtSegment, transientAnnotationsAtSegment } = segmentsSlice.actions;
+export const { selectAnnotationsAtSegment, transientAnnotationsAtSegment, setCssForAllSegments, setCssForAllAnnotations } = segmentsSlice.actions;
 
 export default segmentsSlice.reducer;
