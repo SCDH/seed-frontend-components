@@ -5,7 +5,7 @@ import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { connect } from 'pwa-helpers';
 import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
-import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment, SegmentsState } from "./redux/segmentsSlice";
+import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment, SegmentsState, SegmentsCss } from "./redux/segmentsSlice";
 import { OntologyState } from './redux/ontologySlice';
 import { setCssAnnotationsThunk, setCssForAllSegmentsThunk } from './redux/colorizeText';
 import { store, RootState } from "./redux/store";
@@ -45,6 +45,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 
     annotationsPerSegment: SegmentsState | undefined;
 
+    cssPerSegment: SegmentsCss | undefined = undefined;
+
     /*
      * Inherited from {connect}. This method is called by the redux
      * store to pass in state.
@@ -55,14 +57,17 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	    const s: TextState | null = _state.texts[this.id];
 	    this.position = s?.scrollPosition ?? "start";
 	}
-	// set ontology and colorize the text if all required data is present
+	// set colorize the text if all required data is present
+	if (_state.segments.cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
+	    this.cssPerSegment = _state.segments.cssPerSegment[this.id];
+	    this.colorizeText(_state);
+	}
 	if (_state.ontology !== this.ontology) {
 	    this.ontology = _state.ontology;
 	    if (this.annotationsPerSegment !== undefined) {
 		// TODO: move elsewhere and run as subscriber
 		store.dispatch(setCssAnnotationsThunk());
 		store.dispatch(setCssForAllSegmentsThunk(this.id));
-		this.colorizeText(_state);
 	    }
 	}
 	// set annotationsPerSegment and colorize the text if all required data is present
@@ -72,7 +77,6 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		// TODO: move elsewhere and run as subscriber
 		store.dispatch(setCssAnnotationsThunk());
 		store.dispatch(setCssForAllSegmentsThunk(this.id));
-		this.colorizeText(_state);
 	    }
 	}
     };
