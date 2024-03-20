@@ -37,11 +37,13 @@ export interface RdfObject {
      */
     type: string,
 
-    value: any,
+    value: string,
+
+    datatype: string | undefined,
 
     /*
      * The `@lang` annotation on string literals.
      */
-    lang: string | null,
+    lang: string | undefined,
 
 }
