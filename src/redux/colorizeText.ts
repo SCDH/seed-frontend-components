@@ -48,14 +48,14 @@ export const setCssAnnotationsThunk = () => {
 				// get the CSS properties: background color
 				if (!tag.hasOwnProperty(preferredColorPredicate)) {
 				    css[annotId][0] = new CSSStyleDeclaration();
-				    css[annotId][0].backgroundColor = defaultColor;
+				    css[annotId][0]["background-color"] = defaultColor;
 				} else {
 				    var priority: number = 0;
 				    if (tag.hasOwnProperty(colorPriorityPredicate)) {
 					priority = +tag[colorPriorityPredicate][0].value;
 				    }
 				    css[annotId][priority] = {};
-				    css[annotId][priority].backgroundColor = tag[preferredColorPredicate][0].value;
+				    css[annotId][priority]["background-color"] = tag[preferredColorPredicate][0].value;
 				}
 			    }
 			}
