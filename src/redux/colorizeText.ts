@@ -73,46 +73,59 @@ export const setCssAnnotationsThunk = () => {
  */
 export const setCssForAllSegmentsThunk = (textWidget: string) => {
     return (dispatch: any, getState: any) => {
-	const state: { ontology: OntologyState, segments: SegmentsSlice } = getState();
-	const { ontology, segments } = state;
-	const annotsPerSegment: SegmentsState = segments.annotationsPerSegment[textWidget];
-	const annotations: { [key: string]: Annotation } = segments.annotations;
-	if (annotations !== undefined && Object.keys(ontology).length > 0) {
-	    var cssPerSegment: SegmentsCss = {};
+	const { segments }: { segments: SegmentsSlice }  = getState();
+	const annotsPerSegment: SegmentsState | undefined = segments.annotationsPerSegment[textWidget];
+	const cssPerAnnotation: { [key: string]: { [priority: number]: CSSDefinition } } = segments.cssPerAnnotation;
+	if (annotsPerSegment !== undefined && Object.keys(cssPerAnnotation).length > 0) {
+	    const cssPerSegment: SegmentsCss = {};
 	    // iterate over segments to colorize
 	    for (const segment in annotsPerSegment) {
-		console.log("colorizing segment with ID " + segment);
-		// collect tags, i.e. RDF classes attributed to the annotations at the segment
-		var tags: any = {}
-		// a segment may be targeted by multiple annotations, so
-		// iterate over annotations at the segment
-		for (const annotId of annotsPerSegment[segment]) {
-		    console.log("annotation on segment " + segment + ": " + annotId);
-		    // get the annotation by ID
-		    const annotation = annotations[annotId];
-		    console.log("annotation", annotation);
-		    // an annotation may have multiple predicates with multiple objects
-		    // iterate over the predicates
-		    for (const pred in annotation.predications) {
-			console.log("testing predicate is annotation class", pred);
-			// iterate over array of RDF objects
-			for (const obj of annotation.predications[pred]) {
-			    console.log("rdf object", obj);
-			    if (obj.type === "resource") {
-				const clasUri = obj.value;
-				console.log("rdf class", clasUri);
-				if (ontology.hasOwnProperty(clasUri)) {
-				    console.log("rdf class in ontology", clasUri, ontology[clasUri]);
-				    tags[clasUri] = ontology[clasUri];
+		if (segment !== undefined && segment !== "") {
+		    console.log("colorizing segment with ID " + segment);
+		    // collect tags, i.e. RDF classes attributed to the annotations at the segment
+		    var css: { [key: string]: string } = {}
+		    var highestPriority: number = -1;
+		    // a segment may be targeted by multiple annotations, so
+		    // iterate over annotations at the segment
+		    for (const annotId of annotsPerSegment[segment]) {
+			console.log("annotation on segment " + segment + ": " + annotId);
+			// get the annotation by ID
+			const annotationCss: { [priority: number]: CSSDefinition } = cssPerAnnotation[annotId];
+			console.log("annotation", annotationCss);
+			// an annotation may have multiple predicates with multiple objects
+			// iterate over the predicates
+			for (const priority in annotationCss) {
+			    const priorityTyped: number = +priority;
+			    console.log("testing priority", priority);
+			    // iterate over array of RDF objects
+			    //const cssWithPriority = annotationCss[priority];
+			    if (priorityTyped > highestPriority) {
+				console.log("priority over CSS already seen");
+				// if the current css has priority, add all its definitions to the collected css
+				for (const prop in annotationCss[priority]) {
+				    console.log("overwriting CSS property with higher priority", prop);
+				    css[prop] = annotationCss[priority][prop];
 				}
+			    } else {
+				// otherwise add its definitions, as long as they are not yet in the collected css
+				for (const prop in annotationCss[priority]) {
+				    if (!css.hasOwnProperty(prop)) {
+					console.log("appending unprecedented CSS class with lower priority", prop);
+					css[prop] = annotationCss[priority][prop];
+				    }
+				}
+
 			    }
 			}
 		    }
-		    console.log("annotation rdf tags", tags);
+		    console.log("setting CSS properties on segment", segment, css);
+		    const segmentTyped: string = segment;
+		    cssPerSegment[segmentTyped] = css;
+		} else {
+		    console.warn("bad segment ID %s in text widget %s", segment, textWidget);
 		}
-	    dispatch(setCssForAllSegments({textWidgetId: textWidget, cssPerSegment: cssPerSegment}));
 	    }
+	    dispatch(setCssForAllSegments({textWidgetId: textWidget, cssPerSegment: cssPerSegment}));
 	}
     }
 }
-
