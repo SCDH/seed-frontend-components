@@ -7,6 +7,7 @@ import { connect } from 'pwa-helpers';
 import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
 import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment, SegmentsState } from "./redux/segmentsSlice";
 import { OntologyState } from './redux/ontologySlice';
+import { setCssAnnotationsThunk, setCssForAllSegmentsThunk } from './redux/colorizeText';
 import { store, RootState } from "./redux/store";
 
 // define the web component
@@ -58,6 +59,9 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	if (_state.ontology !== this.ontology) {
 	    this.ontology = _state.ontology;
 	    if (this.annotationsPerSegment !== undefined) {
+		// TODO: move elsewhere and run as subscriber
+		store.dispatch(setCssAnnotationsThunk());
+		store.dispatch(setCssForAllSegmentsThunk(this.id));
 		this.colorizeText(_state);
 	    }
 	}
@@ -65,6 +69,9 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	if (_state.segments.annotationsPerSegment[this.id] !== this.annotationsPerSegment) {
 	    this.annotationsPerSegment = _state.segments.annotationsPerSegment[this.id];
 	    if (this.ontology !== undefined) {
+		// TODO: move elsewhere and run as subscriber
+		store.dispatch(setCssAnnotationsThunk());
+		store.dispatch(setCssForAllSegmentsThunk(this.id));
 		this.colorizeText(_state);
 	    }
 	}
@@ -221,9 +228,10 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	const msg = {
 	    ...this.contentMeta,
 	    "event": "colorize",
-	    "ontology": _state.ontology,
-	    "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
-	    "annotations": _state.segments.annotations,
+	    "cssPerSegment": _state.segments.cssPerSegment[this.id],
+	    // "ontology": _state.ontology,
+	    // "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
+	    // "annotations": _state.segments.annotations,
 	};
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
