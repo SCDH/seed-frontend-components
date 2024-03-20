@@ -231,11 +231,8 @@ const segmentsSlice = createSlice({
 		state.annotationsPerSegment?.[action.payload.textWidgetId]?.[action.payload.segmentId] ?? [];
 	},
 	setCssForAllSegments: (state, action: PayloadAction<{textWidgetId: string, cssPerSegment: SegmentsCss}>) => {
-	    // var cssPerSegment: { [textWidgetId: string]: SegmentsCss } = {};
-	    // Object.assign(cssPerSegment, state.cssPerSegment);
-	    // cssPerSegment[action.payload.textWidgetId] = action.payload.cssPerSegment;
-	    // state = { ...state, cssPerSegment };
-	    Object.assign(state.cssPerSegment[action.payload.textWidgetId], action.payload.cssPerSegment);
+	    //Object.assign(state.cssPerSegment[action.payload.textWidgetId], action.payload.cssPerSegment);
+	    state.cssPerSegment[action.payload.textWidgetId] = action.payload.cssPerSegment;
 	},
 	setCssForAllAnnotations: (state, action: PayloadAction<{ [key: string]: { [priority: number]: CSSDefinition } }>) => {
 	    Object.assign(state.cssPerAnnotation, action.payload);
