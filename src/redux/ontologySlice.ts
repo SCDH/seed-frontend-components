@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { deepmerge } from "deepmerge-ts";
 
 import { Statements } from "./rdfTypes";
 
@@ -38,7 +39,7 @@ const ontologySlice = createSlice({
 	    fetchResourceCenteredJson.fulfilled,
 	    (state, action: PayloadAction<OntologyState>) => {
 		// return action.payload;
-		return { ...state, ...action.payload };
+		return deepmerge(state, action.payload);
 	    }
 	)
 
