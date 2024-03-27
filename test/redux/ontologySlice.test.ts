@@ -2,8 +2,8 @@ import { expect, test } from 'vitest';
 //import { describe, vi } from 'vitest';
 //import { AsyncThunkAction, Dispatch } from '@reduxjs/toolkit';
 
-import { Statements } from '../src/redux/rdfTypes';
-import reducer, { fetchResourceCenteredJson } from '../src/redux/ontologySlice';
+import { Statements } from '../../src/redux/rdfTypes';
+import reducer, { fetchResourceCenteredJson } from '../../src/redux/ontologySlice';
 
 const defaultState: Statements = {
     "scdh": {
