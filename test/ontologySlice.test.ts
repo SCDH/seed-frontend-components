@@ -1,4 +1,5 @@
-import { expect, test } from 'vitest';
+import { expect, test, describe, vi } from 'vitest';
+import { AsyncThunkAction, Dispatch } from '@reduxjs/toolkit';
 
 import { Statements } from '../src/redux/rdfTypes';
 import reducer, { fetchResourceCenteredJson } from '../src/redux/ontologySlice';
@@ -15,10 +16,18 @@ const defaultState: Statements = {
     }
 };
 
-const extraPredicat: Statements = {
+const extraStatement: Statements = {
     "scdh": {
 	"macht-nicht": [
 	    { type: "literal", value: "print", datatype: "string", lang: undefined },
+	]
+    }
+};
+
+const sameStatement: Statements = {
+    "scdh": {
+	"macht-nicht": [
+	    { type: "literal", value: "ops", datatype: "string", lang: undefined },
 	]
     }
 };
@@ -51,9 +60,15 @@ test("should return the ontology passed in", () => {
     expect(reducer({}, action)).toEqual(defaultState);
 })
 
-test("adds to the previous ontology state", () => {
-    const action = { type: fetchResourceCenteredJson.fulfilled.type, payload: extraPredicat };
+test("add other object to the previous ontology state", () => {
+    const action = { type: fetchResourceCenteredJson.fulfilled.type, payload: extraStatement };
     expect(reducer(defaultState, action)).toEqual(expectedState);
+})
+
+// PENDING
+test.skip("add same object to the previous ontology state", () => {
+    const action = { type: fetchResourceCenteredJson.fulfilled.type, payload: sameStatement };
+    expect(reducer(defaultState, action)).toEqual(defaultState);
 })
 
 test("what is the type anyway?", () => {
