@@ -1,5 +1,6 @@
-import { expect, test, describe, vi } from 'vitest';
-import { AsyncThunkAction, Dispatch } from '@reduxjs/toolkit';
+import { expect, test } from 'vitest';
+//import { describe, vi } from 'vitest';
+//import { AsyncThunkAction, Dispatch } from '@reduxjs/toolkit';
 
 import { Statements } from '../src/redux/rdfTypes';
 import reducer, { fetchResourceCenteredJson } from '../src/redux/ontologySlice';
@@ -74,3 +75,38 @@ test.skip("add same object to the previous ontology state", () => {
 test("what is the type anyway?", () => {
     expect(fetchResourceCenteredJson.fulfilled.type).toEqual("ontology/fetchResourceCenteredJson/fulfilled");
 })
+
+
+
+
+// Testing async thunks:
+// https://stackoverflow.com/questions/62253049/testing-createasyncthunk-redux-toolkit-jest
+
+
+// describe("Ontology Thunks", () => {
+
+//     describe("fetchResourceCenteredJson", () => {
+
+// 	let action: AsyncThunkAction<Statements, string, {}>;
+
+// 	let dispatch: Dispatch;
+// 	let getState: () => unknown;
+
+// 	let arg: string;
+// 	let result: Statements;
+
+// 	beforeEach(() => {
+// 	    dispatch = vi.fn();
+// 	    getState = vi.fn();
+
+// 	    action = thunks.
+// 	});
+
+// 	it("calls", async () => {
+
+// 	});
+	
+
+//     })
+
+// })
