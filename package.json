@@ -25,7 +25,8 @@
     "deepmerge-ts": "^5.1.0",
     "jszip": "^3.10.1",
     "lit": "^2.6.1",
-    "pwa-helpers": "^0.9.1"
+    "pwa-helpers": "^0.9.1",
+    "schema-dts": "^1.1.2"
   },
   "devDependencies": {
     "saxon-js": "^2.6.0",
