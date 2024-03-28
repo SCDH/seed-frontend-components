@@ -160,9 +160,9 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		    // We do not destructure e.data, since we have no control over it!
 		    const txt: TextState = {
 			location: this.iframe.contentDocument?.location?.toString() ?? null,
-			canonicalUrl: e.data.canonicalUrl ?? null,
-			title: e.data.title ?? null,
-			author: e.data.author ?? null,
+			canonicalUrl: e.data.canonicalUrl,
+			title: e.data.title,
+			author: e.data.author,
 		    };
 		    store.dispatch(initText({textId: this.id}));
 		    store.dispatch(setText({textId: this.id, text: txt}));
