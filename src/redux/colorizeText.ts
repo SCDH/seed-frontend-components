@@ -1,4 +1,5 @@
-import { SegmentsSlice, SegmentsState, Annotation, SegmentsCss, setCssForAllSegments, setCssForAllAnnotations } from "./segmentsSlice";
+import { TextViewsSlice, AnnotationsPerSegment, setCssForAllSegments } from "./textViewsSlice";
+import { AnnotationsSlice, AnnotationId, Annotation, setCssForAllAnnotations } from "./annotationsSlice";
 import { OntologyState } from "./ontologySlice";
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
@@ -10,7 +11,7 @@ export const defaultColor: string = "yellow";
 
 /*
  * A thunk for setting the CSS for all annotations. This will update
- * `SegmentsSlice.cssPerAnnotation`.
+ * `AnnotationsSlice.cssPerAnnotation`.
  *
  * USAGE:
  * `store.dispatch(setCssAnnotationsThunk())`
@@ -18,16 +19,16 @@ export const defaultColor: string = "yellow";
 export const setCssAnnotationsThunk = () => {
     return (dispatch: any, getState: any) => {
 	console.log("dispatched setCssAnnotationsThunk");
-	const state: { ontology: OntologyState, segments: SegmentsSlice } = getState();
-	const { ontology, segments } = state;
-	const annotations: { [key: string]: Annotation } = segments.annotations;
-	if (annotations !== undefined && Object.keys(ontology).length > 0) {
+	const state: { ontology: OntologyState, annotations: AnnotationsSlice } = getState();
+	const { ontology, annotations } = state;
+	const annots: { [key: AnnotationId]: Annotation } = annotations.annotations;
+	if (annots !== undefined && Object.keys(ontology).length > 0) {
 	    var css: { [key: string]: { [priority: number]: CSSDefinition } } = {};
 	    // iterate over annotations to colorize
-	    for (const annotId in annotations) {
+	    for (const annotId in annots) {
 		console.log("setting CSS for annotation : " + annotId);
 		// get the annotation by ID
-		const annotation = annotations[annotId];
+		const annotation = annots[annotId];
 		css[annotId] = {};
 		// collect attributed RDF classes into the tags variable
 		var tags: any = {}
@@ -69,15 +70,15 @@ export const setCssAnnotationsThunk = () => {
 }
 
 /*
- * A thunk for setting the CSS for all segments of a text widget
+ * A thunk for setting the CSS for all segments of a text view.
  */
 export const setCssForAllSegmentsThunk = (textWidget: string) => {
     return (dispatch: any, getState: any) => {
-	const { segments }: { segments: SegmentsSlice }  = getState();
-	const annotsPerSegment: SegmentsState | undefined = segments.annotationsPerSegment[textWidget];
-	const cssPerAnnotation: { [key: string]: { [priority: number]: CSSDefinition } } = segments.cssPerAnnotation;
+	const { textViews, annotations }: { textViews: TextViewsSlice, annotations: AnnotationsSlice }  = getState();
+	const annotsPerSegment: AnnotationsPerSegment | undefined = textViews[textWidget].annotationsPerSegment;
+	const cssPerAnnotation: { [key: string]: { [priority: number]: CSSDefinition } } = annotations.cssPerAnnotation;
 	if (annotsPerSegment !== undefined && Object.keys(cssPerAnnotation).length > 0) {
-	    const cssPerSegment: SegmentsCss = {};
+	    const cssPerSegment: { [segmentId: string]: CSSDefinition } = {};
 	    // iterate over segments to colorize
 	    for (const segment in annotsPerSegment) {
 		if (segment !== undefined && segment !== "") {
@@ -125,7 +126,7 @@ export const setCssForAllSegmentsThunk = (textWidget: string) => {
 		    console.warn("bad segment ID %s in text widget %s", segment, textWidget);
 		}
 	    }
-	    dispatch(setCssForAllSegments({textWidgetId: textWidget, cssPerSegment: cssPerSegment}));
+	    dispatch(setCssForAllSegments({viewId: textWidget, cssPerSegment: cssPerSegment}));
 	}
     }
 }

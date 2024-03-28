@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import textsReducer from "./textsSlice";
-import segmentsReducer from "./segmentsSlice";
+import textViewsReducer from "./textViewsSlice";
+import annotationsReducer from "./annotationsSlice";
 import ontologyReducer from "./ontologySlice";
 
 export const store = configureStore({
     reducer: {
 	texts: textsReducer,
-	segments: segmentsReducer,
+	textViews: textViewsReducer,
+	annotations: annotationsReducer,
 	ontology: ontologyReducer,
     },
 });
