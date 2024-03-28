@@ -12,9 +12,12 @@ export type TextId = string;
 export interface TextState {
 
     /*
-     * The origin URL, obtained by `window.location.origin`.
+     * The origin URL, obtained by {Document.location.toString()}.
+     *
+     * Note: This cannot be of type {Location}, since we have to use a
+     * serializable type.
      */
-    location: Location | null;
+    location: string | null;
 
     /*
      * The canonical URL has present in the header.

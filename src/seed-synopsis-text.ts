@@ -159,7 +159,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
 		    const txt: TextState = {
-			location: this.iframe.contentDocument?.location ?? null,
+			location: this.iframe.contentDocument?.location?.toString() ?? null,
 			canonicalUrl: e.data.canonicalUrl ?? null,
 			title: e.data.title ?? null,
 			author: e.data.author ?? null,
