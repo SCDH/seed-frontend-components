@@ -66,14 +66,14 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	// set colorize the text if all required data is present
 	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
 	    this.cssPerSegment = _state.textViews[this.id].cssPerSegment;
-	    this.colorizeText(_state);
+	    //this.colorizeText(_state);
 	}
 	if (_state.ontology !== this.ontology) {
 	    this.ontology = _state.ontology;
 	    if (this.annotationsPerSegment !== undefined) {
 		// TODO: move elsewhere and run as subscriber
-		store.dispatch(setCssAnnotationsThunk());
-		store.dispatch(setCssForAllSegmentsThunk(this.id));
+		//store.dispatch(setCssAnnotationsThunk());
+		//store.dispatch(setCssForAllSegmentsThunk(this.id));
 	    }
 	}
 	// set annotationsPerSegment and colorize the text if all required data is present
@@ -81,8 +81,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	    this.annotationsPerSegment = _state.textViews[this.id].annotationsPerSegment;
 	    if (this.ontology !== undefined) {
 		// TODO: move elsewhere and run as subscriber
-		store.dispatch(setCssAnnotationsThunk());
-		store.dispatch(setCssForAllSegmentsThunk(this.id));
+		//store.dispatch(setCssAnnotationsThunk());
+		//store.dispatch(setCssForAllSegmentsThunk(this.id));
 	    }
 	}
     };
