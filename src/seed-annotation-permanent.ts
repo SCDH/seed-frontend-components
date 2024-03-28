@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js'
 
 import { connect } from 'pwa-helpers';
 import { store, RootState } from "./redux/store";
-import { fetchAnnotations, Annotation } from './redux/segmentsSlice';
+import { fetchAnnotations, Annotation } from './redux/annotationsSlice';
 import { fetchResourceCenteredJson } from './redux/ontologySlice';
 
 /*
@@ -35,9 +35,9 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
      * when changed.
      */
     stateChanged(_state: RootState): void {
-	this.annotationId = _state.segments.annotationSelected;
-	if (this.annotationId != null && _state.segments.annotations.hasOwnProperty(this.annotationId)) {
-	    this.annotation = _state.segments.annotations[this.annotationId];
+	this.annotationId = _state.annotations.annotationSelected;
+	if (this.annotationId != null && _state.annotations.annotations.hasOwnProperty(this.annotationId)) {
+	    this.annotation = _state.annotations.annotations[this.annotationId];
 	} else {
 	    this.annotation = null;
 	}

@@ -1,11 +1,14 @@
 import { html, css, LitElement } from 'lit'
 import { CSSResult, query } from 'lit-element'
 import { customElement, property } from 'lit/decorators.js'
+import { connect } from 'pwa-helpers';
+
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
-import { connect } from 'pwa-helpers';
-import { initTextWidget, addText, scrolledTo, TextState } from "./redux/textsSlice";
-import { getAnnotationsPerSegment, selectAnnotationsAtSegment, transientAnnotationsAtSegment, SegmentsState, SegmentsCss } from "./redux/segmentsSlice";
+import { initText, setText, TextState } from "./redux/textsSlice";
+import { TextViewState, AnnotationsPerSegment, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
+import { CSSDefinition } from './redux/cssTypes';
 import { OntologyState } from './redux/ontologySlice';
 import { setCssAnnotationsThunk, setCssForAllSegmentsThunk } from './redux/colorizeText';
 import { store, RootState } from "./redux/store";
@@ -22,6 +25,9 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 
     @property({ attribute: true, type: String})
     id!: string;
+
+    @property({ attribute: "annotations-per-segment-url", type: String })
+    annotationsPerSegmentUrl!: string;
 
     @property({ attribute: false, state: true })
     protected position!: string;
@@ -43,9 +49,9 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 
     ontology: OntologyState | undefined;
 
-    annotationsPerSegment: SegmentsState | undefined;
+    annotationsPerSegment: AnnotationsPerSegment | undefined;
 
-    cssPerSegment: SegmentsCss | undefined = undefined;
+    cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
     /*
      * Inherited from {connect}. This method is called by the redux
@@ -53,13 +59,13 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
      */
     stateChanged(_state: RootState) {
 	// set scroll position from redux store (overkill)
-	if (_state.texts.hasOwnProperty(this.id)) {
-	    const s: TextState | null = _state.texts[this.id];
+	if (_state.textViews.hasOwnProperty(this.id)) {
+	    const s: TextViewState | null = _state.textViews[this.id];
 	    this.position = s?.scrollPosition ?? "start";
 	}
 	// set colorize the text if all required data is present
-	if (_state.segments.cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
-	    this.cssPerSegment = _state.segments.cssPerSegment[this.id];
+	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
+	    this.cssPerSegment = _state.textViews[this.id].cssPerSegment;
 	    this.colorizeText(_state);
 	}
 	if (_state.ontology !== this.ontology) {
@@ -71,8 +77,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	    }
 	}
 	// set annotationsPerSegment and colorize the text if all required data is present
-	if (_state.segments.annotationsPerSegment[this.id] !== this.annotationsPerSegment) {
-	    this.annotationsPerSegment = _state.segments.annotationsPerSegment[this.id];
+	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].annotationsPerSegment !== this.annotationsPerSegment) {
+	    this.annotationsPerSegment = _state.textViews[this.id].annotationsPerSegment;
 	    if (this.ontology !== undefined) {
 		// TODO: move elsewhere and run as subscriber
 		store.dispatch(setCssAnnotationsThunk());
@@ -90,7 +96,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	// dispatch initTextWidget action to the redux state store:
 	// this has to be done, since addText with meta information is
 	// fired lately, only after the first scrolledTo action.
-	store.dispatch(initTextWidget({id: this.id}));
+	store.dispatch(initTextView({viewId: this.id}));
+	store.dispatch(setTextViewText({viewId: this.id, text: this.id}));
     }
 
     disconnectedCallback() {
@@ -152,28 +159,27 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
 		    const txt: TextState = {
-			origin: e.data.origin ?? null,
-			href: e.data.href ?? null,
-			pathname: e.data.pathname ?? null,
+			location: this.iframe.contentDocument?.location ?? null,
 			canonicalUrl: e.data.canonicalUrl ?? null,
 			title: e.data.title ?? null,
-			scrollPosition: null
+			author: e.data.author ?? null,
 		    };
-		    store.dispatch(addText({id: this.id, text: txt}));
-		    store.dispatch(getAnnotationsPerSegment(this.id));
+		    store.dispatch(initText({textId: this.id}));
+		    store.dispatch(setText({textId: this.id, text: txt}));
+		    store.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
 		    break;
 		case "scrolled":
 		    this.contentMeta = e.data as IContentMeta;
-		    store.dispatch(scrolledTo({id: this.id, position: e.data.top}));
+		    store.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    break;
 		case "mouse-over-segment":
-		    store.dispatch(transientAnnotationsAtSegment({textWidgetId: this.id, segmentId: e.data.segmentId}));
+		    store.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentId));
 		    break;
 		case "mouse-out-segment":
 		    // TODO
 		    break;
 		case "click-segment":
-		    store.dispatch(selectAnnotationsAtSegment({textWidgetId: this.id, segmentId: e.data.segmentId}));
+		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentId));
 		    break;
 		default:
 		    console.log("unknown event: ", e);
@@ -232,7 +238,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	const msg = {
 	    ...this.contentMeta,
 	    "event": "colorize",
-	    "cssPerSegment": _state.segments.cssPerSegment[this.id],
+	    "cssPerSegment": _state.textViews[this.id].cssPerSegment,
 	    // "ontology": _state.ontology,
 	    // "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
 	    // "annotations": _state.segments.annotations,
