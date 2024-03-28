@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { deepmerge } from "deepmerge-ts";
+import { Graph } from "schema-dts";
 
 import { Statements } from "./rdfTypes";
 
@@ -7,9 +8,13 @@ import { Statements } from "./rdfTypes";
 /*
  * The {OntologyState} are RDF {Statements}.
  */
-export interface OntologyState extends Statements {}
+export interface OntologyState extends Graph {}
 
-const initialState: OntologyState = {}
+const initialState: OntologyState = {
+
+    "@context": 'https://schema.org',
+    "@graph": [],
+}
 
 /*
  * Fetches an ontology from a given URL and merges it in the ontology state slice.
@@ -24,7 +29,7 @@ export const fetchResourceCenteredJson = createAsyncThunk<OntologyState, string>
 	    return result;
 	}).catch(() => {
 	    console.error("failed to load ontology " + url);
-	    return {};
+	    return initialState;
 	});
     }
 );
