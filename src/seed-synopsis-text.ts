@@ -6,11 +6,9 @@ import { connect } from 'pwa-helpers';
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 
 import { initText, setText, TextState } from "./redux/textsSlice";
-import { TextViewState, AnnotationsPerSegment, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { TextViewState, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
-import { OntologyState } from './redux/ontologySlice';
-import { setCssAnnotationsThunk, setCssForAllSegmentsThunk } from './redux/colorizeText';
 import { store, RootState } from "./redux/store";
 import log from "./logging";
 
@@ -49,10 +47,6 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
 
-    ontology: OntologyState | undefined;
-
-    annotationsPerSegment: AnnotationsPerSegment | undefined;
-
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
     /*
@@ -69,23 +63,6 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
 	    this.cssPerSegment = _state.textViews[this.id].cssPerSegment;
 	    this.colorizeText(_state);
-	}
-	if (_state.ontology !== this.ontology) {
-	    this.ontology = _state.ontology;
-	    if (this.annotationsPerSegment !== undefined) {
-		// TODO: move elsewhere and run as subscriber
-		store.dispatch(setCssAnnotationsThunk());
-		store.dispatch(setCssForAllSegmentsThunk(this.id));
-	    }
-	}
-	// set annotationsPerSegment and colorize the text if all required data is present
-	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].annotationsPerSegment !== this.annotationsPerSegment) {
-	    this.annotationsPerSegment = _state.textViews[this.id].annotationsPerSegment;
-	    if (this.ontology !== undefined) {
-		// TODO: move elsewhere and run as subscriber
-		store.dispatch(setCssAnnotationsThunk());
-		store.dispatch(setCssForAllSegmentsThunk(this.id));
-	    }
 	}
     };
 
@@ -241,9 +218,6 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	    ...this.contentMeta,
 	    "event": "colorize",
 	    "cssPerSegment": _state.textViews[this.id].cssPerSegment,
-	    // "ontology": _state.ontology,
-	    // "annotationsPerSegment": _state.segments.annotationsPerSegment[this.id],
-	    // "annotations": _state.segments.annotations,
 	};
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
