@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { CSSDefinition } from "./cssTypes";
-import { log } from "./logging";
+import log from "./logging";
 
 
 /*

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
-import { log } from "./logging";
+import log from "./logging";
 
 
 export type AnnotationId = string;

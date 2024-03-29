@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { deepmerge } from "deepmerge-ts";
 
-import { log } from "./logging";
+import log from "./logging";
 import { Statements } from "./rdfTypes";
 
 

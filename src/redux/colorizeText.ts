@@ -3,7 +3,7 @@ import { AnnotationsSlice, AnnotationId, Annotation, setCssForAllAnnotations } f
 import { OntologyState } from "./ontologySlice";
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
-import { log } from "./logging";
+import log from "./logging";
 
 export const preferredColorPredicate: string = "https://intertextuality.org/annotation#preferredCssColor";
 export const colorPriorityPredicate: string = "https://intertextuality.org/annotation#colorPriority";
