@@ -54,7 +54,7 @@ export interface AnnotationsSlice {
      *
      * TODO: Change to {Statements}?
      */
-    annotations: { [key: AnnotationId]: Annotation }
+    annotations: { [key: AnnotationId]: Annotation },
 
     /*
      * For each annotation given by its ID, we store a map of
@@ -64,7 +64,7 @@ export interface AnnotationsSlice {
      * it has derived values and we want to be precise on the type no
      * matter how {annotations} look like in the future.
      */
-    cssPerAnnotation: { [key: AnnotationId]: { [priority: number]: CSSDefinition } }
+    cssPerAnnotation: { [key: AnnotationId]: { [priority: number]: CSSDefinition } },
 
 }
 
