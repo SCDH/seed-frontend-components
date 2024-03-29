@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { CSSDefinition } from "./cssTypes";
+import { log } from "./logging";
 
 
 /*
@@ -113,7 +114,7 @@ export const fetchAnnotationsPerSegment = createAsyncThunk<{viewId: string, segm
     // 2: first argument to function, i.e., the type of the argument of the dispatch function
     "textViews/fetchAnnotationsPerSegment",
     async ({viewId_, url}): Promise<{viewId: string, segments: AnnotationsPerSegment}> => {
-	console.log("fetching annotated segments from ", url);
+	log.info("fetching annotated segments from ", url);
 	const response = await fetch(url);
 	return response.json().then((result: AnnotationsPerSegment) => {
 	    return {viewId: viewId_, segments: result};

@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
+import { log } from "./logging";
 
 
 export type AnnotationId = string;
@@ -89,12 +90,12 @@ const initialState: AnnotationsSlice = {
 export const fetchAnnotations = createAsyncThunk<any, string>(
     "segments/fetchAnnotations",
     async (url): Promise<{[key: AnnotationId]: Annotation}> => {
-	console.log("fetching annotations from ", url);
+	log.info("fetching annotations from ", url);
 	const response = await fetch(url);
 	return response.json().then((result) => {
 	    return result;
 	}).catch(() => {
-	    console.log("failed to fetch annoations from ", url);
+	    log.error("failed to fetch annoations from ", url);
 	    return {};
 	});
     }
