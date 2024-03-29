@@ -29,6 +29,7 @@
     "pwa-helpers": "^0.9.1"
   },
   "devDependencies": {
+    "anylogger-console": "^1.0.0",
     "saxon-js": "^2.6.0",
     "typedoc": "^0.25.3",
     "typescript": "^5.0.2",
