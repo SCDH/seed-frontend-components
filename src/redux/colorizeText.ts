@@ -3,7 +3,9 @@ import { AnnotationsSlice, AnnotationId, Annotation, setCssForAllAnnotations } f
 import { OntologyState } from "./ontologySlice";
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
+import { SeedState, SeedStore } from "./seed-store";
 import log from "./logging";
+
 
 export const preferredColorPredicate: string = "https://intertextuality.org/annotation#preferredCssColor";
 export const colorPriorityPredicate: string = "https://intertextuality.org/annotation#colorPriority";
@@ -75,6 +77,7 @@ export const setCssAnnotationsThunk = () => {
  */
 export const setCssForAllSegmentsThunk = (textWidget: string) => {
     return (dispatch: any, getState: any) => {
+	log.debug("dispatched setCssForAllSegmentsThunk for " + textWidget);
 	const { textViews, annotations }: { textViews: TextViewsSlice, annotations: AnnotationsSlice }  = getState();
 	const annotsPerSegment: AnnotationsPerSegment | undefined = textViews[textWidget].annotationsPerSegment;
 	const cssPerAnnotation: { [key: string]: { [priority: number]: CSSDefinition } } = annotations.cssPerAnnotation;
@@ -131,3 +134,115 @@ export const setCssForAllSegmentsThunk = (textWidget: string) => {
 	}
     }
 }
+
+
+////////////////////////////////////////////////////////////
+// functions for subscribing the above thunks to a store
+////////////////////////////////////////////////////////////
+
+
+/*
+ * This variable tracks the `state.ontology`.
+ */
+let previousOntology: OntologyState = {};
+
+/*
+ * This variable tracks `state.annotations.annotations`.
+ */
+let previousAnnotations: { [key: AnnotationId]: Annotation } = {};
+
+/*
+ * Use this function to subscribe a state listener that fires, when
+ * CSS of annotations has to be recalculated, to a {SeedStore} redux
+ * store.
+ *
+ * We can use `===` and `!==` for deep equality checks on an immutable
+ * state.
+ *
+ * This calls `store.subscribe(...)` but also passes the store into
+ * the subscribed callback, which calls `store.getState()` and
+ * `store.dispatch()`.
+ */
+export const subscribeAnnotationsCssUpdater = (store: SeedStore) => {
+    store.subscribe(() => {
+	const state: SeedState = store.getState();
+	// test update condition
+	if (state.ontology !== previousOntology
+	    || state.annotations.annotations !== previousAnnotations) {
+	    // update state tracking variables first!
+	    previousOntology = state.ontology;
+	    previousAnnotations = state.annotations.annotations;
+	    // then dispatch the action!
+	    store.dispatch(setCssAnnotationsThunk());
+	}
+    });
+};
+
+
+
+/*
+ * This variable tracks changes in `state.textViews`.
+ */
+let previousTextViews: TextViewsSlice = {};
+
+
+/*
+ * Use this function to subscribe a state listener that fires, when
+ * CSS of segments has to be recalculated, to a {SeedStore} redux
+ * store.
+ *
+ * We can use `===` and `!==` for deep equality checks on an immutable
+ * state.
+ *
+ * This calls `store.subscribe(...)` but also passes the store into
+ * the subscribed callback, which calls `store.getState()` and
+ * `store.dispatch()`.
+ */
+export const subscribeSegmentsCssOnSegmentsUpdater = (store: SeedStore) => {
+    store.subscribe(() => {
+	const state: SeedState = store.getState();
+	if (state.textViews !== previousTextViews) {
+	    for (const viewId in state.textViews) {
+		if (!previousTextViews.hasOwnProperty(viewId)
+		    || state.textViews[viewId] !== previousTextViews[viewId]
+		    && state.textViews[viewId].annotationsPerSegment !== previousTextViews[viewId].annotationsPerSegment) {
+		    previousTextViews = state.textViews;
+		    store.dispatch(setCssForAllSegmentsThunk(viewId));
+		}
+	    }
+	}
+    });
+}
+
+/*
+ * This keeps track of changes in `state.annotations.cssPerAnnotation`.
+ */
+let previousCssPerAnnotation: { [key: AnnotationId]: { [priority: number]: CSSDefinition } } = {};
+
+
+/*
+ * Use this function to subscribe a state listener that fires, when
+ * CSS of segments has to be recalculated, to a {SeedStore} redux
+ * store.
+ *
+ * We can use `===` and `!==` for deep equality checks on an immutable
+ * state.
+ *
+ * This calls `store.subscribe(...)` but also passes the store into
+ * the subscribed callback, which calls `store.getState()` and
+ * `store.dispatch()`.
+ */
+export const subscribeSegmentsCssOnCssUpdater = (store: SeedStore) => {
+    store.subscribe(() => {
+	const state: SeedState = store.getState();
+	if (state.annotations.cssPerAnnotation !== previousCssPerAnnotation) {
+	    log.debug("css of annotations changed, updating segments");
+	    // first update the state tracking variables
+	    previousCssPerAnnotation = state.annotations.cssPerAnnotation;
+	    // then dispatch action on each view
+	    for (const textView in state.textViews) {
+		store.dispatch(setCssForAllSegmentsThunk(textView));
+	    }
+	}
+    });
+};
