@@ -3,6 +3,7 @@ import { AnnotationsSlice, AnnotationId, Annotation, setCssForAllAnnotations } f
 import { OntologyState } from "./ontologySlice";
 import { Predications } from "./rdfTypes";
 import { CSSDefinition } from "./cssTypes";
+import log from "./logging";
 
 export const preferredColorPredicate: string = "https://intertextuality.org/annotation#preferredCssColor";
 export const colorPriorityPredicate: string = "https://intertextuality.org/annotation#colorPriority";
@@ -18,7 +19,7 @@ export const defaultColor: string = "yellow";
  */
 export const setCssAnnotationsThunk = () => {
     return (dispatch: any, getState: any) => {
-	console.log("dispatched setCssAnnotationsThunk");
+	log.debug("dispatched setCssAnnotationsThunk");
 	const state: { ontology: OntologyState, annotations: AnnotationsSlice } = getState();
 	const { ontology, annotations } = state;
 	const annots: { [key: AnnotationId]: Annotation } = annotations.annotations;
@@ -26,7 +27,7 @@ export const setCssAnnotationsThunk = () => {
 	    var css: { [key: string]: { [priority: number]: CSSDefinition } } = {};
 	    // iterate over annotations to colorize
 	    for (const annotId in annots) {
-		console.log("setting CSS for annotation : " + annotId);
+		log.debug("setting CSS for annotation : " + annotId);
 		// get the annotation by ID
 		const annotation = annots[annotId];
 		css[annotId] = {};
@@ -35,15 +36,15 @@ export const setCssAnnotationsThunk = () => {
 		// an annotation may have multiple predicates with multiple objects
 		// iterate over the predicates
 		for (const pred in annotation.predications) {
-		    console.log("testing predicate is annotation class", pred);
+		    log.debug("testing predicate is annotation class", pred);
 		    // iterate over array of RDF objects
 		    for (const obj of annotation.predications[pred]) {
-			console.log("rdf object", obj);
+			log.debug("rdf object", obj);
 			if (obj.type === "resource") {
 			    const clasUri = obj.value;
-			    console.log("rdf class", clasUri);
+			    log.debug("rdf class", clasUri);
 			    if (ontology.hasOwnProperty(clasUri)) {
-				console.log("rdf class in ontology", clasUri, ontology[clasUri]);
+				log.debug("rdf class in ontology", clasUri, ontology[clasUri]);
 				tags[clasUri] = ontology[clasUri];
 				var tag: Predications = ontology[clasUri];
 				// get the CSS properties: background color
@@ -62,7 +63,7 @@ export const setCssAnnotationsThunk = () => {
 			}
 		    }
 		}
-		console.log("annotation rdf tags", tags);
+		log.debug("annotation rdf tags", tags);
 	    }
 	    dispatch(setCssForAllAnnotations(css));
 	}
@@ -82,36 +83,36 @@ export const setCssForAllSegmentsThunk = (textWidget: string) => {
 	    // iterate over segments to colorize
 	    for (const segment in annotsPerSegment) {
 		if (segment !== undefined && segment !== "") {
-		    console.log("colorizing segment with ID " + segment);
+		    log.debug("colorizing segment with ID " + segment);
 		    // collect tags, i.e. RDF classes attributed to the annotations at the segment
 		    var css: { [key: string]: string } = {}
 		    var highestPriority: number = -1;
 		    // a segment may be targeted by multiple annotations, so
 		    // iterate over annotations at the segment
 		    for (const annotId of annotsPerSegment[segment]) {
-			console.log("annotation on segment " + segment + ": " + annotId);
+			log.debug("annotation on segment " + segment + ": " + annotId);
 			// get the annotation by ID
 			const annotationCss: { [priority: number]: CSSDefinition } = cssPerAnnotation[annotId];
-			console.log("annotation", annotationCss);
+			log.debug("annotation", annotationCss);
 			// an annotation may have multiple predicates with multiple objects
 			// iterate over the predicates
 			for (const priority in annotationCss) {
 			    const priorityTyped: number = +priority;
-			    console.log("testing priority", priority);
+			    log.debug("testing priority", priority);
 			    // iterate over array of RDF objects
 			    //const cssWithPriority = annotationCss[priority];
 			    if (priorityTyped > highestPriority) {
-				console.log("priority over CSS already seen");
+				log.debug("priority over CSS already seen");
 				// if the current css has priority, add all its definitions to the collected css
 				for (const prop in annotationCss[priority]) {
-				    console.log("overwriting CSS property with higher priority", prop);
+				    log.debug("overwriting CSS property with higher priority", prop);
 				    css[prop] = annotationCss[priority][prop];
 				}
 			    } else {
 				// otherwise add its definitions, as long as they are not yet in the collected css
 				for (const prop in annotationCss[priority]) {
 				    if (!css.hasOwnProperty(prop)) {
-					console.log("appending unprecedented CSS class with lower priority", prop);
+					log.debug("appending unprecedented CSS class with lower priority", prop);
 					css[prop] = annotationCss[priority][prop];
 				    }
 				}
@@ -119,11 +120,11 @@ export const setCssForAllSegmentsThunk = (textWidget: string) => {
 			    }
 			}
 		    }
-		    console.log("setting CSS properties on segment", segment, css);
+		    log.debug("setting CSS properties on segment", segment, css);
 		    const segmentTyped: string = segment;
 		    cssPerSegment[segmentTyped] = css;
 		} else {
-		    console.warn("bad segment ID %s in text widget %s", segment, textWidget);
+		    log.warn("bad segment ID %s in text widget %s", segment, textWidget);
 		}
 	    }
 	    dispatch(setCssForAllSegments({viewId: textWidget, cssPerSegment: cssPerSegment}));

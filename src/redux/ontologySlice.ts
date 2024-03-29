@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { deepmerge } from "deepmerge-ts";
 
+import log from "./logging";
 import { Statements } from "./rdfTypes";
 
 
@@ -17,13 +18,13 @@ const initialState: OntologyState = {}
 export const fetchResourceCenteredJson = createAsyncThunk<OntologyState, string>(
     "ontology/fetchResourceCenteredJson",
     async (url:string): Promise<OntologyState> => {
-	console.log("fetching ontology from " + url);
+	log.info("fetching ontology from " + url);
 	const response = await fetch(url);
 	return response.json().then((result: OntologyState) => {
-	    console.log("ontology loaded", result);
+	    log.debug("ontology loaded", result);
 	    return result;
 	}).catch(() => {
-	    console.error("failed to load ontology " + url);
+	    log.error("failed to load ontology " + url);
 	    return {};
 	});
     }

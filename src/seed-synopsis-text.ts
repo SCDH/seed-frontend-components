@@ -12,6 +12,8 @@ import { CSSDefinition } from './redux/cssTypes';
 import { OntologyState } from './redux/ontologySlice';
 import { setCssAnnotationsThunk, setCssForAllSegmentsThunk } from './redux/colorizeText';
 import { store, RootState } from "./redux/store";
+import log from "./logging";
+
 
 // define the web component
 @customElement("seed-synopsis-text")
@@ -142,7 +144,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	if (url !== null) {
 	    return new URL(url);
 	} else {
-	    console.log("no valid location in iframe, using parent location");
+	    log.warn("no valid location in iframe, using parent location");
 	    return new URL(this.content, window.location.href);
 	}
     }
@@ -154,7 +156,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     protected handleMessage = (e: MessageEvent) => {
 	if (e.data?.href !== undefined &&
 	    this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("filtered message: ", e, this.getContentUrl().toString());
+	    log.debug("filtered message: ", e, this.getContentUrl().toString());
 	    switch (e.data?.event) {
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
@@ -182,7 +184,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentId));
 		    break;
 		default:
-		    console.log("unknown event: ", e);
+		    log.debug("unknown event: ", e);
 	    }
 	}
     }
@@ -198,7 +200,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     }
 
     protected syncOthers = (_e: Event) => {
-	console.log("syncing others");
+	log.debug("syncing others");
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
 	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: { ...this.contentMeta, "event": "sync" }, bubbles: true, composed: true }));
@@ -210,7 +212,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     set syncTarget(target: IContentMeta) {
 	// do the sync by posting a message to the iframe
 	if (this.stripFragment(target.href) !== this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
+	    log.debug("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
 	    if (this.hasSyncManager) {
 		// TODO
 	    } else {
@@ -234,7 +236,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
      * post message channel down to the document displayed in the iframe.
      */
     colorizeText(_state: RootState): void {
-	console.log("colorizing text in widget " + this.id);
+	log.debug("colorizing text in widget " + this.id);
 	const msg = {
 	    ...this.contentMeta,
 	    "event": "colorize",
