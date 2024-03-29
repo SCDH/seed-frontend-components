@@ -23,9 +23,6 @@ export const fetchResourceCenteredJson = createAsyncThunk<OntologyState, string>
 	return response.json().then((result: OntologyState) => {
 	    log.debug("ontology loaded", result);
 	    return result;
-	}).catch(() => {
-	    log.error("failed to load ontology " + url);
-	    return {};
 	});
     }
 );
@@ -36,14 +33,19 @@ const ontologySlice = createSlice({
     reducers: {
     },
     extraReducers: (builder) => {
-	builder.addCase(
-	    fetchResourceCenteredJson.fulfilled,
-	    (state, action: PayloadAction<OntologyState>) => {
-		// return action.payload;
-		return deepmerge(state, action.payload);
-	    }
-	)
-
+	builder
+	    .addCase(
+		fetchResourceCenteredJson.fulfilled,
+		(state, action: PayloadAction<OntologyState>) => {
+		    // return action.payload;
+		    return deepmerge(state, action.payload);
+		})
+	    .addCase(
+		fetchResourceCenteredJson.rejected,
+		() => {
+		    log.error("failed to load ontology");
+		}
+	    );
     },
 });
 
