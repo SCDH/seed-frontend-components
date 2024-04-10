@@ -1,11 +1,21 @@
 import { html, css, LitElement } from 'lit'
 import { CSSResult, query } from 'lit-element'
 import { customElement, property } from 'lit/decorators.js'
+import { connect } from 'pwa-helpers';
+
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
+
+import { initText, setText, TextState } from "./redux/textsSlice";
+import { TextViewState, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
+import { CSSDefinition } from './redux/cssTypes';
+import { store, RootState } from "./redux/store";
+import log from "./logging";
+
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends connect(store)(LitElement) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -13,8 +23,11 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     @property({ type: String })
     source: string = "";
 
-    @property({ type: String })
-    id: string = "";
+    @property({ attribute: true, type: String})
+    id!: string;
+
+    @property({ attribute: "annotations-per-segment-url", type: String })
+    annotationsPerSegmentUrl!: string;
 
     @property({ attribute: false, state: true })
     protected position!: string;
@@ -34,13 +47,40 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
 
+    cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
+
+    /*
+     * Inherited from {connect}. This method is called by the redux
+     * store to pass in state.
+     */
+    stateChanged(_state: RootState) {
+	// set scroll position from redux store (overkill)
+	if (_state.textViews.hasOwnProperty(this.id)) {
+	    const s: TextViewState | null = _state.textViews[this.id];
+	    this.position = s?.scrollPosition ?? "start";
+	}
+	// set colorize the text if all required data is present
+	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
+	    this.cssPerSegment = _state.textViews[this.id].cssPerSegment;
+	    this.colorizeText(_state);
+	}
+    };
+
+
     connectedCallback() {
+	// this is called when the component has been added to the DOM
 	super.connectedCallback();
-	window.addEventListener("message", this.handleScrolled);
+	// set the event listener for scroll events on the post message channel
+	window.addEventListener("message", this.handleMessage);
+	// dispatch initTextWidget action to the redux state store:
+	// this has to be done, since addText with meta information is
+	// fired lately, only after the first scrolledTo action.
+	store.dispatch(initTextView({viewId: this.id}));
+	store.dispatch(setTextViewText({viewId: this.id, text: this.id}));
     }
 
     disconnectedCallback() {
-	window.removeEventListener("message", this.handleScrolled);
+	window.removeEventListener("message", this.handleMessage);
 	super.disconnectedCallback();
     }
 
@@ -81,19 +121,51 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	if (url !== null) {
 	    return new URL(url);
 	} else {
-	    console.log("no valid location in iframe, using parent location");
+	    log.warn("no valid location in iframe, using parent location");
 	    return new URL(this.content, window.location.href);
 	}
     }
 
-    protected handleScrolled = (e: MessageEvent) => {
-	// console.log("filtering message: ", e, this.getContentUrl().toString());
-	if (e.data?.event == "scrolled" && this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("text in " + this.id + " was scrolled: ", e.data);
-	    this.contentMeta = e.data as IContentMeta;
-	    this.position = e.data.top;
+    /*
+     * On incoming messages via the post message channel,
+     * {handleMessage} dispatches redux store actions.
+     */
+    protected handleMessage = (e: MessageEvent) => {
+	if (e.data?.href !== undefined &&
+	    this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
+	    log.debug("filtered message: ", e, this.getContentUrl().toString());
+	    switch (e.data?.event) {
+		case "meta":
+		    // We do not destructure e.data, since we have no control over it!
+		    const txt: TextState = {
+			location: this.iframe.contentDocument?.location?.toString() ?? null,
+			canonicalUrl: e.data.canonicalUrl,
+			title: e.data.title,
+			author: e.data.author,
+		    };
+		    store.dispatch(initText({textId: this.id}));
+		    store.dispatch(setText({textId: this.id, text: txt}));
+		    store.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
+		    break;
+		case "scrolled":
+		    this.contentMeta = e.data as IContentMeta;
+		    store.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
+		    break;
+		case "mouse-over-segment":
+		    store.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
+		    break;
+		case "mouse-out-segment":
+		    // TODO
+		    break;
+		case "click-segment":
+		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
+		    break;
+		default:
+		    log.debug("unknown event: ", e);
+	    }
 	}
     }
+
 
     protected stripFragment(url: string): string {
 	let pos = url.indexOf("#");
@@ -105,7 +177,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     }
 
     protected syncOthers = (_e: Event) => {
-	console.log("syncing others");
+	log.debug("syncing others");
 	// for sending a message to an iframe, we have to post it on the iframe's content window,
 	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
 	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: { ...this.contentMeta, "event": "sync" }, bubbles: true, composed: true }));
@@ -117,7 +189,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
     set syncTarget(target: IContentMeta) {
 	// do the sync by posting a message to the iframe
 	if (this.stripFragment(target.href) !== this.stripFragment(this.getContentUrl().toString())) {
-	    console.log("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
+	    log.debug("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
 	    if (this.hasSyncManager) {
 		// TODO
 	    } else {
@@ -136,6 +208,19 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	return this._syncTarget;
     }
 
+    /*
+     * Pass data for colorizing the annotations in the text via the
+     * post message channel down to the document displayed in the iframe.
+     */
+    colorizeText(_state: RootState): void {
+	log.debug("colorizing text in widget " + this.id);
+	const msg = {
+	    ...this.contentMeta,
+	    "event": "colorize",
+	    "cssPerSegment": _state.textViews[this.id].cssPerSegment,
+	};
+	this.iframe.contentWindow?.postMessage(msg, window.location.href);
+    }
 
     static styles : CSSResult = css`
 :host {

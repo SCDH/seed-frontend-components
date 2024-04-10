@@ -5,15 +5,18 @@
     <link rel="icon" type="image/png" href="/public/scdh.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test</title>
+    <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
     <script type="module" src="/src/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-annotation-permanent.ts"></script>
   </head>
   <body>
     <seed-synopsis alignment="horizontal">
-      <seed-synopsis-text content="doc1.html" id="LXX" source="LXX.words.tei.xml"></seed-synopsis-text>
-      <seed-synopsis-text content="doc2.html" id="MT" source="MT.words.tei.xml"></seed-synopsis-text>
-      <seed-synopsis-text content="doc3.html" id="TG" source="TG.words.tei.xml"></seed-synopsis-text>
+      <seed-synopsis-text content="doc1.html" id="LXX" source="LXX.words.tei.xml" annotations-per-segment-url="doc1.html.segments.json"></seed-synopsis-text>
+      <seed-synopsis-text content="doc2.html" id="MT" source="MT.words.tei.xml"  annotations-per-segment-url="doc2.html.segments.json"></seed-synopsis-text>
+      <seed-synopsis-text content="doc3.html" id="TG" source="TG.words.tei.xml"  annotations-per-segment-url="doc2.html.segments.json"></seed-synopsis-text>
     </seed-synopsis>
+    <seed-annotation-permanent annotations-url="annotations.json" ontology-urls="ontology.json"></seed-annotation-permanent>
   </body>
 
   <script>
