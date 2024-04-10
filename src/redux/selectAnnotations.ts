@@ -11,12 +11,12 @@ import { TextViewsSlice } from './textViewsSlice';
  * thunk is intended to be dispatched on click or other selection
  * events on portions of a text.
  */
-export const selectAnnotationsAtSegmentThunk = (textViewId: string, subtreeIds: Array<string>) => {
+export const selectAnnotationsAtSegmentThunk = (textViewId: string, segmentIds: Array<string>) => {
     return (dispatch: any, getState: any) => {
 	let state: { textViews: TextViewsSlice, annotations: AnnotationsSlice } = getState();
 	const { textViews, annotations } = state;
 	let annots: Array<string> = [];
-	for (const segmentId of subtreeIds) {
+	for (const segmentId of segmentIds) {
 	    annots = annots.concat(textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? []);
 	}
 	if (annots.length > 0) {
@@ -39,11 +39,11 @@ export const selectAnnotationsAtSegmentThunk = (textViewId: string, subtreeIds: 
  * portions of a text and to highlight or inform about annotations
  * passed by the mouse pointer.
  */
-export const passByAnnotationsAtSegmentThunk = (textViewId: string, subtreeIds: Array<string>) => {
+export const passByAnnotationsAtSegmentThunk = (textViewId: string, segmentIds: Array<string>) => {
     return (dispatch: any, getState: any) => {
 	let state: { textViews: TextViewsSlice } = getState();
 	let annots: Array<string> = [];
-	for (const segmentId of subtreeIds) {
+	for (const segmentId of segmentIds) {
 	    annots = annots.concat(state.textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? []);
 	}
 	dispatch(annotationsPassedBy(annots));
