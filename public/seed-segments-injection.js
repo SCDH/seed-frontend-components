@@ -5,14 +5,16 @@ function postMessageOnSegmentEvent() {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "mouse-over-segment", "segmentId": targetElement.id }, window.location.href);
+	    var idsInSubtree = seedAncestorOrSelfIds(targetElement, []);
+	    parent.postMessage({ ...msg, "event": "mouse-over-segment", "segmentId": targetElement.id, "subtreeIds": idsInSubtree }, window.location.href);
 	}
     });
     document.body.addEventListener("mouseout", function(e) {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "mouse-out-segment", "segmentId": targetElement.id }, window.location.href);
+	    var idsInSubtree = seedAncestorOrSelfIds(targetElement, []);
+	    parent.postMessage({ ...msg, "event": "mouse-out-segment", "segmentId": targetElement.id, "subtreeIds": idsInSubtree }, window.location.href);
 	}
     });
     document.body.addEventListener("click", function(e) {
@@ -27,7 +29,12 @@ function postMessageOnSegmentEvent() {
 window.addEventListener("load", (event) => {
     postMessageOnSegmentEvent();
 });
-
+/*
+ * Recursively collects the IDs from the element and its
+ * ancestors. The IDs from ancestors are of interest, since
+ * annotations may be nested or attributed to whole paragraphs or
+ * divisions.
+ */
 function seedAncestorOrSelfIds(element, ids) {
     if (! (element instanceof HTMLElement))
         return ids;

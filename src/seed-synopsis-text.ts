@@ -152,7 +152,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		    store.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    break;
 		case "mouse-over-segment":
-		    store.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentId));
+		    store.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.subtreeIds));
 		    break;
 		case "mouse-out-segment":
 		    // TODO
