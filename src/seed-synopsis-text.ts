@@ -158,7 +158,7 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 		    // TODO
 		    break;
 		case "click-segment":
-		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentId));
+		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.subtreeIds));
 		    break;
 		default:
 		    log.debug("unknown event: ", e);

@@ -19,10 +19,21 @@ function postMessageOnSegmentEvent() {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	if (targetElement.hasAttribute('id')) {
-	    parent.postMessage({ ...msg, "event": "click-segment", "segmentId": targetElement.id }, window.location.href);
+	    var idsInSubtree = seedAncestorOrSelfIds(targetElement, []);
+	    parent.postMessage({ ...msg, "event": "click-segment", "segmentId": targetElement.id, "subtreeIds": idsInSubtree }, window.location.href);
 	}
     });
 }
 window.addEventListener("load", (event) => {
     postMessageOnSegmentEvent();
 });
+
+function seedAncestorOrSelfIds(element, ids) {
+    if (! (element instanceof HTMLElement))
+        return ids;
+    if (element.hasAttribute('id'))
+        ids.push(element.id);
+    if (! element.parentNode)
+        return ids;
+    return seedAncestorOrSelfIds(element.parentNode, ids);
+}

@@ -9,11 +9,14 @@ import { TextViewsSlice } from './textViewsSlice';
  * thunk is intended to be dispatched on click or other selection
  * events on portions of a text.
  */
-export const selectAnnotationsAtSegmentThunk = (textViewId: string, segmentId: string) => {
+export const selectAnnotationsAtSegmentThunk = (textViewId: string, subtreeIds: Array<string>) => {
     return (dispatch: any, getState: any) => {
 	let state: { textViews: TextViewsSlice, annotations: AnnotationsSlice } = getState();
 	const { textViews, annotations } = state;
-	const annots: Array<string> = textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? [];
+	let annots: Array<string> = [];
+	for (const segmentId of subtreeIds) {
+	    annots = annots.concat(textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? []);
+	}
 	if (annots.length > 0) {
 	    dispatch(annotationsSelected(annots));
 	    // if none is selected or if previously selected is not in set of selected: show the first in detail
