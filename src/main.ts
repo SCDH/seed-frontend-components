@@ -10,3 +10,6 @@ export { SeedTransformSEF } from './seed-transform-sef'
 export { WorkaroundApi } from './workaround-transformer-api'
 export { XSFormFieldFactory } from './xsform'
 export { StringDefaultValueConverter, BooleanDefaultValueConverter, PassDefaultValueConverter } from './xsform'
+
+// required for evil implementation of SeedAnnotationPermanent.renderAnnotationBody TODO: remove!
+export { html } from 'lit'
