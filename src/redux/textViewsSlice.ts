@@ -31,6 +31,12 @@ export interface TextViewState {
     scrollPosition: string | null;
 
     /*
+     * The identifiable region of alignment with other text
+     * representations (other text views, views for text images etc.).
+     */
+    alignmentByLevel: AlignmentByLevel;
+
+    /*
      * A text view may show only a subset of the annotations on the
      * text while an other text view may show a different subset. The
      * subset may result from an arbitrary query.
@@ -77,6 +83,19 @@ export interface TextViewState {
 export interface AnnotationsPerSegment {
 
     [segmentId: string]: Array<string>;
+
+}
+
+/*
+ * The type of {TextViewState.alignmentbyLevel}.
+ */
+export interface AlignmentByLevel {
+
+    /*
+     * A mapping of alignment levels (page, region/paragraph, line,
+     * word, etc.) to Identifiers.
+     */
+    [level: string]: string;
 
 }
 
