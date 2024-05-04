@@ -1,10 +1,10 @@
-import { html, css, LitElement, PropertyValues } from 'lit'
+import { html, css, LitElement } from 'lit'
 import { CSSResult, query } from 'lit-element'
 import { customElement, property, state } from 'lit/decorators.js'
-import { consume } from '@lit/context';
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
+import { storeConsumerMixin } from './store-consumer-mixin';
 
 import { initText, setText, TextState } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
@@ -12,18 +12,13 @@ import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from
 import { CSSDefinition } from './redux/cssTypes';
 import log from "./logging";
 
-import { SeedStore, SeedState } from './redux/seed-store';
-import { seedStoreContext } from './seed-context';
+import { SeedState } from './redux/seed-store';
 
 
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComponent {
-
-    @consume({ context: seedStoreContext })
-    @property({ attribute: false })
-    store?: SeedStore;
+export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -84,14 +79,6 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 	    }
 	}));
 	// this.storeUnsubscribeListeners.push(subsc);
-    }
-
-    protected willUpdate(changedProperties: PropertyValues<this>): void {
-	if (changedProperties.has("store" as keyof SeedSynopsisText) && changedProperties.get("store" as keyof SeedSynopsisText) === undefined) {
-	    log.info("element subscribing to store, " + this.id);
-	    this.subscribeStore();
-	}
-	super.willUpdate(changedProperties);
     }
 
     connectedCallback() {
