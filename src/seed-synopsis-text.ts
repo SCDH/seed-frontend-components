@@ -65,22 +65,24 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 
     subscribeStore(): void {
 	log.debug("subscribing component to the redux store, element with Id " + this.id);
-	//const subsc: UnsubscribeListener | null =
 	if (this.store === undefined) {
 	    log.debug("no store yet for element with Id ", this.id);
 	}
+	// This kind of subscription with store.dispatch(addListener(...)) needs a store with listener middleware, see
+	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
+
+	// listen for changes on CSS per segment
 	this.store?.dispatch(addListener({
 	    predicate: (_action: UnknownAction, currentState, _previousState): boolean => {
-		log.debug("checking predicate for element with Id " + this.id);
+		// log.debug("checking predicate for element with Id " + this.id);
 		let currState: { textViews: TextViewsSlice } = currentState as SeedState;
-		//let prevState: { textViews: TextViewsSlice } = previousState as SeedState;
 		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== this.cssPerSegment;
 	    },
-	    effect: (_dispatch: any, getState: any): void => {
+	    effect: (_action, listenerApi): void => {
 		log.debug("cssPerSegment updated for element with Id " + this.id)
-		let state: SeedState = getState();
+		let state: SeedState = listenerApi.getState() as SeedState;
 		this.cssPerSegment = state.textViews[this.id].cssPerSegment;
-		this.colorizeText(state);
+		this.colorizeText();
 	    }
 	}));
 	// this.storeUnsubscribeListeners.push(subsc);
@@ -239,7 +241,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
      * Pass data for colorizing the annotations in the text via the
      * post message channel down to the document displayed in the iframe.
      */
-    colorizeText(_state: SeedState): void {
+    colorizeText(): void {
 	log.debug("colorizing text in widget " + this.id);
 	const msg = {
 	    ...this.contentMeta,
