@@ -15,8 +15,6 @@ import log from "./logging";
 import { SeedStore, SeedState } from './redux/seed-store';
 import { seedStoreContext } from './seed-context';
 
-import { store } from './redux/store';
-//import { useAppDispatch } from './redux/hooks';
 
 
 // define the web component
@@ -25,7 +23,7 @@ export class SeedSynopsisText extends LitElement implements SeedSynopsisSyncComp
 
     @consume({ context: seedStoreContext })
     @property({ attribute: false })
-    store?: SeedStore = store;
+    store?: SeedStore;
 
     @property({ type: String })
     content: string = "";
