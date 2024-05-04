@@ -20,6 +20,7 @@
     "doc": "typedoc"
   },
   "dependencies": {
+    "@lit/context": "^1.1.1",
     "@reduxjs/toolkit": "^2.2.1",
     "@scdh/seed-xml-transformer-ts-client": "0.1.0",
     "anylogger": "^1.0.11",
