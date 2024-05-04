@@ -1,10 +1,13 @@
 import { html, LitElement, PropertyValues } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { addListener } from '@reduxjs/toolkit';
 
-import { connect } from 'pwa-helpers';
-import { store, RootState } from "./redux/store";
+import { storeConsumerMixin } from './store-consumer-mixin';
+import { store } from "./redux/store";
+import { SeedState } from './redux/seed-store';
 import { fetchAnnotations, Annotation } from './redux/annotationsSlice';
 import { fetchResourceCenteredJson } from './redux/ontologySlice';
+import log from "./logging";
 
 /*
  * The {SeedAnnotationPermanent} object is Lit web component for
@@ -12,7 +15,7 @@ import { fetchResourceCenteredJson } from './redux/ontologySlice';
  * `annotationSelected`.
  */
 @customElement("seed-annotation-permanent")
-export class SeedAnnotationPermanent extends connect(store)(LitElement) {
+export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
 
     @property({ attribute: "annotations-url", type: String })
     annotationsUrl!: string;
@@ -29,21 +32,36 @@ export class SeedAnnotationPermanent extends connect(store)(LitElement) {
     @property({ attribute: "ontology-urls", type: String })
     ontologyUrls!: string;
 
-    /*
-     * Pull in the state from the redux store and write them to
-     * reactive properties that result in re-rendering the component
-     * when changed.
-     */
-    stateChanged(_state: RootState): void {
-	this.annotationId = _state.annotations.annotationSelected;
-	if (this.annotationId != null && _state.annotations.annotations.hasOwnProperty(this.annotationId)) {
-	    this.annotation = _state.annotations.annotations[this.annotationId];
-	} else {
-	    this.annotation = null;
+
+    subscribeStore(): void {
+	log.debug("subscribing component to the redux store, element with Id " + this.id);
+	if (this.store === undefined) {
+	    log.debug("no store yet for element with Id ", this.id);
 	}
+	// This kind of subscription with store.dispatch(addListener(...)) needs a store with listener middleware, see
+	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
+
+	// listen for changes on annotation[this.annotationId]
+	this.store?.dispatch(addListener({
+	    predicate: (_action, currentState, previousState): boolean => {
+		// log.debug("checking predicate for element with Id " + this.id);
+		let currState: SeedState = currentState as SeedState;
+		let prevState: SeedState = previousState as SeedState;
+		return prevState.annotations.annotationSelected !== currState.annotations.annotationSelected;
+	    },
+	    effect: (_action, listenerApi): void => {
+		log.debug("cssPerSegment updated for element with Id " + this.id)
+		let state: SeedState = listenerApi.getState() as SeedState;
+		this.annotationId = state.annotations.annotationSelected;
+		if (this.annotationId) {
+		    this.annotation = state.annotations.annotations[this.annotationId];
+		}
+	    }
+	}));
     }
 
     protected willUpdate(changedProperties: PropertyValues<this>): void {
+	super.willUpdate(changedProperties);
 	if (changedProperties.has("annotationsUrl" as keyof SeedAnnotationPermanent)) {
 	    store.dispatch(fetchAnnotations(this.annotationsUrl));
 	}

@@ -1,21 +1,24 @@
 import { html, css, LitElement } from 'lit'
 import { CSSResult, query } from 'lit-element'
-import { customElement, property } from 'lit/decorators.js'
-import { connect } from 'pwa-helpers';
+import { customElement, property, state } from 'lit/decorators.js'
+import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
+import { storeConsumerMixin } from './store-consumer-mixin';
 
 import { initText, setText, TextState } from "./redux/textsSlice";
-import { TextViewState, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
-import { store, RootState } from "./redux/store";
 import log from "./logging";
+
+import { SeedState } from './redux/seed-store';
+
 
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends connect(store)(LitElement) implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -47,25 +50,36 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
 
+    @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
-    /*
-     * Inherited from {connect}. This method is called by the redux
-     * store to pass in state.
-     */
-    stateChanged(_state: RootState) {
-	// set scroll position from redux store (overkill)
-	if (_state.textViews.hasOwnProperty(this.id)) {
-	    const s: TextViewState | null = _state.textViews[this.id];
-	    this.position = s?.scrollPosition ?? "start";
-	}
-	// set colorize the text if all required data is present
-	if (_state.textViews.hasOwnProperty(this.id)  && _state.textViews[this.id].cssPerSegment !== this.cssPerSegment && this.iframe !== null) {
-	    this.cssPerSegment = _state.textViews[this.id].cssPerSegment;
-	    this.colorizeText(_state);
-	}
-    };
+    storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
 
+
+    subscribeStore(): void {
+	log.debug("subscribing component to the redux store, element with Id " + this.id);
+	if (this.store === undefined) {
+	    log.debug("no store yet for element with Id ", this.id);
+	}
+	// This kind of subscription with store.dispatch(addListener(...)) needs a store with listener middleware, see
+	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
+
+	// listen for changes on CSS per segment
+	this.store?.dispatch(addListener({
+	    predicate: (_action: UnknownAction, currentState, _previousState): boolean => {
+		// log.debug("checking predicate for element with Id " + this.id);
+		let currState: { textViews: TextViewsSlice } = currentState as SeedState;
+		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== this.cssPerSegment;
+	    },
+	    effect: (_action, listenerApi): void => {
+		log.debug("cssPerSegment updated for element with Id " + this.id)
+		let state: SeedState = listenerApi.getState() as SeedState;
+		this.cssPerSegment = state.textViews[this.id].cssPerSegment;
+		this.colorizeText();
+	    }
+	}));
+	// this.storeUnsubscribeListeners.push(subsc);
+    }
 
     connectedCallback() {
 	// this is called when the component has been added to the DOM
@@ -75,8 +89,8 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 	// dispatch initTextWidget action to the redux state store:
 	// this has to be done, since addText with meta information is
 	// fired lately, only after the first scrolledTo action.
-	store.dispatch(initTextView({viewId: this.id}));
-	store.dispatch(setTextViewText({viewId: this.id, text: this.id}));
+	this.store?.dispatch(initTextView({viewId: this.id}));
+	this.store?.dispatch(setTextViewText({viewId: this.id, text: this.id}));
     }
 
     disconnectedCallback() {
@@ -143,22 +157,22 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
 			title: e.data.title,
 			author: e.data.author,
 		    };
-		    store.dispatch(initText({textId: this.id}));
-		    store.dispatch(setText({textId: this.id, text: txt}));
-		    store.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
+		    this.store?.dispatch(initText({textId: this.id}));
+		    this.store?.dispatch(setText({textId: this.id, text: txt}));
+		    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
 		    break;
 		case "scrolled":
 		    this.contentMeta = e.data as IContentMeta;
-		    store.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
+		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    break;
 		case "mouse-over-segment":
-		    store.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
+		    this.store?.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
 		    break;
 		case "mouse-out-segment":
 		    // TODO
 		    break;
 		case "click-segment":
-		    store.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
+		    this.store?.dispatch(selectAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
 		    break;
 		default:
 		    log.debug("unknown event: ", e);
@@ -212,12 +226,12 @@ export class SeedSynopsisText extends connect(store)(LitElement) implements Seed
      * Pass data for colorizing the annotations in the text via the
      * post message channel down to the document displayed in the iframe.
      */
-    colorizeText(_state: RootState): void {
+    colorizeText(): void {
 	log.debug("colorizing text in widget " + this.id);
 	const msg = {
 	    ...this.contentMeta,
 	    "event": "colorize",
-	    "cssPerSegment": _state.textViews[this.id].cssPerSegment,
+	    "cssPerSegment": this.cssPerSegment,
 	};
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
