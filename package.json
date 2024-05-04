@@ -26,8 +26,7 @@
     "anylogger": "^1.0.11",
     "deepmerge-ts": "^5.1.0",
     "jszip": "^3.10.1",
-    "lit": "^2.6.1",
-    "pwa-helpers": "^0.9.1"
+    "lit": "^2.6.1"
   },
   "devDependencies": {
     "anylogger-console": "^1.0.0",
