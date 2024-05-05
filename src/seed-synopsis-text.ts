@@ -7,7 +7,7 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 import { widgetSizeConsumer } from './widget-size-consumer';
 
-import { initText, setText, TextState } from "./redux/textsSlice";
+import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
@@ -73,6 +73,26 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		this.colorizeText();
 	    }
 	}));
+
+	// get the text title / listen for changes
+	this.store?.dispatch(addListener({
+	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
+		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
+		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
+		return currState.textViews.hasOwnProperty(this.id)
+		    // && currState.textViews[this.id].textId !== null
+		    // && currState.texts.hasOwnProperty(currState.textViews[this.id]?.textId ?? "unknown")
+		    && currState.texts[currState.textViews[this.id]?.textId ?? "unknown"] !== prevState.texts[currState.textViews[this.id]?.textId ?? "unknown"];
+ ;
+	    },
+	    effect: (_action, listenerApi): void => {
+		let state: SeedState = listenerApi.getState() as SeedState;
+		this.title = state.texts[state.textViews[this.id]?.textId ??
+		    "unknown"].title ?? state.texts[state.textViews[this.id]?.textId ?? "unknown"].author ??
+		    "unknown";
+	    }
+	}));
+
 	// this.storeUnsubscribeListeners.push(subsc);
     }
 
