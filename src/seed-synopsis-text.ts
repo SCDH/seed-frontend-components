@@ -5,6 +5,8 @@ import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolki
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 import { storeConsumerMixin } from './store-consumer-mixin';
+import { windowMixin } from './window-mixin';
+import { widgetSizeConsumer } from './widget-size-consumer';
 
 import { initText, setText, TextState } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
@@ -18,7 +20,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -37,12 +39,6 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 
     @property({ type: String })
     alignment: string = "horizontal";
-
-    @property({ type: String })
-    width!: string; // = "100%";
-
-    @property({ type: String })
-    height!: string; // = "100%";
 
     @property({ state: true })
     protected contentMeta!: IContentMeta;
@@ -98,10 +94,6 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 	super.disconnectedCallback();
     }
 
-    protected styleTemplate() {
-	return html`<style>:host { display: ${this.getHostDisplay()}; width: ${this.width}; height: ${this.height}; }</style>`;
-    }
-
     protected headerTemplate() {
 	return html`<div><span>${this.id}:</span> <span>${this.source}</span>`;
     }
@@ -114,7 +106,7 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
     }
 
-    render() {
+    renderContent() {
 	return html`${this.styleTemplate()}<div class="synopsis-text-container">${this.headerTemplate()}${this.iframeTemplate()}${this.footerTemplate()}</div>`;
     }
 
