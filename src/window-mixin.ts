@@ -222,8 +222,8 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 
 	disposeHandler(): void {
 	    // TODO
-	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
-					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
+	    // this.dispatchEvent(new CustomEvent('widget-size-consumer',
+	    // 					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
 	}
 
 	connectedCallback(): void {

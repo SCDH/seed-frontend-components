@@ -95,9 +95,8 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
                         this.childrenCountContainer -= 1;
                     }
                 } else if (windowState === WindowState.Disposed) {
-                    this.childrenCount -= 1;
-                    this.childrenCountContainer -= 1;
-                    this.childrenCountMinimized -= 1;
+                    // this.childrenCount -= 1;
+                    // this.childrenCountContainer -= 1;
                 }
                 e.stopPropagation(); // do not allow bubbling up to the next provider
                 this.recalculateChildDimensions();
