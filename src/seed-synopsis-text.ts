@@ -91,6 +91,7 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     disconnectedCallback() {
 	window.removeEventListener("message", this.handleMessage);
 	super.disconnectedCallback();
+	// TODO: store.dispatch(disposeTextView({viewId: this.id});
     }
 
     protected headerTemplate() {
