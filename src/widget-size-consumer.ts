@@ -46,7 +46,12 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
                     display: ${this.widgetDisplay};
                     width: ${this.widgetWidthMinimized}px;
                     height: ${this.widgetHeightMinimized}px;
-                }</style>`;
+		    ${this.hostStyleDisplayAddon()}
+                }
+	        .minimized-rotation {
+	            transform: rotate(${this.minimizedRotation()}deg);
+		}
+		</style>`;
             }
             return html`<style>:host {
                 display: ${this.widgetDisplay};
@@ -54,6 +59,16 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
                 height: ${this.widgetHeight}px;
             }</style>`;
         }
+
+	hostStyleDisplayAddon(): HTMLTemplateResult {
+	    if (this.widgetDisplay !== "block") return html`vertical-align: top;`
+	    return html``;
+	}
+
+	minimizedRotation(): HTMLTemplateResult {
+	    if (this.widgetDisplay === "block") return html`0`;
+	    return html`-90`;
+	}
 
     };
     return WidgetSizeConsumer;
