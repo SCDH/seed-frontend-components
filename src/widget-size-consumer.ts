@@ -2,7 +2,7 @@ import { LitElement, html, HTMLTemplateResult } from 'lit';
 import { state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 
-import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext } from './seed-context';
+import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext, seedWidgetMarginContext } from './seed-context';
 import { isMinimized } from './window-mixin';
 
 
@@ -37,6 +37,10 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
         @consume({ context: seedWidgetDisplayContext, subscribe: true })
         widgetDisplay?: string;
 
+	@state()
+	@consume({ context: seedWidgetMarginContext, subscribe: true })
+	windowMargin: number = 2;
+
         /*
          * Scoped styles with dynamic properties setting the host's dimensions.
          */
@@ -46,6 +50,7 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
                     display: ${this.widgetDisplay};
                     width: ${this.widgetWidthMinimized}px;
                     height: ${this.widgetHeightMinimized}px;
+                    margin: ${this.windowMargin}px;
 		    ${this.hostStyleDisplayAddon()}
                 }
 	        .minimized-rotation {
@@ -57,6 +62,7 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
                 display: ${this.widgetDisplay};
                 width: ${this.widgetWidth}px;
                 height: ${this.widgetHeight}px;
+                margin: ${this.windowMargin}px;
             }</style>`;
         }
 

@@ -8,3 +8,4 @@ export const seedWidgetHeightContext = createContext<number>(Symbol('widget-heig
 export const seedWidgetWidthMinimizedContext = createContext<number>(Symbol('widget-width-minimized'));
 export const seedWidgetHeightMinimizedContext = createContext<number>(Symbol('widget-height-minimized'));
 export const seedWidgetDisplayContext = createContext<string>(Symbol('widget-display'));
+export const seedWidgetMarginContext = createContext<number>(Symbol('widget-margin'));

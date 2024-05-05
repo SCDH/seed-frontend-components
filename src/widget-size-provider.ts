@@ -3,7 +3,7 @@ import { property, state } from 'lit/decorators.js';
 import { provide } from '@lit/context';
 
 import { WindowState } from './window-mixin';
-import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext } from './seed-context';
+import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext, seedWidgetMarginContext } from './seed-context';
 import log from "./logging";
 
 
@@ -44,6 +44,10 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 	@property({ attribute: "default-line-height-px" })
 	defaultLineHeightPx: string = "15";
 
+	@property({ attribute: "children-margin-px"})
+	@provide({ context: seedWidgetMarginContext })
+	childrenMarginPx: number = 2;
+
         @state()
         childrenCount: number = 0;
 
@@ -61,8 +65,8 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
                 this.widgetHeight = this.offsetHeight;
                 this.widgetWidth = (this.offsetWidth -
 		    (this.childrenCountMinimized * this.widgetWidthMinimized) - // minus minimized
-		    (this.childrenCount * 6) - // minus border and margin
-		    0) / // minus fixed value
+		    (this.childrenCount * 2 * (this.childrenMarginPx + 1)) - // minus margin and border
+		    2) / // minus fixed value
 		    Math.max(this.childrenCountContainer, 1);
                 this.widgetDisplay = "inline-block";
 		this.widgetHeightMinimized = this.widgetHeight;
@@ -70,7 +74,7 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
             } else {
                 this.widgetHeight = (this.offsetHeight -
 		    (this.childrenCountMinimized * this.widgetHeightMinimized) - // minux minimized
-		    (this.childrenCount * 6) - // minus border and margin
+		    (this.childrenCount * 2 * (this.childrenMarginPx + 1)) - // minus border and margin
 		    2) /
 		    Math.max(this.childrenCountContainer, 1);
                 this.widgetWidth = this.offsetWidth;
