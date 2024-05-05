@@ -73,13 +73,16 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	@property({ attribute: true })
 	disposable: boolean = true;
 
+
 	render(): HTMLTemplateResult {
 	    if (this.windowState === WindowState.Minimized) {
-		return html`<div class="${this.clas} minimized-window">
+		return html`${this.styleTemplate()}
+		<div class="${this.clas} minimized-window">
 		    <button @click=${this.restoreHandler}>!</button>
 		</div>`;
 	    }
-	    return html`<div class="${this.clas} container-window">
+	    return html`${this.styleTemplate()}
+		<div class="${this.clas} container-window">
 		${this.renderWindowDecoration()}
 		<div class="window-content">
 		    ${this.renderContent()}
@@ -87,14 +90,22 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    </div>`;
 	}
 
+	/*
+	 * Scoped styles with dynamic properties. Override this with
+	 * what you need.
+	 */
+	protected styleTemplate(): HTMLTemplateResult {
+	    return html``;
+	}
+
 	renderContent(): HTMLTemplateResult {
 	    return html``;
 	}
 
 	renderWindowDecoration(): HTMLTemplateResult {
-	    return html`<div class="window-decoration" width="100%">
-		<span class="window-title">${this.title}</span>
-		<span class="window-visibility">
+	    return html`<div class="window-decoration" style="position:relative; width:auto">
+		<span class="window-title">${this.title} sdfg</span>
+		<span class="window-visibility" position="container" style="position:absolute; top:0px; right=0px;">
 		    <button @click=${this.minimizeHandler}>_</button>
 		    ${this.renderDisposeButton()}
 		</span>
