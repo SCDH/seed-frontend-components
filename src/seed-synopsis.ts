@@ -1,12 +1,12 @@
-import { html, css, LitElement } from 'lit'
-import { queryAssignedElements, CSSResult } from 'lit-element'
-import { TemplateResult } from 'lit-html'
-import { customElement, property } from 'lit/decorators.js'
+import { html, css, LitElement, CSSResult, TemplateResult } from 'lit'
+import { customElement, property, queryAssignedElements } from 'lit/decorators.js'
 import { IContentMeta, SeedSynopsisSyncComponent } from './isynopsis'
+
+import { widgetSizeProvider } from './widget-size-provider'
 
 // define the web component
 @customElement("seed-synopsis")
-export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponent {
+export class SeedSynopsis extends widgetSizeProvider(LitElement) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     id: string = "";
@@ -28,12 +28,12 @@ export class SeedSynopsis extends LitElement implements SeedSynopsisSyncComponen
 		this.propagateSync((e as CustomEvent).detail as IContentMeta);
 	    });
 	}
-	// Would there be a better event to register this alignChildren method to?
-	window.addEventListener("load", this.alignChildren);
+	// // Would there be a better event to register this alignChildren method to?
+	// window.addEventListener("load", this.alignChildren);
     }
 
     disconnectedCallback() {
-	window.removeEventListener("load", this.alignChildren);
+	// window.removeEventListener("load", this.alignChildren);
 	super.disconnectedCallback();
     }
 

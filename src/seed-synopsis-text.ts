@@ -1,10 +1,11 @@
-import { html, css, LitElement } from 'lit'
-import { CSSResult, query } from 'lit-element'
-import { customElement, property, state } from 'lit/decorators.js'
+import { html, css, LitElement, CSSResultGroup } from 'lit'
+import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 import { storeConsumerMixin } from './store-consumer-mixin';
+import { windowMixin, windowStyles } from './window-mixin';
+import { widgetSizeConsumer } from './widget-size-consumer';
 
 import { initText, setText, TextState } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
@@ -18,7 +19,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements SeedSynopsisSyncComponent {
 
     @property({ type: String })
     content: string = "";
@@ -37,12 +38,6 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 
     @property({ type: String })
     alignment: string = "horizontal";
-
-    @property({ type: String })
-    width!: string; // = "100%";
-
-    @property({ type: String })
-    height!: string; // = "100%";
 
     @property({ state: true })
     protected contentMeta!: IContentMeta;
@@ -96,10 +91,7 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
     disconnectedCallback() {
 	window.removeEventListener("message", this.handleMessage);
 	super.disconnectedCallback();
-    }
-
-    protected styleTemplate() {
-	return html`<style>:host { display: ${this.getHostDisplay()}; width: ${this.width}; height: ${this.height}; }</style>`;
+	// TODO: store.dispatch(disposeTextView({viewId: this.id});
     }
 
     protected headerTemplate() {
@@ -110,12 +102,12 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 	return html`<div class="content-container" id="${this.id}-content-container"><iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe></div>`;
     }
 
-    protected footerTemplate() {
+    footerTemplate() {
 	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
     }
 
-    render() {
-	return html`${this.styleTemplate()}<div class="synopsis-text-container">${this.headerTemplate()}${this.iframeTemplate()}${this.footerTemplate()}</div>`;
+    renderContent() {
+	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
     }
 
     protected getHostDisplay() : String {
@@ -236,20 +228,19 @@ export class SeedSynopsisText extends storeConsumerMixin(LitElement) implements 
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
 
-    static styles : CSSResult = css`
-:host {
-  border: 1px solid lightblue;
-}
-div.synopsis-text-container {
-  height: 100%;
-}
-div.content-container {
-  height: 90%;
-}
-iframe {
-  border: 1px solid silver;
-}`
-
+    static styles: CSSResultGroup = [
+	windowStyles,
+	css`
+ 	    div.synopsis-text-container {
+ 	    height: 100%;
+ 	    }
+ 	    div.content-container {
+ 	    height: 100%;
+ 	    }
+ 	    iframe {
+ 	    border: none; /* 1px solid silver; */
+ 	    }`
+    ]
 }
 
 
