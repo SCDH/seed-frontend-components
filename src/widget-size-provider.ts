@@ -59,12 +59,20 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 	    const lineHeight: number = Number(lineHeightStr);
             if (this.orientation === "horizontal") {
                 this.widgetHeight = this.offsetHeight;
-                this.widgetWidth = (this.offsetWidth - (this.childrenCountMinimized * this.widgetWidthMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
+                this.widgetWidth = (this.offsetWidth -
+		    (this.childrenCountMinimized * this.widgetWidthMinimized) - // minus minimized
+		    (this.childrenCount * 6) - // minus border and margin
+		    0) / // minus fixed value
+		    Math.max(this.childrenCountContainer, 1);
                 this.widgetDisplay = "inline-block";
 		this.widgetHeightMinimized = this.widgetHeight;
 		this.widgetWidthMinimized = lineHeight * 2;
             } else {
-                this.widgetHeight = (this.offsetHeight - (this.childrenCountMinimized * this.widgetHeightMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
+                this.widgetHeight = (this.offsetHeight -
+		    (this.childrenCountMinimized * this.widgetHeightMinimized) - // minux minimized
+		    (this.childrenCount * 6) - // minus border and margin
+		    2) /
+		    Math.max(this.childrenCountContainer, 1);
                 this.widgetWidth = this.offsetWidth;
                 this.widgetDisplay = "block";
 		this.widgetHeightMinimized = lineHeight * 2;
