@@ -41,6 +41,9 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
         @provide({ context: seedWidgetHeightMinimizedContext })
         widgetHeightMinimized: number = 50;
 
+	@property({ attribute: "default-line-height-px" })
+	defaultLineHeightPx: string = "15";
+
         @state()
         childrenCount: number = 0;
 
@@ -52,14 +55,20 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 
         recalculateChildDimensions() {
             log.debug("recalculating dimensions of " + this.childrenCount.toString() + " children");
+	    const lineHeightStr: string = window.getComputedStyle(this)?.getPropertyValue("font-size")?.match(/\d+/)?.[0] ?? this.defaultLineHeightPx;
+	    const lineHeight: number = Number(lineHeightStr);
             if (this.orientation === "horizontal") {
                 this.widgetHeight = this.offsetHeight;
                 this.widgetWidth = (this.offsetWidth - (this.childrenCountMinimized * this.widgetWidthMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
                 this.widgetDisplay = "inline-block";
+		this.widgetHeightMinimized = this.widgetHeight;
+		this.widgetWidthMinimized = lineHeight * 2;
             } else {
                 this.widgetHeight = (this.offsetHeight - (this.childrenCountMinimized * this.widgetHeightMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
                 this.widgetWidth = this.offsetWidth;
                 this.widgetDisplay = "block";
+		this.widgetHeightMinimized = lineHeight * 2;
+		this.widgetWidthMinimized = this.widgetWidth;
             }
         }
 
