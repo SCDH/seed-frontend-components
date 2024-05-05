@@ -155,6 +155,7 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		    break;
 		case "scrolled":
 		    this.contentMeta = e.data as IContentMeta;
+		    this.position = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    break;
 		case "mouse-over-segment":
