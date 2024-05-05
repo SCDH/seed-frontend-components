@@ -1,11 +1,11 @@
-import { html, css, LitElement } from 'lit'
-import { CSSResult, query } from 'lit-element'
+import { html, css, LitElement, CSSResultGroup } from 'lit'
+import { query } from 'lit-element'
 import { customElement, property, state } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
 import { storeConsumerMixin } from './store-consumer-mixin';
-import { windowMixin } from './window-mixin';
+import { windowMixin, windowStyles } from './window-mixin';
 import { widgetSizeConsumer } from './widget-size-consumer';
 
 import { initText, setText, TextState } from "./redux/textsSlice";
@@ -102,12 +102,12 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	return html`<div class="content-container" id="${this.id}-content-container"><iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe></div>`;
     }
 
-    protected footerTemplate() {
+    footerTemplate() {
 	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
     }
 
     renderContent() {
-	return html`${this.styleTemplate()}<div class="synopsis-text-container">${this.headerTemplate()}${this.iframeTemplate()}${this.footerTemplate()}</div>`;
+	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
     }
 
     protected getHostDisplay() : String {
@@ -228,20 +228,19 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
 
-    static styles : CSSResult = css`
-:host {
-  border: 1px solid lightblue;
-}
-div.synopsis-text-container {
-  height: 100%;
-}
-div.content-container {
-  height: 90%;
-}
-iframe {
-  border: 1px solid silver;
-}`
-
+    static styles: CSSResultGroup = [
+	windowStyles,
+	css`
+ 	    div.synopsis-text-container {
+ 	    height: 100%;
+ 	    }
+ 	    div.content-container {
+ 	    height: 100%;
+ 	    }
+ 	    iframe {
+ 	    border: none; /* 1px solid silver; */
+ 	    }`
+    ]
 }
 
 
