@@ -117,17 +117,33 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html`<button @click=${this.disposeHandler}>X</button>`
 	}
 
+	private evopts = { bubbles: true, cancelable: true, composed: true };
+
 	restoreHandler(): void {
 	    this.windowState = WindowState.Container;
+	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
+					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
 	}
 
 	minimizeHandler(): void {
 	    log.debug("minimizing window");
 	    this.windowState = WindowState.Minimized;
+	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
+					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
 	}
 
 	disposeHandler(): void {
 	    // TODO
+	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
+					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
+	}
+
+	connectedCallback(): void {
+	    super.connectedCallback();
+	    log.debug("initializing widget with ", this.windowState);
+	    this.dispatchEvent(new CustomEvent("widget-size-consumer",
+					       { ...this.evopts, detail: { windowState: this.windowState, initialize: true}}));
+
 	}
 
     };
