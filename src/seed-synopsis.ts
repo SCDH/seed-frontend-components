@@ -1,7 +1,5 @@
-import { html, css, LitElement } from 'lit'
-import { queryAssignedElements, CSSResult } from 'lit-element'
-import { TemplateResult } from 'lit-html'
-import { customElement, property } from 'lit/decorators.js'
+import { html, css, LitElement, CSSResult, TemplateResult } from 'lit'
+import { customElement, property, queryAssignedElements } from 'lit/decorators.js'
 import { IContentMeta, SeedSynopsisSyncComponent } from './isynopsis'
 
 import { widgetSizeProvider } from './widget-size-provider'

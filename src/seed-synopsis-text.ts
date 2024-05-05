@@ -1,6 +1,5 @@
 import { html, css, LitElement, CSSResultGroup } from 'lit'
-import { query } from 'lit-element'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
 import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
