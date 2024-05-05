@@ -79,6 +79,25 @@ export const windowStyles = css`
     .window-visibility {
     float: right;
     }
+    .window-visibility > button {
+    padding: 2px;
+    border: none;
+    background: none;
+    width: var(--window-button-width, auto);
+    height: var(--window-button-height, auto);
+    }
+    .window-visibility > button.minimize {
+    background: var(--window-minimize-button-bg, inherit);
+    }
+    .window-visibility > button.maximize {
+    background: var(--window-maximize-button-bg, inherit);
+    }
+    .window-visibility > button.dispose {
+    background: var(--window-dispose-button-bg, inherit);
+    }
+    .window-visibility > button:hover {
+    color: red;
+    }
     .window-title {
     display: inline-block;
     width: 65%;
@@ -86,6 +105,11 @@ export const windowStyles = css`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    }
+    .window-container.minimized-window {
+    }
+    .window-container.minimized-window > .window-header > .window-decoration > .window-title {
+    display: none;
     }
 `;
 
@@ -121,10 +145,9 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	render(): HTMLTemplateResult {
 	    if (this.windowState === WindowState.Minimized) {
 		return html`${this.styleTemplate()}
-		<div class="${this.clas} minimized-window">
-                    <div class="window-decoration">
-		        <span class="window-title">${this.title}</span>
-		        <button @click=${this.restoreHandler}>!</button>
+		<div class="${this.clas} window-container minimized-window">
+                    <div class="window-header">
+                        ${this.renderWindowDecorationMinimized()}
                     </div>
 		</div>`;
 	    }
@@ -162,15 +185,24 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html`<div class="window-decoration">
 		<span class="window-title">${this.title}</span>
 		<span class="window-visibility">
-		    <button @click=${this.minimizeHandler}>_</button>
+		    <button @click=${this.minimizeHandler} class="minimize">&#x1F5D5;</button>
 		    ${this.renderDisposeButton()}
 		</span>
 	    </div>`;
 	}
 
+	renderWindowDecorationMinimized(): HTMLTemplateResult {
+	    return html`<div class="window-decoration">
+		<span class="window-title minimized-rotation">${this.title}</span>
+             	<span class="window-visibility">
+		    <button @click=${this.restoreHandler} class="maximize">&#x1F5D6;</button>
+                </span>
+            </div>`
+	}
+
 	renderDisposeButton(): HTMLTemplateResult {
 	    if (!this.disposable) return html``;
-	    return html`<button @click=${this.disposeHandler}>X</button>`
+	    return html`<button @click=${this.disposeHandler} class="dispose">&#x1F5D9;</button>`
 	}
 
 	private evopts = { bubbles: true, cancelable: true, composed: true };
