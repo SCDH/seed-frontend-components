@@ -1,0 +1,102 @@
+import { LitElement } from 'lit';
+import { property, state } from 'lit/decorators.js';
+import { provide } from '@lit/context';
+
+import { WindowState } from './window-mixin';
+import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext } from './seed-context';
+import log from "./logging";
+
+
+type Constructor<T = {}> = new (...args: any[]) => T;
+
+/*
+ * A mixin for {LitElement}s that sets the widget dimensions from context.
+ *
+ * A usage example can be found in `seed-synopsis-text.ts`.
+ */
+export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass: T) => {
+
+    class WidgetSizeProvider extends superClass {
+
+        @property({ attribute: true })
+        orientation: string = "horizontal";
+
+        @property({ attribute: "children-height"})
+        @provide({ context: seedWidgetHeightContext })
+        widgetHeight: number = 100;
+
+        @property({ attribute: "children-width"})
+        @provide({ context: seedWidgetWidthContext })
+        widgetWidth: number = 100;
+
+        @property({ attribute: "children-display"})
+        @provide({ context: seedWidgetDisplayContext })
+        widgetDisplay: string = "inline-block";
+
+        @property({ attribute: "children-width-minimized" })
+        @provide({ context: seedWidgetWidthMinimizedContext })
+        widgetWidthMinimized: number = 50;
+
+        @property({ attribute: "children-height-minimized" })
+        @provide({ context: seedWidgetHeightMinimizedContext })
+        widgetHeightMinimized: number = 50;
+
+        @state()
+        childrenCount: number = 0;
+
+        @state()
+        childrenCountContainer: number = 0;
+
+        @state()
+        childrenCountMinimized: number = 0;
+
+        recalculateChildDimensions() {
+            log.debug("recalculating dimensions of " + this.childrenCount.toString() + " children");
+            if (this.orientation === "horizontal") {
+                this.widgetHeight = this.offsetHeight;
+                this.widgetWidth = (this.offsetWidth - (this.childrenCountMinimized * this.widgetWidthMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
+                this.widgetDisplay = "inline-block";
+            } else {
+                this.widgetHeight = (this.offsetHeight - (this.childrenCountMinimized * this.widgetHeightMinimized) - 100) / Math.max(this.childrenCountContainer, 1);
+                this.widgetWidth = this.offsetWidth;
+                this.widgetDisplay = "block";
+            }
+        }
+
+        connectedCallback(): void {
+            super.connectedCallback();
+            if (this.shadowRoot) {
+                log.debug("add event listener for widget size consumer event");
+                this.shadowRoot.addEventListener("widget-size-consumer", this.handleChildEvent());
+            }
+        }
+
+        handleChildEvent() {
+            return (e: Event) => {
+                const { windowState, initialize } = (e as CustomEvent<{ windowState: WindowState, initialize: boolean }>).detail;
+                if (initialize) this.childrenCount += 1;
+                if (windowState === WindowState.Container) {
+                    this.childrenCountContainer += 1;
+                    if (!initialize) {
+                        this.childrenCountMinimized -= 1;
+                    }
+                } else if (windowState === WindowState.Minimized) {
+                    this.childrenCountMinimized += 1;
+                    if (!initialize) {
+                        this.childrenCountContainer -= 1;
+                    }
+                } else if (windowState === WindowState.Disposed) {
+                    this.childrenCount -= 1;
+                    this.childrenCountContainer -= 1;
+                    this.childrenCountMinimized -= 1;
+                }
+                e.stopPropagation(); // do not allow bubbling up to the next provider
+                this.recalculateChildDimensions();
+            };
+        }
+
+    };
+
+    return WidgetSizeProvider;
+
+}
