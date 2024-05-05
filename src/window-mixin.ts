@@ -1,20 +1,56 @@
 import { LitElement, html, HTMLTemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
+
 import log from "./logging";
 
-
+/*
+ * An enumeration type describing the window state.
+ */
 export enum WindowState {
     Container,
     Minimized,
     Disposed
 }
 
+/*
+ * An interface for widgets which are windows. A window is a widget
+ * with visibility properties (and the functions for setting them are
+ * exposed to the user).
+ */
+export interface IWindow {
+
+    /*
+     * A window has an window state, i.e., a visibility state.
+     */
+    windowState: WindowState;
+
+}
+
+/*
+ * Test whether an unknown object is a window.
+ */
+export function isWindow(obj: unknown): obj is IWindow {
+    return (obj as IWindow)!.windowState !== undefined
+	&& typeof (obj as IWindow).windowState === "number";
+}
+
+/*
+ * Test whether an unknown object is a window and if it's window state
+ * is {WindowState.Minimized}.
+ */
+export function isMinimized(obj: unknown): boolean {
+    return (obj as IWindow)!.windowState !== undefined
+	&& typeof (obj as IWindow).windowState === "number"
+	&& (obj as IWindow).windowState === WindowState.Minimized;
+}
+
+
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 /*
  * A mixin for {LitElement}s that adds Window functionality. A window
- *is a widget with its own visibility functions exposed to the user.
+ * is a widget with its own visibility functions exposed to the user.
  *
  * This mixin overrides `willUpdate()`, so sub classes should call
  *`super.willUpdate()` when overriding this lifecycle method.
