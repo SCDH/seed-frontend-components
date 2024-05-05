@@ -1,4 +1,4 @@
-import { LitElement, html, HTMLTemplateResult } from 'lit';
+import { LitElement, html, css, CSSResultGroup, HTMLTemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 
@@ -45,6 +45,50 @@ export function isMinimized(obj: unknown): boolean {
 	&& (obj as IWindow).windowState === WindowState.Minimized;
 }
 
+/*
+ * CSS styles for window mixin. This is moved outside of the class for
+ * easy inheritance. See
+ * https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
+ */
+export const windowStyles = css`
+    :host {
+    border: 1px solid var(--window-border-color, lightblue);
+    }
+    div.window-container {
+    height: 100%;
+    }
+    .window-header, .window-footer {
+    height: 1.5em;
+    padding: 0.5em;
+    }
+    div.window-content {
+    height: calc(100% - 5em - 3px); /* 100% minus height of decoration and footer */
+    }
+    .window-header {
+    background: var(--window-header-background-color, aliceblue);
+    border-bottom: 1px solid var(--window-border-color, lightblue);
+    }
+    .window-footer {
+    background: var(--window-header-background-color, aliceblue);
+    border-top: 1px solid var(--window-border-color, lightblue);
+    }
+    .window-decoration {
+    display: inline;
+    white-space: nowrap;
+    }
+    .window-visibility {
+    float: right;
+    }
+    .window-title {
+    display: inline-block;
+    width: 65%;
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    }
+`;
+
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -78,17 +122,25 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    if (this.windowState === WindowState.Minimized) {
 		return html`${this.styleTemplate()}
 		<div class="${this.clas} minimized-window">
-		    <button @click=${this.restoreHandler}>!</button>
+                    <div class="window-decoration">
+		        <span class="window-title">${this.title}</span>
+		        <button @click=${this.restoreHandler}>!</button>
+                    </div>
 		</div>`;
 	    }
-	    return html`${this.styleTemplate()}
-		<div class="${this.clas} container-window">
-		${this.renderWindowDecoration()}
-		<div class="window-content">
-		    ${this.renderContent()}
-		</div>
-	    </div>`;
-	}
+            return html`${this.styleTemplate()}
+                <div class="${this.clas} window-container container-managed-window">
+                    <div class="window-header">
+                       ${this.renderWindowDecoration()}
+                    </div>
+                    <div class="window-content">
+                        ${this.renderContent()}
+                    </div>
+                    <div class="window-footer">
+                        ${this.footerTemplate()}
+                    </div>
+                </div>`;
+        }
 
 	/*
 	 * Scoped styles with dynamic properties. Override this with
@@ -102,10 +154,14 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html``;
 	}
 
+	footerTemplate(): HTMLTemplateResult {
+	    return html``;
+	}
+
 	renderWindowDecoration(): HTMLTemplateResult {
-	    return html`<div class="window-decoration" style="position:relative; width:auto">
-		<span class="window-title">${this.title} sdfg</span>
-		<span class="window-visibility" position="container" style="position:absolute; top:0px; right=0px;">
+	    return html`<div class="window-decoration">
+		<span class="window-title">${this.title}</span>
+		<span class="window-visibility">
 		    <button @click=${this.minimizeHandler}>_</button>
 		    ${this.renderDisposeButton()}
 		</span>
@@ -146,7 +202,10 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 
 	}
 
-    };
+	// see https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
+	static styles = windowStyles as CSSResultGroup;
+
+	};
     return WindowMixin;
 
 }
