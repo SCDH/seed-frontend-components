@@ -39,7 +39,7 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
 
 	@state()
 	@consume({ context: seedWidgetMarginContext, subscribe: true })
-	windowMargin: number = 2;
+	windowMargin?: number;
 
         /*
          * Scoped styles with dynamic properties setting the host's dimensions.
