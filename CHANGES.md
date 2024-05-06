@@ -1,6 +1,10 @@
 # Changes
 
-## 0.5.1
+## 0.5.3
+
+- logging window events
+
+## 0.5.2
 
 - export all new stuff via `main.ts`
 
