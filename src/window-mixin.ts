@@ -205,7 +205,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html`<button @click=${this.disposeHandler} class="dispose">&#x1F5D9;</button>`
 	}
 
-	private evopts = { bubbles: true, cancelable: true, composed: true };
+	private evopts = { bubbles: true, cancelable: false, composed: true };
 
 	restoreHandler(): void {
 	    this.windowState = WindowState.Container;
