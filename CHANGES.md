@@ -1,5 +1,9 @@
 # Changes
 
+## 0.5.1
+
+- export all new stuff via `main.ts`
+
 ## 0.5.0
 
 - connect to Redux store via
