@@ -221,9 +221,11 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	}
 
 	disposeHandler(): void {
-	    // TODO
-	    // this.dispatchEvent(new CustomEvent('widget-size-consumer',
-	    // 					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
+	    log.debug("disposing window");
+	    this.windowState = WindowState.Disposed;
+	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
+					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));	    
+	    this.remove();
 	}
 
 	connectedCallback(): void {
@@ -231,7 +233,6 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    log.debug("initializing widget with ", this.windowState);
 	    this.dispatchEvent(new CustomEvent("widget-size-consumer",
 					       { ...this.evopts, detail: { windowState: this.windowState, initialize: true}}));
-
 	}
 
 	// see https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
