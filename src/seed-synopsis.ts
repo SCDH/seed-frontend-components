@@ -100,9 +100,10 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
 
     static styles: CSSResult = css`
 :host {
+white-space: nowrap;
+white-space-collapse: discard;
 }
 div {
-  min-height: 20em;
 }
 `
 
