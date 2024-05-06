@@ -10,9 +10,12 @@ integrated in Imperia or other CMSs.
 
 ## List of Web Components
 
+- `<seed-app>`: a container element that provides app context (Redux
+  store, etc.) to descending elements
 - `<seed-synopsis>`: a container in a synopsis setup
 - `<seed-synopsis-text>`: an single HTML text in a `<iframe>` element
   with synoptical features
+- `<seed-annotation-permanent>`: shows the last selected annotation
 - `<seed-transform-rest>`: transform XML input (or other format) to
   HTML (or other format) using a RESTful webservice implementing the
   [*Transformation API*](transformation-api.md).
