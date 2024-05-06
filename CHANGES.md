@@ -1,5 +1,9 @@
 # Changes
 
+## 0.5.4
+
+- make window events not cancelable
+
 ## 0.5.3
 
 - logging window events
