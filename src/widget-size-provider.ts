@@ -87,7 +87,7 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
         connectedCallback(): void {
             super.connectedCallback();
             if (this.shadowRoot) {
-                log.debug("add event listener for widget size consumer event");
+                log.debug("adding event listener for widget-size-consumer event");
                 this.shadowRoot.addEventListener("widget-size-consumer", this.handleChildEvent());
             }
         }
@@ -95,7 +95,10 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
         handleChildEvent() {
             return (e: Event) => {
                 const { windowState, initialize } = (e as CustomEvent<{ windowState: WindowState, initialize: boolean }>).detail;
-                if (initialize) this.childrenCount += 1;
+                if (initialize) {
+		    this.childrenCount += 1;
+		    log.debug("handling window initialization");
+		}
                 if (windowState === WindowState.Container) {
                     this.childrenCountContainer += 1;
                     if (!initialize) {
@@ -107,9 +110,11 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
                         this.childrenCountContainer -= 1;
                     }
                 } else if (windowState === WindowState.Disposed) {
-		    log.debug("window disposed");
+		    log.debug("handling window disposal");
 		    this.childrenCount = this.childrenCount - 1;
 		    this.childrenCountContainer = this.childrenCountContainer - 1;
+		} else {
+		    log.error("unknown window state: " + windowState);
 		}
                 e.stopPropagation(); // do not allow bubbling up to the next provider
                 this.recalculateChildDimensions();
