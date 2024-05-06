@@ -11,9 +11,6 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
     @property({ type: String })
     id: string = "";
 
-    @property({ type: String, attribute: true, reflect: true })
-    alignment: string = "horizontal";
-
     @property({ type: String, reflect: true })
     width: string = "100%";
 
@@ -28,13 +25,6 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
 		this.propagateSync((e as CustomEvent).detail as IContentMeta);
 	    });
 	}
-	// // Would there be a better event to register this alignChildren method to?
-	// window.addEventListener("load", this.alignChildren);
-    }
-
-    disconnectedCallback() {
-	// window.removeEventListener("load", this.alignChildren);
-	super.disconnectedCallback();
     }
 
     protected styleTemplate(): TemplateResult<1> {
@@ -77,35 +67,14 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
 	return this._syncTarget;
     }
 
-
-    /**
-     * Set alignment, width, and height properties on children.
-     */
-    protected alignChildren = (_e: Event) => {
-	let countOfChildren = this.synopsisTexts.length;
-	let childWidth: number = 99;
-	let childHeight: number = 100;
-	if (this.alignment == "horizontal") {
-	    childWidth = Math.floor(childWidth / countOfChildren);
-	} else {
-	    childHeight = Math.floor(childHeight / countOfChildren);
-	}
-	console.log("aligning " + countOfChildren + " children:", this.alignment, childWidth, childHeight);
-	for (let i = 0; i < countOfChildren; i++) {
-	    (this.synopsisTexts[i] as any).alignment = this.alignment;
-	    (this.synopsisTexts[i] as any).width = childWidth.toString() + "%";
-	    (this.synopsisTexts[i] as any).height = childHeight.toString() + "%";
-	}
-    }
-
     static styles: CSSResult = css`
-:host {
-white-space: nowrap;
-white-space-collapse: discard;
-}
-div {
-}
-`
+	:host {
+	white-space: nowrap;
+	white-space-collapse: discard;
+	}
+	div {
+	}
+    `
 
 }
 
