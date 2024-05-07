@@ -18,13 +18,13 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
     height: string = Math.floor(window.innerHeight * 0.8).toString() + "px";
 
     connectedCallback() {
-	super.connectedCallback();
 	if (this.shadowRoot !== null) {
 	    this.shadowRoot.addEventListener("seed-synopsis-sync-scroll", (e: Event) => {
 		console.log("propagating sync event to " + this.synopsisTexts.length + " children");
 		this.propagateSync((e as CustomEvent).detail as IContentMeta);
 	    });
 	}
+	super.connectedCallback();
     }
 
     protected styleTemplate(): TemplateResult<1> {
