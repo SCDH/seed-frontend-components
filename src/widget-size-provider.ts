@@ -90,6 +90,11 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
             this.addEventListener("widget-size-consumer", this.handleChildEvent());
         }
 
+	connectedCallback(): void {
+	    super.connectedCallback();
+	    this.recalculateChildDimensions();
+	    }
+
         handleChildEvent() {
             return (e: Event) => {
                 const { windowState, initialize } = (e as CustomEvent<{ windowState: WindowState, initialize: boolean }>).detail;
