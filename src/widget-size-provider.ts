@@ -1,4 +1,4 @@
-import { LitElement } from 'lit';
+import { LitElement, PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { provide } from '@lit/context';
 
@@ -90,10 +90,10 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
             this.addEventListener("widget-size-consumer", this.handleChildEvent());
         }
 
-	connectedCallback(): void {
-	    super.connectedCallback();
+	firstUpdated(changedProperties: PropertyValues<this>): void {
+	    super.firstUpdated(changedProperties);
 	    this.recalculateChildDimensions();
-	    }
+	}
 
         handleChildEvent() {
             return (e: Event) => {
