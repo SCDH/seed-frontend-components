@@ -85,11 +85,11 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
         }
 
         connectedCallback(): void {
-            super.connectedCallback();
             if (this.shadowRoot) {
                 log.debug("adding event listener for widget-size-consumer event");
                 this.shadowRoot.addEventListener("widget-size-consumer", this.handleChildEvent());
             }
+            super.connectedCallback();
         }
 
         handleChildEvent() {
