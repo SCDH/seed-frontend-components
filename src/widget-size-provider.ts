@@ -84,7 +84,7 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
             }
         }
 
-        constructor() {
+        constructor(..._args: any[]) {
             super();
             log.debug("adding event listener for widget-size-consumer event");
             this.addEventListener("widget-size-consumer", this.handleChildEvent());
