@@ -97,27 +97,39 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 
         handleChildEvent() {
             return (e: Event) => {
-                const { windowState, initialize } = (e as CustomEvent<{ windowState: WindowState, initialize: boolean }>).detail;
+                const { oldWindowState, newWindowState, initialize } = (e as CustomEvent<{ oldWindowState: WindowState | undefined, newWindowState: WindowState, initialize: boolean }>).detail;
                 if (initialize) {
-		    this.childrenCount += 1;
 		    log.debug("handling window initialization");
+		    this.childrenCount += 1;
+                    if (newWindowState === WindowState.Container) {
+			this.childrenCountContainer += 1;
+                    } else if (newWindowState === WindowState.Minimized) {
+			this.childrenCountMinimized += 1;
+                    } else if (newWindowState === WindowState.Disposed) {
+			log.error("inconsistent window state: initializing with disposed state");
+		    } else {
+			log.error("unknown window state: " + newWindowState);
+		    }
 		}
-                if (windowState === WindowState.Container) {
-                    this.childrenCountContainer += 1;
-                    if (!initialize) {
-                        this.childrenCountMinimized -= 1;
-                    }
-                } else if (windowState === WindowState.Minimized) {
-                    this.childrenCountMinimized += 1;
-                    if (!initialize) {
-                        this.childrenCountContainer -= 1;
-                    }
-                } else if (windowState === WindowState.Disposed) {
+		if (newWindowState === WindowState.Disposed) {
 		    log.debug("handling window disposal");
-		    this.childrenCount = this.childrenCount - 1;
-		    this.childrenCountContainer = this.childrenCountContainer - 1;
-		} else {
-		    log.error("unknown window state: " + windowState);
+                    if (oldWindowState === WindowState.Container) {
+			this.childrenCountContainer -= 1;
+                    } else if (oldWindowState === WindowState.Minimized) {
+			this.childrenCountMinimized -= 1;
+		    } else {
+			log.error("unknown state of disposed window: " + newWindowState);
+		    }
+		    this.childrenCount -= 1;
+		}
+		if (oldWindowState === WindowState.Minimized && newWindowState === WindowState.Container) {
+                    this.childrenCountMinimized -= 1;
+                    this.childrenCountContainer += 1;
+                } else if (oldWindowState === WindowState.Container && newWindowState === WindowState.Minimized) {
+                    this.childrenCountContainer -= 1;
+                    this.childrenCountMinimized += 1;
+                } else {
+		    log.error("unknown window state: " + newWindowState);
 		}
                 e.stopPropagation(); // do not allow bubbling up to the next provider
                 this.recalculateChildDimensions();

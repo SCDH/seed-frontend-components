@@ -208,23 +208,23 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	private evopts = { bubbles: true, cancelable: false, composed: true };
 
 	restoreHandler(): void {
-	    this.windowState = WindowState.Container;
 	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
-					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
+					       { ...this.evopts, detail: { oldWindowState: this.windowState, newWindowState: WindowState.Container, initialize: false}}));
+	    this.windowState = WindowState.Container;
 	}
 
 	minimizeHandler(): void {
 	    log.debug("minimizing window");
-	    this.windowState = WindowState.Minimized;
 	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
-					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));
+					       { ...this.evopts, detail: { oldWindowState: this.windowState, newWindowState: WindowState.Minimized, initialize: false}}));
+	    this.windowState = WindowState.Minimized;
 	}
 
 	disposeHandler(): void {
 	    log.debug("disposing window");
-	    this.windowState = WindowState.Disposed;
 	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
-					       { ...this.evopts, detail: { windowState: this.windowState, initialize: false}}));	    
+					       { ...this.evopts, detail: { oldWindowState: this.windowState, newWindowState: WindowState.Disposed, initialize: false}}));
+	    this.windowState = WindowState.Disposed;
 	    this.remove();
 	}
 
@@ -232,7 +232,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    super.connectedCallback();
 	    log.debug("initializing widget with ", this.windowState);
 	    this.dispatchEvent(new CustomEvent("widget-size-consumer",
-					       { ...this.evopts, detail: { windowState: this.windowState, initialize: true}}));
+					       { ...this.evopts, detail: { newWindowState: this.windowState, initialize: true}}));
 	}
 
 	// see https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
