@@ -15,7 +15,7 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
     width: string = "100%";
 
     @property({ type: String, reflect: true })
-    height: string = Math.floor(window.innerHeight * 0.8).toString() + "px";
+    height: string = "100%";
 
     connectedCallback() {
 	if (this.shadowRoot !== null) {
