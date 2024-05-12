@@ -1,4 +1,4 @@
-import { html, css, LitElement, CSSResultGroup } from 'lit'
+import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
@@ -7,10 +7,15 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 import { widgetSizeConsumer } from './widget-size-consumer';
 
+import { addAppListener } from "./redux/seed-store";
 import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
+import { scrolled, syncOthers } from './redux/synopsisSlice';
+import { scrolledTextViewThunk } from './redux/synopsisActions';
+import { setScrollTarget, WithScrollTarget } from './redux/synopsisMiddleware';
+
 import log from "./logging";
 
 import { SeedState } from './redux/seed-store';
@@ -19,7 +24,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements SeedSynopsisSyncComponent {
+export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements SeedSynopsisSyncComponent, WithScrollTarget {
 
     @property({ type: String })
     content: string = "";
@@ -35,6 +40,9 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 
     @property({ attribute: false, state: true })
     protected position!: string;
+
+    @property({ attribute: false, state: true })
+    scrollTarget!: string;
 
     @property({ type: String })
     alignment: string = "horizontal";
@@ -93,6 +101,15 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	    }
 	}));
 
+	// this.store?.dispatch(addAppListener({
+	//     actionCreator: scrolled,
+	//     effect: setScrollTarget(this, this.id),
+	// })); 
+	this.store?.dispatch(addAppListener({
+	    actionCreator: syncOthers,
+	    effect: setScrollTarget(this, this.id),
+	})); 
+
 	// this.storeUnsubscribeListeners.push(subsc);
     }
 
@@ -114,6 +131,18 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	// TODO: store.dispatch(disposeTextView({viewId: this.id});
     }
 
+    protected willUpdate(changedProperties: PropertyValues<this>): void {
+	super.willUpdate(changedProperties);
+	if (changedProperties.has("scrollTarget" as keyof SeedSynopsisText)) {
+	    const msg = {
+		...this.contentMeta,
+		"event": "sync",
+		"scrollTarget": this.scrollTarget,
+	    };
+	    this.iframe.contentWindow?.postMessage(msg, window.location.href);
+	}
+    }
+
     protected headerTemplate() {
 	return html`<div><span>${this.id}:</span> <span>${this.source}</span>`;
     }
@@ -123,19 +152,11 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     }
 
     footerTemplate() {
-	return html`<div>Position: <span class="scroll-position">${this.position} <button @click="${this.syncOthers}">sync others</botton></div>`;
+	return html`<div>Position: <span class="scroll-position">${this.position}</span> <button @click="${this.syncOtherViews}">sync others</botton></div>`;
     }
 
     renderContent() {
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
-    }
-
-    protected getHostDisplay() : String {
-	if (this.alignment == "horizontal") {
-	    return "inline-block";
-	} else {
-	    return "block";
-	}
     }
 
     @query("iframe")
@@ -177,6 +198,7 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		    this.contentMeta = e.data as IContentMeta;
 		    this.position = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
+		    this.store?.dispatch(scrolledTextViewThunk(scrolled, this.id, [e.data.top]));
 		    break;
 		case "mouse-over-segment":
 		    this.store?.dispatch(passByAnnotationsAtSegmentThunk(this.id, e.data.segmentIds));
@@ -203,32 +225,13 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	}
     }
 
-    protected syncOthers = (_e: Event) => {
+    protected syncOtherViews = (_e: Event) => {
 	log.debug("syncing others");
-	// for sending a message to an iframe, we have to post it on the iframe's content window,
-	// cf. https://stackoverflow.com/questions/61548354/how-to-postmessage-into-iframe
-	this.dispatchEvent(new CustomEvent('seed-synopsis-sync-scroll', { detail: { ...this.contentMeta, "event": "sync" }, bubbles: true, composed: true }));
+	this.store?.dispatch(scrolledTextViewThunk(syncOthers, this.id, [this.position]));
     }
 
     // the reactive property syncTarget has a custom setter and getter
     private _syncTarget!: IContentMeta;
-
-    set syncTarget(target: IContentMeta) {
-	// do the sync by posting a message to the iframe
-	if (this.stripFragment(target.href) !== this.stripFragment(this.getContentUrl().toString())) {
-	    log.debug("sync-ing " + this.contentMeta.href + ", scrolling to element aligned to: " + target.top);
-	    if (this.hasSyncManager) {
-		// TODO
-	    } else {
-		// the document in the iframe must get the scroll target on its own
-		this.iframe.contentWindow?.postMessage(target, window.location.href);
-	    }
-	}
-	// see https://lit.dev/docs/components/properties/#accessors-custom
-	let oldTarget: Object = this._syncTarget;
-	this._syncTarget = target;
-	this.requestUpdate('syncTarget', oldTarget);
-    }
 
     @property({ attribute: false })
     get syncTarget(): IContentMeta {
