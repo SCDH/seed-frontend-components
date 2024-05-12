@@ -112,6 +112,13 @@ Running the [development server](#development) will bring up several
 pages with usage examples. They are contained in the
 [`examples`](examples) folder.
 
+- [examples/synopsis.html](examples/synopsis.html) shows how to use
+  the web components for presenting several texts in parallel or
+  synoptically. The content is borrowed from a project about the book
+  of Ijob, but shortend. The presented files have some internal JS to
+  make the synchronized scrolling and highlighting the annotations
+  etc. work.
+
 - [`examples/xslt-rest.html`](examples/xslt.html) shows how to use the
   web components for running XSL transformations on a service
   implementing the [`Transformation API`](transformation-api.js). The
@@ -134,11 +141,6 @@ pages with usage examples. They are contained in the
   `examples/xslt-rest.html`, except the `<seed-transform-sef>`
   component which uses `SaxonJS` as a transformation engine instead of
   a web service.
-
-- [examples/synopsis.html](examples/synopsis.html) shows how to use
-  the web components for presenting several texts in parallel or
-  synoptically. The presented files need some internal JS to make the
-  synchronized scrolling work.
 
 ### API Docs
 
