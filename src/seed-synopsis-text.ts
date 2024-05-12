@@ -136,15 +136,23 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     }
 
     protected headerTemplate() {
-	return html`<div><span>${this.id}:</span> <span>${this.source}</span>`;
+	return html`<div>
+	    <span>${this.id}:</span>
+	    <span>${this.source}</span>
+	</div>`;
     }
 
     protected iframeTemplate() {
-	return html`<div class="content-container" id="${this.id}-content-container"><iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe></div>`;
+	return html`<div class="content-container" id="${this.id}-content-container">
+	    <iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
+	</div>`;
     }
 
     footerTemplate() {
-	return html`<div>Position: <span class="scroll-position">${this.position}</span> <button @click="${this.syncOtherViews}">sync others</botton></div>`;
+	return html`<div>
+	    Position: <span class="scroll-position">${this.position}</span>
+	    <button @click="${this.syncOtherViews}">sync others</botton>
+	</div>`;
     }
 
     renderContent() {
