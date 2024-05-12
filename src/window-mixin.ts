@@ -85,6 +85,7 @@ export const windowStyles = css`
     background: none;
     width: var(--window-button-width, auto);
     height: var(--window-button-height, auto);
+    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
     }
     .window-visibility > button.minimize {
     background: var(--window-minimize-button-bg, inherit);
