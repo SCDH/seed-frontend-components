@@ -43,12 +43,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     @property({ attribute: false, state: true })
     scrollTarget!: string;
 
-    @property({ type: String })
-    alignment: string = "horizontal";
-
-    @property({ type: Boolean })
-    hasSyncManager: boolean = false;
-
     @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
