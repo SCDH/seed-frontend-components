@@ -46,6 +46,9 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     @query("iframe")
     protected iframe!: HTMLIFrameElement;
 
+    @query("#scrollTo")
+    protected scrollToInput!: HTMLInputElement;
+
     @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
@@ -149,11 +152,15 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     }
 
     footerTemplate() {
-	return html`<div>
-	    Position: <span class="scroll-position">${this.position}</span>
-	    <button @click="${this.syncOtherViews}">sync others</botton>
+		return html`<div>
+	    <span class="scroll-position">
+		<label for="scrollTo">Position</label>
+		<input name="scrollTo" id="scrollTo" type="text" value="${this.position}"/>
+		<button class="unicode-button" @click="${this.handleScrollToInput}" title="Go to manually entered position!">&#x21b7;</button>
+	    </span>
+	    <button class="unicode-button" @click="${this.syncOtherViews}" title="Sync others!">&#x2194;</botton>
 	</div>`;
-    }
+	}
 
     renderContent() {
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
@@ -168,6 +175,12 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	    log.warn("no valid location in iframe, using parent location");
 	    return new URL(this.content, window.location.href);
 	}
+    }
+
+    handleScrollToInput(): void {
+	log.info("manual scroll to");
+	const scrollTarget: string = this.scrollToInput.value.trim();
+	this.scrollTarget = scrollTarget;
     }
 
     /*
@@ -193,6 +206,7 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		    break;
 		case "scrolled":
 		    this.position = e.data.top;
+		    this.scrollToInput.value = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    this.store?.dispatch(scrolledTextViewThunk(scrolled, this.id, [e.data.top]));
 		    break;
@@ -240,9 +254,9 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
 
-    static styles: CSSResultGroup = [
-	windowStyles,
-	css`
+	static styles: CSSResultGroup = [
+		windowStyles,
+		css`
  	    div.synopsis-text-container {
  	    height: 100%;
  	    }
@@ -251,8 +265,19 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
  	    }
  	    iframe {
  	    border: none; /* 1px solid silver; */
- 	    }`
-    ]
+ 	    }
+	    button.unicode-button {
+		padding: 2px;
+		border: none;
+		background: none;
+		width: var(--window-button-width, auto);
+		    height: var(--window-button-height, auto);
+		    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
+		}
+		    button.unicode-button:hover {
+		    color: red;
+		    }`
+	]
 }
 
 
