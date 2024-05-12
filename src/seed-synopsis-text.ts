@@ -212,6 +212,7 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		default:
 		    log.debug("unknown event: ", e);
 	    }
+	    e.stopPropagation();
 	}
     }
 
