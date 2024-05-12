@@ -2,7 +2,7 @@ import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
-import { SeedSynopsisSyncComponent, IContentMeta } from './isynopsis'
+import { IContentMeta } from './isynopsis'
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 import { widgetSizeConsumer } from './widget-size-consumer';
@@ -24,7 +24,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements SeedSynopsisSyncComponent, WithScrollTarget {
+export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
 
     @property({ type: String })
     content: string = "";
@@ -229,14 +229,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     protected syncOtherViews = (_e: Event) => {
 	log.debug("syncing others");
 	this.store?.dispatch(scrolledTextViewThunk(syncOthers, this.id, [this.position]));
-    }
-
-    // the reactive property syncTarget has a custom setter and getter
-    private _syncTarget!: IContentMeta;
-
-    @property({ attribute: false })
-    get syncTarget(): IContentMeta {
-	return this._syncTarget;
     }
 
     /*
