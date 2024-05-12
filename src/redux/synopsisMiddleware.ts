@@ -23,13 +23,15 @@ export interface WithScrollTarget {
  */
 export const setScrollTarget = (view: WithScrollTarget, textViewId: string): PositionChangedEffect => {
     return (_action: UnknownAction, listenerApi: ListenerEffectAPI<SeedState, SeedDispatch, unknown>): void => {
+	const synopsisSlice = listenerApi.getState().synopsis;
+	if (synopsisSlice.currentPosition === undefined) return;
+	// if the current synopsis position comes from this view: quit
+	if (synopsisSlice?.currentPosition?.textViewId === textViewId) return;
 	// lookup text ID in current view
 	const textViewsSlice = listenerApi.getState().textViews;
 	const targetTextId: string | undefined = textViewsSlice?.[textViewId]?.textId;
 	if (targetTextId === undefined) return;
 	// get scroll position of the text to be synced with
-	const synopsisSlice = listenerApi.getState().synopsis;
-	if (synopsisSlice.currentPosition === undefined) return;
 	const sourceTextId: string = synopsisSlice?.currentPosition?.textId ?? "unknown";
 	const sourceSegmentIds: Array<string> = synopsisSlice?.currentPosition?.segmentIds ?? [];
 	// possible by regexAlignment?
