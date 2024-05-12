@@ -1,15 +1,24 @@
-import { html, css, LitElement, CSSResult, TemplateResult } from 'lit'
-import { customElement, property, queryAssignedElements } from 'lit/decorators.js'
-import { IContentMeta, SeedSynopsisSyncComponent } from './isynopsis'
+import { html, css, LitElement, CSSResult, TemplateResult, PropertyValues } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
 
 import { widgetSizeProvider } from './widget-size-provider'
+import { storeConsumerMixin } from './store-consumer-mixin'
+import { fetchRegexAlignment, fetchMappingAlignment } from './redux/synopsisSlice'
+
+
 
 // define the web component
 @customElement("seed-synopsis")
-export class SeedSynopsis extends widgetSizeProvider(LitElement) implements SeedSynopsisSyncComponent {
+export class SeedSynopsis extends widgetSizeProvider(storeConsumerMixin(LitElement)) {
 
     @property({ type: String })
-    id: string = "";
+    id!: string;
+
+    @property({ attribute: "regex-alignment" })
+    regexAlignment!: string;
+
+    @property({ attribute: "mapping-alignment" })
+    mappingAlignment!: string;
 
     @property({ type: String, reflect: true })
     width: string = "100%";
@@ -17,14 +26,14 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
     @property({ type: String, reflect: true })
     height: string = "100%";
 
-    connectedCallback() {
-	if (this.shadowRoot !== null) {
-	    this.shadowRoot.addEventListener("seed-synopsis-sync-scroll", (e: Event) => {
-		console.log("propagating sync event to " + this.synopsisTexts.length + " children");
-		this.propagateSync((e as CustomEvent).detail as IContentMeta);
-	    });
+    protected willUpdate(changedProperties: PropertyValues<this>): void {
+	if (changedProperties.has("regexAlignment") && this.regexAlignment) {
+	    this.store?.dispatch(fetchRegexAlignment(this.regexAlignment));
 	}
-	super.connectedCallback();
+	if (changedProperties.has("mappingAlignment") && this.mappingAlignment) {
+	    this.store?.dispatch(fetchMappingAlignment(this.mappingAlignment));
+	}
+	super.willUpdate(changedProperties);
     }
 
     protected styleTemplate(): TemplateResult<1> {
@@ -33,38 +42,6 @@ export class SeedSynopsis extends widgetSizeProvider(LitElement) implements Seed
 
     render(): TemplateResult<1> {
 	return html`${this.styleTemplate()}<div class="synopsis"><slot></slot></div>`;
-    }
-
-    @property({ attribute: false, state: true })
-    @queryAssignedElements({ flatten: true, selector: "*" })
-    synopsisTexts!: Array<Element>;
-
-    // pass a sync event down by setting the syncTarget property on synoposis components
-    protected propagateSync = (msg: IContentMeta) => {
-	for (var i = 0; i < this.synopsisTexts.length; i++) {
-	    // test if element is a SeedSynopsisSyncComponent by using type guard
-	    if ("syncTarget" in (this.synopsisTexts[i] as any)) {
-		// following the "properties down" principle
-		// information is passed by setting a property
-		(this.synopsisTexts[i] as any).syncTarget = msg;
-	    }
-	}
-    }
-
-    // the syncTarget property has a custom setter and getter
-    private _syncTarget!: IContentMeta;
-
-    set syncTarget(target: IContentMeta) {
-	this.propagateSync(target);
-	// see https://lit.dev/docs/components/properties/#accessors-custom
-	let oldTarget: Object = this._syncTarget;
-	this._syncTarget = target;
-	this.requestUpdate('syncTarget', oldTarget);
-    }
-
-    @property({ attribute: false })
-    get syncTarget(): IContentMeta {
-	return this._syncTarget;
     }
 
     static styles: CSSResult = css`

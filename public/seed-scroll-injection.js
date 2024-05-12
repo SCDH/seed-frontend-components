@@ -34,11 +34,9 @@ window.addEventListener("scroll", (event) => {
 
 // callback for scroll-sync message
 function notifySyncScroll(e) {
-    if (e.data?.event == "sync" && e.data?.href !== msg.href) {
-        let newPos =  makeScrollTarget(e.data?.top, e.data);
-        console.log("performing a sync for " + msg.filename + " aka " + e.data?.source + ", scrolling to: " + newPos);
+    if (e.data?.event == "sync") {
         location.href = "#"; // bug fix for webkit
-        location.href = "#" + newPos;
+        location.href = "#" + (e.data?.scrollTarget ?? "unknown");
     }
 }
 

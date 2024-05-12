@@ -1,9 +1,11 @@
-import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 
+import { seedListenerMiddleware } from "./seed-store";
 import textsReducer from "./textsSlice";
 import textViewsReducer from "./textViewsSlice";
 import annotationsReducer from "./annotationsSlice";
 import ontologyReducer from "./ontologySlice";
+import synopsisReducer from "./synopsisSlice";
 import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subscribeSegmentsCssOnSegmentsUpdater } from "./colorizeText";
 
 /*
@@ -12,7 +14,6 @@ import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subsc
  *
  * See https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
  */
-export const listenerMiddleware = createListenerMiddleware();
 
 
 export const store = configureStore({
@@ -21,9 +22,10 @@ export const store = configureStore({
 	textViews: textViewsReducer,
 	annotations: annotationsReducer,
 	ontology: ontologyReducer,
+	synopsis: synopsisReducer,
     },
     // add the middleware
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(seedListenerMiddleware.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
