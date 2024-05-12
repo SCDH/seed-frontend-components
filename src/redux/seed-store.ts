@@ -1,5 +1,7 @@
-import { EnhancedStore } from "@reduxjs/toolkit";
-// import { UnknownAction } from "@reduxjs/toolkit";
+import { EnhancedStore, createListenerMiddleware } from "@reduxjs/toolkit";
+import { UnknownAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { addListener } from "@reduxjs/toolkit";
+import { UnsubscribeListener, Action } from "@reduxjs/toolkit";
 // import { Action, UnknownAction, Tuple } from "@reduxjs/toolkit";
 // import { Middleware } from "@reduxjs/toolkit";
 // import { StoreEnhancer } from "@reduxjs/toolkit";
@@ -40,3 +42,9 @@ export interface SeedState {
 //   P = S> = EnhancedStore<S, A, M, E>;
 
 export type SeedStore = EnhancedStore<SeedState, any, any>;
+export type SeedDispatch = ((action: Action<"listenerMiddleware/add">) => UnsubscribeListener) & ThunkDispatch<SeedState, unknown, UnknownAction>;
+
+export const seedListenerMiddleware = createListenerMiddleware();
+export const startAppListening = seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
+
+export const addAppListener = addListener.withTypes<SeedState, SeedDispatch>();
