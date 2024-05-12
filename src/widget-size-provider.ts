@@ -98,7 +98,7 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
         handleChildEvent() {
             return (e: Event) => {
                 const { oldWindowState, newWindowState, initialize } = (e as CustomEvent<{ oldWindowState: WindowState | undefined, newWindowState: WindowState, initialize: boolean }>).detail;
-                if (initialize) {
+                if (initialize === true) {
 		    log.debug("handling window initialization");
 		    this.childrenCount += 1;
                     if (newWindowState === WindowState.Container) {
@@ -110,8 +110,7 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 		    } else {
 			log.error("unknown window state: " + newWindowState);
 		    }
-		}
-		if (newWindowState === WindowState.Disposed) {
+		} else if (newWindowState === WindowState.Disposed) {
 		    log.debug("handling window disposal");
                     if (oldWindowState === WindowState.Container) {
 			this.childrenCountContainer -= 1;
@@ -121,15 +120,14 @@ export const widgetSizeProvider = <T extends Constructor<LitElement>>(superClass
 			log.error("unknown state of disposed window: " + newWindowState);
 		    }
 		    this.childrenCount -= 1;
-		}
-		if (oldWindowState === WindowState.Minimized && newWindowState === WindowState.Container) {
+		} else if (oldWindowState === WindowState.Minimized && newWindowState === WindowState.Container) {
                     this.childrenCountMinimized -= 1;
                     this.childrenCountContainer += 1;
                 } else if (oldWindowState === WindowState.Container && newWindowState === WindowState.Minimized) {
                     this.childrenCountContainer -= 1;
                     this.childrenCountMinimized += 1;
                 } else {
-		    log.error("unknown window state: " + newWindowState);
+		    log.error("unknown window state: ", oldWindowState, newWindowState);
 		}
                 e.stopPropagation(); // do not allow bubbling up to the next provider
                 this.recalculateChildDimensions();
