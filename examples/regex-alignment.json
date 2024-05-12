@@ -1,0 +1,32 @@
+{
+    "MT": {
+	"LXX": [{
+	    "matchPattern": "MT\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "LXX.$1.$2"
+	}],
+	"TG": [{
+	    "matchPattern": "MT\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "TG.$1.$2"
+	}]
+    },
+    "LXX": {
+	"MT": [{
+	    "matchPattern": "LXX\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "MT.$1.$2"
+	}],
+	"TG": [{
+	    "matchPattern": "LXX\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "TG.$1.$2"
+	}]
+    },
+    "TG": {
+	"LXX": [{
+	    "matchPattern": "TG\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "LXX.$1.$2"
+	}],
+	"MT": [{
+	    "matchPattern": "TG\\.(\\d+)\\.(\\d+)",
+	    "replacementPattern": "MT.$1.$2"
+	}]
+    }
+}

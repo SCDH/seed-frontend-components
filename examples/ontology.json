@@ -1,0 +1,92 @@
+{ 
+  "https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/edition/ontology#EntstellendeUebersetzung" : { 
+    "https://intertextuality.org/annotation#colorPriority" : [ { 
+      "type" : "literal" ,
+      "value" : "10" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#comment" : [ { 
+      "type" : "literal" ,
+      "value" : "Der übersetzende Text entstellt den Sinn des übersetzten Textes." ,
+      "lang" : "de"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#label" : [ { 
+      "type" : "literal" ,
+      "value" : "Entstellende Übersetzung" ,
+      "lang" : "de"
+    }
+     ] ,
+    "https://intertextuality.org/annotation#preferredCssColor" : [ { 
+      "type" : "literal" ,
+      "value" : "orange"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ { 
+      "type" : "uri" ,
+      "value" : "https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/edition/ontology#Uebersetzung"
+    }
+     ]
+  }
+   ,
+  "https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/edition/ontology#Uebersetzung" : { 
+    "https://intertextuality.org/annotation#colorPriority" : [ { 
+      "type" : "literal" ,
+      "value" : "5" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#comment" : [ { 
+      "type" : "literal" ,
+      "value" : "Eine Übersetzung ist eine Art intertextueller Relation." ,
+      "lang" : "de"
+    }
+    , { 
+      "type" : "literal" ,
+      "value" : "A translation is a subclass of intertextual relations." ,
+      "lang" : "en"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#label" : [ { 
+      "type" : "literal" ,
+      "value" : "Translation" ,
+      "lang" : "en"
+    }
+    , { 
+      "type" : "literal" ,
+      "value" : "Übersetzung" ,
+      "lang" : "de"
+    }
+     ] ,
+    "https://intertextuality.org/annotation#preferredCssColor" : [ { 
+      "type" : "literal" ,
+      "value" : "orange"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ { 
+      "type" : "uri" ,
+      "value" : "https://intertextuality.org/abstract#IntertextualSpecification"
+    }
+     ]
+  }
+   ,
+  "https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/edition/ontology#" : { 
+    "http://www.w3.org/2002/07/owl#imports" : [ { 
+      "type" : "uri" ,
+      "value" : "https://intertextuality.org/abstract#"
+    }
+     ] ,
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : [ { 
+      "type" : "uri" ,
+      "value" : "http://www.w3.org/2002/07/owl#Ontology"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#Label" : [ { 
+      "type" : "literal" ,
+      "value" : "Ontology für die Edition des Buches Ijob" ,
+      "lang" : "de"
+    }
+     ]
+  }
+}

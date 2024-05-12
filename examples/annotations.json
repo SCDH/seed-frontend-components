@@ -1,0 +1,30 @@
+{
+    "a12.5_1": {
+      "body": "<div class=\"annotation-body\" id=\"annotation-a12.5_1-body\">\n            LXX übersetzt den Konsonantenbestand, führt ihn aber auf מעיד \"Termin, Zeitpunkt\" zurück.\n         <\/div>",
+      "predications": {
+        "http:\/\/www.w3.org\/2000\/01\/rdf-schema#type": [ 
+          {
+            "value": "https:\/\/intertextuality.org\/abstract#IntertextualRelation",
+            "type": "resource"
+          } ],
+        "https:\/\/intertextuality.org\/abstract#specifiedBy": [
+          {
+            "value": "https:\/\/scdh.zivgitlabpages.uni-muenster.de\/schnocks-ijob\/edition\/ontology#Uebersetzung",
+            "type": "resource"
+          },
+          {
+            "value": "https:\/\/scdh.zivgitlabpages.uni-muenster.de\/schnocks-ijob\/edition\/ontology#Bedeutungsverschiebung",
+            "type": "resource"
+          }
+        ]
+      }
+    },
+    "a12.5_2": {
+      "body": "<div class=\"annotation-body\" id=\"annotation-a12.5_2-body\">\n            Noch etwas ganz anderes.\n         <\/div>",
+      "predications": {  }
+    },
+    "a19.2_1": {
+      "body": "<div class=\"annotation-body\" id=\"annotation-a19.2_1-body\">\n            irgendwas\n         <\/div>",
+      "predications": {  }
+    }
+  }
