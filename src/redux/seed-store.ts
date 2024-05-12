@@ -8,6 +8,7 @@ import { TextsSlice } from "./textsSlice";
 import { TextViewsSlice } from "./textViewsSlice";
 import { AnnotationsSlice } from "./annotationsSlice";
 import { OntologyState } from "./ontologySlice";
+import { SynopsisSlice } from "./synopsisSlice";
 
 /*
  * An interface describing a store with the slices of this library.
@@ -21,6 +22,8 @@ export interface SeedState {
     annotations: AnnotationsSlice;
 
     ontology: OntologyState;
+
+    synopsis: SynopsisSlice;
 
 };
 
