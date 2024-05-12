@@ -24,6 +24,7 @@ export const scrolledTextViewThunk = (action: ActionCreatorWithPayload<TextPosit
 	} else {
 	    const position: TextPosition = {
 		textId: textId,
+		textViewId: textViewId,
 		segmentIds: segmentIds,
 	    };
 	    dispatch(action(position));

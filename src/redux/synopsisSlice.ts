@@ -6,6 +6,8 @@ export interface TextPosition {
 
     textId: string;
 
+    textViewId: string;
+
     segmentIds: Array<string>;
 
 }
