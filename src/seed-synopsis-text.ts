@@ -2,7 +2,6 @@ import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 
-import { IContentMeta } from './isynopsis'
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 import { widgetSizeConsumer } from './widget-size-consumer';
@@ -46,9 +45,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 
     @property({ type: String })
     alignment: string = "horizontal";
-
-    @property({ state: true })
-    protected contentMeta!: IContentMeta;
 
     @property({ type: Boolean })
     hasSyncManager: boolean = false;
@@ -135,7 +131,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	super.willUpdate(changedProperties);
 	if (changedProperties.has("scrollTarget" as keyof SeedSynopsisText)) {
 	    const msg = {
-		...this.contentMeta,
 		"event": "sync",
 		"scrollTarget": this.scrollTarget,
 	    };
@@ -195,7 +190,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 		    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
 		    break;
 		case "scrolled":
-		    this.contentMeta = e.data as IContentMeta;
 		    this.position = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    this.store?.dispatch(scrolledTextViewThunk(scrolled, this.id, [e.data.top]));
@@ -238,7 +232,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     colorizeText(): void {
 	log.debug("colorizing text in widget " + this.id);
 	const msg = {
-	    ...this.contentMeta,
 	    "event": "colorize",
 	    "cssPerSegment": this.cssPerSegment,
 	};
