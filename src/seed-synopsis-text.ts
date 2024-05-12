@@ -254,9 +254,9 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
 
-	static styles: CSSResultGroup = [
-		windowStyles,
-		css`
+    static styles: CSSResultGroup = [
+	windowStyles,
+	css`
  	    div.synopsis-text-container {
  	    height: 100%;
  	    }
@@ -267,17 +267,17 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
  	    border: none; /* 1px solid silver; */
  	    }
 	    button.unicode-button {
-		padding: 2px;
-		border: none;
-		background: none;
-		width: var(--window-button-width, auto);
-		    height: var(--window-button-height, auto);
-		    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
-		}
-		    button.unicode-button:hover {
-		    color: red;
-		    }`
-	]
+	    padding: 2px;
+	    border: none;
+	    background: none;
+	    width: var(--window-button-width, auto);
+	    height: var(--window-button-height, auto);
+	    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
+	    }
+	    button.unicode-button:hover {
+	    color: red;
+	    }`
+    ]
 }
 
 
