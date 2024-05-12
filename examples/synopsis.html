@@ -15,28 +15,28 @@
     <seed-app>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <seed-synopsis
-	regex-alignment="regex-alignment.json"
+	regex-alignment="alignment.json"
 	height="80vh"
 	orientation="horizontal"
       ><seed-synopsis-text
-	 content="doc1.html"
+	 content="LXX.tei.html"
 	 id="LXX"
 	 source="LXX.words.tei.xml"
-	 annotations-per-segment-url="doc1.html.segments.json"
+	 annotations-per-segment-url="LXX.tei.xml.segments.json"
 	 ></seed-synopsis-text
       ><seed-synopsis-text
-	 content="doc2.html"
+	 content="MT.tei.html"
 	 id="MT" source="MT.words.tei.xml"
-	 annotations-per-segment-url="doc2.html.segments.json"
+	 annotations-per-segment-url="MT.tei.xml.segments.json"
 	 ></seed-synopsis-text
       ><seed-synopsis-text
-	 content="doc3.html"
+	 content="TG.tei.html"
 	 id="TG"
 	 source="TG.words.tei.xml"
-	 annotations-per-segment-url="doc2.html.segments.json"
+	 annotations-per-segment-url="TG.tei.xml.segments.json"
 	 ></seed-synopsis-text
 	    ></seed-synopsis>
-    <seed-annotation-permanent annotations-url="annotations.json" ontology-urls="ontology.json"></seed-annotation-permanent>
+    <seed-annotation-permanent annotations-url="Annotationen.json" ontology-urls="ontology.json"></seed-annotation-permanent>
     </seed-app>
   </body>
 
