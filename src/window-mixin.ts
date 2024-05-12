@@ -186,7 +186,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html`<div class="window-decoration">
 		<span class="window-title">${this.title}</span>
 		<span class="window-visibility">
-		    <button @click=${this.minimizeHandler} class="minimize">&#x1F5D5;</button>
+		    <button @click=${this.minimizeHandler} class="minimize" title="Minimize!">&#x1F5D5;</button>
 		    ${this.renderDisposeButton()}
 		</span>
 	    </div>`;
@@ -196,14 +196,14 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    return html`<div class="window-decoration">
 		<span class="window-title minimized-rotation">${this.title}</span>
              	<span class="window-visibility">
-		    <button @click=${this.restoreHandler} class="maximize">&#x1F5D6;</button>
+		    <button @click=${this.restoreHandler} class="maximize" title="Restore size!">&#x1F5D6;</button>
                 </span>
             </div>`
 	}
 
 	renderDisposeButton(): HTMLTemplateResult {
 	    if (!this.disposable) return html``;
-	    return html`<button @click=${this.disposeHandler} class="dispose">&#x1F5D9;</button>`
+	    return html`<button @click=${this.disposeHandler} class="dispose" title="Close!">&#x1F5D9;</button>`
 	}
 
 	private evopts = { bubbles: true, cancelable: false, composed: true };
