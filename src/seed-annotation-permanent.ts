@@ -1,4 +1,4 @@
-import { html, LitElement, PropertyValues } from 'lit'
+import { html, LitElement, PropertyValues, CSSResultGroup, HTMLTemplateResult } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { addListener } from '@reduxjs/toolkit';
 
@@ -7,6 +7,7 @@ import { store } from "./redux/store";
 import { SeedState } from './redux/seed-store';
 import { fetchAnnotations, Annotation } from './redux/annotationsSlice';
 import { fetchResourceCenteredJson } from './redux/ontologySlice';
+import { windowMixin, windowStyles } from './window-mixin';
 import log from "./logging";
 
 /*
@@ -15,7 +16,7 @@ import log from "./logging";
  * `annotationSelected`.
  */
 @customElement("seed-annotation-permanent")
-export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
+export class SeedAnnotationPermanent extends windowMixin(storeConsumerMixin(LitElement)) {
 
     @property({ attribute: "annotations-url", type: String })
     annotationsUrl!: string;
@@ -31,6 +32,18 @@ export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
 
     @property({ attribute: "ontology-urls", type: String })
     ontologyUrls!: string;
+
+    @property({ attribute: true })
+    width: string = "auto";
+
+    @property({ attribute: true })
+    height: string = "auto";
+
+    @property({ attribute: true })
+    display: string = "block";
+
+    @property({ attribute: true })
+    clas: string = "annotations";
 
 
     subscribeStore(): void {
@@ -73,7 +86,7 @@ export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
     /*
      * Render the web component.
      */
-    render() {
+    renderContent() {
 	return html`<div class="annotation-container annotation-permanent">${this.renderAnnotationId()}${this.renderAnnotationBody()}</div>`;
     }
 
@@ -96,9 +109,31 @@ export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
 	}
     }
 
+    protected headerTemplate() {
+	return html`<div>
+	    <span>Annotations</span>
+	</div>`;
+    }
+
+    /*
+     * Scoped styles with dynamic properties. Override this with
+     * what you need.
+     */
+    protected styleTemplate(): HTMLTemplateResult {
+            return html`<style>:host {
+                display: ${this.display};
+		width: ${this.width};
+                height: ${this.height};
+            }</style>`;
+	}
+
     _fetchAnnotations(): void {
 	store.dispatch(fetchAnnotations(this.annotationsUrl));
     }
+
+    static styles: CSSResultGroup = [
+	windowStyles,
+    ];
 
 }
 
