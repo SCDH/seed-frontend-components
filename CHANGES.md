@@ -1,5 +1,10 @@
 # Changes
 
+## 0.6.0
+
+- redux-based scrolling on synopsis
+  - scroll targets can either be determined by regex or by a mapping
+
 ## 0.5.4
 
 - make window events not cancelable
