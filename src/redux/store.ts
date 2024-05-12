@@ -4,6 +4,7 @@ import textsReducer from "./textsSlice";
 import textViewsReducer from "./textViewsSlice";
 import annotationsReducer from "./annotationsSlice";
 import ontologyReducer from "./ontologySlice";
+import synopsisReducer from "./synopsisSlice";
 import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subscribeSegmentsCssOnSegmentsUpdater } from "./colorizeText";
 
 /*
@@ -21,6 +22,7 @@ export const store = configureStore({
 	textViews: textViewsReducer,
 	annotations: annotationsReducer,
 	ontology: ontologyReducer,
+	synopsis: synopsisReducer,
     },
     // add the middleware
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
