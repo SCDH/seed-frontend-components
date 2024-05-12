@@ -43,6 +43,9 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     @property({ attribute: false, state: true })
     scrollTarget!: string;
 
+    @query("iframe")
+    protected iframe!: HTMLIFrameElement;
+
     @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
@@ -94,11 +97,11 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
 	// this.store?.dispatch(addAppListener({
 	//     actionCreator: scrolled,
 	//     effect: setScrollTarget(this, this.id),
-	// })); 
+	// }));
 	this.store?.dispatch(addAppListener({
 	    actionCreator: syncOthers,
 	    effect: setScrollTarget(this, this.id),
-	})); 
+	}));
 
 	// this.storeUnsubscribeListeners.push(subsc);
     }
@@ -147,9 +150,6 @@ export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsum
     renderContent() {
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
     }
-
-    @query("iframe")
-    protected iframe!: HTMLIFrameElement;
 
     protected getContentUrl() : URL {
 	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
