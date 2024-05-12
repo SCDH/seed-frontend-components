@@ -4,14 +4,17 @@
 
 - redux-based scrolling on synopsis
   - scroll targets can either be determined by regex or by a mapping
+  - allow for manual entering of scroll target
 
-## 0.5.4
+## 0.5.10
 
-- make window events not cancelable
+- `seed-synopsis`
+  - fixed default values for width and height
+- more robost implementation of window state
 
-## 0.5.3
+## 0.5.3...9
 
-- logging window events
+- fix issues #23 and #24
 
 ## 0.5.2
 
