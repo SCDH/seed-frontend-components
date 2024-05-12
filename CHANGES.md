@@ -5,6 +5,7 @@
 - redux-based scrolling on synopsis
   - scroll targets can either be determined by regex or by a mapping
   - allow for manual entering of scroll target
+- `seed-annotations-permanent` is a window now
 
 ## 0.5.10
 
