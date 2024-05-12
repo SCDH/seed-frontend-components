@@ -59,10 +59,11 @@ export const windowStyles = css`
     }
     .window-header, .window-footer {
     height: 1.5em;
-    padding: 0.5em;
+    padding: var(--window-padding, 0.5em);
     }
     div.window-content {
-    height: calc(100% - 5em - 3px); /* 100% minus height of decoration and footer */
+    height: calc(100% - 5em - 3px - 2*var(--window-padding, 0.5em)); /* 100% minus height of decoration, footer, padding */
+    padding: var(--window-padding, 0.5em);
     }
     .window-header {
     background: var(--window-header-background-color, aliceblue);
