@@ -140,8 +140,17 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	@property({ attribute: false })
 	clas!: string;
 
+	@property({ attribute: "styles-minimized"})
+        stylesMinimized: string = "max-height: calc(2*var(--window-padding, 0.5em) + 1.5em) !important; min-width: calc(2*var(--window-padding, 0.5em) + 1em) !important; max-width: calc(2*var(--window-padding, 0.5em) + 1em) !important; flex-grow: 0 !important;";
+
 	@property({ attribute: true })
 	disposable: boolean = true;
+
+	@property({ attribute: true, reflect: true, type: Boolean })
+	minimized: boolean = false;
+
+	@property({ attribute: true })
+	direction: string = "horizontal";
 
 
 	render(): HTMLTemplateResult {
@@ -168,12 +177,13 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
         }
 
 	/*
-	 * Scoped styles with dynamic properties. Override this with
-	 * what you need.
-	 */
-	protected styleTemplate(): HTMLTemplateResult {
-	    return html``;
-	}
+         * Scoped styles with dynamic properties setting the host's dimensions.
+         */
+        protected styleTemplate(): HTMLTemplateResult {
+            return isMinimized(this)
+		? html`<style>:host {${this.stylesMinimized}}</style>`
+		: html``;
+        }
 
 	renderContent(): HTMLTemplateResult {
 	    return html``;
@@ -210,6 +220,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	private evopts = { bubbles: true, cancelable: false, composed: true };
 
 	restoreHandler(): void {
+	    this.minimized = false;
 	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
 					       { ...this.evopts, detail: { oldWindowState: this.windowState, newWindowState: WindowState.Container, initialize: false}}));
 	    this.windowState = WindowState.Container;
@@ -217,6 +228,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 
 	minimizeHandler(): void {
 	    log.debug("minimizing window");
+	    this.minimized = true;
 	    this.dispatchEvent(new CustomEvent('widget-size-consumer',
 					       { ...this.evopts, detail: { oldWindowState: this.windowState, newWindowState: WindowState.Minimized, initialize: false}}));
 	    this.windowState = WindowState.Minimized;
