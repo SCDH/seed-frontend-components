@@ -5,7 +5,19 @@
 - redux-based scrolling on synopsis
   - scroll targets can either be determined by regex or by a mapping
   - allow for manual entering of scroll target
-- `seed-annotations-permanent` is a window now
+- `seed-config`
+  - all fetched data except specific to a certain text view is fetched
+    through this element. So this takes functions that was in other
+    elements before: in `seed-annotations-*` and `seed-synopsis`:
+    - annotations via `annotations-url` attribute
+	- ontology via `ontology-urls` attribute
+    - alignments via `regex-alignment` or `mapping-alignment` attribute
+- `seed-annotations-permanent`
+  - is a window and a pure view component now
+  - remove attributes `annotations-url` and `ontology-urls`
+- use CSS flex box model for setting the size of synopsis texts
+  instead of widget size provider/consumer
+- `seed-synopsis` is deprecated
 
 ## 0.5.10
 
