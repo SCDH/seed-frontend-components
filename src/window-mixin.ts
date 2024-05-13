@@ -111,7 +111,7 @@ export const windowStyles = css`
     .window-container.minimized-window {
     }
     .window-container.minimized-window > .window-header > .window-decoration > .window-title {
-    display: none;
+    writing-mode: vertical-rl;
     }
 `;
 
@@ -141,7 +141,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	clas!: string;
 
 	@property({ attribute: "styles-minimized"})
-        stylesMinimized: string = "max-height: calc(2*var(--window-padding, 0.5em) + 1.5em) !important; min-width: calc(2*var(--window-padding, 0.5em) + 1em) !important; max-width: calc(2*var(--window-padding, 0.5em) + 1em) !important; flex-grow: 0 !important;";
+        stylesMinimized: string = "max-height: calc(2*var(--window-padding, 0.5em) + 1.5em) !important; min-width: calc(2*var(--window-padding, 0.5em) + 1.5em) !important; max-width: calc(2*var(--window-padding, 0.5em) + 1.5em) !important; flex-grow: 0 !important;";
 
 	@property({ attribute: true })
 	disposable: boolean = true;
@@ -157,9 +157,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    if (this.windowState === WindowState.Minimized) {
 		return html`${this.styleTemplate()}
 		<div class="${this.clas} window-container minimized-window">
-                    <div class="window-header">
-                        ${this.renderWindowDecorationMinimized()}
-                    </div>
+                    ${this.renderWindowMinimized()}
 		</div>`;
 	    }
             return html`${this.styleTemplate()}
@@ -203,13 +201,15 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	    </div>`;
 	}
 
-	renderWindowDecorationMinimized(): HTMLTemplateResult {
-	    return html`<div class="window-decoration">
-		<span class="window-title minimized-rotation">${this.title}</span>
-             	<span class="window-visibility">
-		    <button @click=${this.restoreHandler} class="maximize" title="Restore size!">&#x1F5D6;</button>
-                </span>
-            </div>`
+	renderWindowMinimized(): HTMLTemplateResult {
+	    return html`<div class="window-header">
+		<div class="window-decoration">
+             	    <span class="window-visibility">
+			<button @click=${this.restoreHandler} class="maximize" title="Restore size!">&#x1F5D6;</button>
+                    </span>
+		</div>
+		<span class="window-title minimized">${this.title}</span>		
+	    </div>`
 	}
 
 	renderDisposeButton(): HTMLTemplateResult {
