@@ -22,7 +22,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)) implements WithScrollTarget {
+export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
 
     @property({ type: String })
     content: string = "";
