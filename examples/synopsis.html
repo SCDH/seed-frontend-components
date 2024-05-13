@@ -27,7 +27,10 @@
   </head>
   <body>
     <seed-app>
-      <seed-config regex-alignment="alignment.json"/>
+      <seed-config
+	annotations-url="Annotationen.json"
+	ontology-urls="ontology.json"
+	regex-alignment="alignment.json"></seed-config>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
@@ -52,8 +55,6 @@
       <div style="min-height:10px">&nbsp;</div>
       <seed-annotation-permanent
 	title="Annotation"
-	annotations-url="Annotationen.json"
-	ontology-urls="ontology.json"
 	height="auto"
 	width="auto"
 	display="inline-block"
