@@ -1,12 +1,10 @@
-import { html, LitElement, PropertyValues, CSSResultGroup, HTMLTemplateResult } from 'lit'
+import { html, LitElement, CSSResultGroup, HTMLTemplateResult } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { addListener } from '@reduxjs/toolkit';
 
 import { storeConsumerMixin } from './store-consumer-mixin';
-import { store } from "./redux/store";
 import { SeedState } from './redux/seed-store';
-import { fetchAnnotations, Annotation } from './redux/annotationsSlice';
-import { fetchResourceCenteredJson } from './redux/ontologySlice';
+import { Annotation } from './redux/annotationsSlice';
 import { windowMixin, windowStyles } from './window-mixin';
 import log from "./logging";
 
@@ -18,9 +16,6 @@ import log from "./logging";
 @customElement("seed-annotation-permanent")
 export class SeedAnnotationPermanent extends windowMixin(storeConsumerMixin(LitElement)) {
 
-    @property({ attribute: "annotations-url", type: String })
-    annotationsUrl!: string;
-
     @property({ state: true } )
     annotationId: string | null = null;
 
@@ -29,9 +24,6 @@ export class SeedAnnotationPermanent extends windowMixin(storeConsumerMixin(LitE
 
     @property({ state: true })
     annotation: Annotation | null = null;
-
-    @property({ attribute: "ontology-urls", type: String })
-    ontologyUrls!: string;
 
     @property({ attribute: true })
     width: string = "auto";
@@ -71,16 +63,6 @@ export class SeedAnnotationPermanent extends windowMixin(storeConsumerMixin(LitE
 		}
 	    }
 	}));
-    }
-
-    protected willUpdate(changedProperties: PropertyValues<this>): void {
-	super.willUpdate(changedProperties);
-	if (changedProperties.has("annotationsUrl" as keyof SeedAnnotationPermanent)) {
-	    store.dispatch(fetchAnnotations(this.annotationsUrl));
-	}
-	if (changedProperties.has("ontologyUrls" as keyof SeedAnnotationPermanent)) {
-	    store.dispatch(fetchResourceCenteredJson(this.ontologyUrls));
-	}
     }
 
     /*
@@ -125,10 +107,6 @@ export class SeedAnnotationPermanent extends windowMixin(storeConsumerMixin(LitE
 		width: ${this.width};
                 height: ${this.height};
             }</style>`;
-	}
-
-    _fetchAnnotations(): void {
-	store.dispatch(fetchAnnotations(this.annotationsUrl));
     }
 
     static styles: CSSResultGroup = [
