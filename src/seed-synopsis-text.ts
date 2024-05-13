@@ -4,7 +4,6 @@ import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolki
 
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
-import { widgetSizeConsumer } from './widget-size-consumer';
 
 import { addAppListener } from "./redux/seed-store";
 import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
@@ -23,7 +22,7 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends widgetSizeConsumer(windowMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
+export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)) implements WithScrollTarget {
 
     @property({ type: String })
     content: string = "";
