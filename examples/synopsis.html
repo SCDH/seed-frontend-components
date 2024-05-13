@@ -10,14 +10,25 @@
     <script type="module" src="/src/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
+    <style type="text/css">
+      .synopsis {
+	  height: 80vh;
+	  display: flex;
+	  flex-direction: row;
+	  flex-wrap: nowrap;
+      }
+      .synopsis seed-synopsis-text {
+	  flex-grow: 1;
+	  min-width: 20em;
+	  margin: 2px;
+      }
+    </style>
   </head>
   <body>
     <seed-app>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
-      <seed-synopsis
-	regex-alignment="alignment.json"
-	height="80vh"
-	orientation="horizontal"
+      <div
+	class="synopsis"
       ><seed-synopsis-text
 	 content="LXX.tei.html"
 	 id="LXX"
@@ -35,7 +46,7 @@
 	 source="TG.words.tei.xml"
 	 annotations-per-segment-url="TG.tei.xml.segments.json"
 	 ></seed-synopsis-text
-	    ></seed-synopsis>
+	    ></div>
       <div style="min-height:10px">&nbsp;</div>
       <seed-annotation-permanent
 	title="Annotation"
