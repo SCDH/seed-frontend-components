@@ -7,6 +7,7 @@
     <title>Test</title>
     <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
     <script type="module" src="/src/seed-app.ts"></script>
+    <script type="module" src="/src/seed-config.ts"></script>
     <script type="module" src="/src/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
@@ -26,6 +27,7 @@
   </head>
   <body>
     <seed-app>
+      <seed-config regex-alignment="alignment.json"/>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
