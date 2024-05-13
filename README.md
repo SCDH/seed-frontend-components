@@ -12,9 +12,10 @@ integrated in Imperia or other CMSs.
 
 - `<seed-app>`: a container element that provides app context (Redux
   store, etc.) to descending elements
-- `<seed-synopsis>`: a container in a synopsis setup
+- `<seed-config>`: an empty element for providing config options,
+  e.g., URLs where annotations or alignment information can be found
 - `<seed-synopsis-text>`: an single HTML text in a `<iframe>` element
-  with synoptical features
+  with features for setting up synoptical presentation of texts
 - `<seed-annotation-permanent>`: shows the last selected annotation
 - `<seed-transform-rest>`: transform XML input (or other format) to
   HTML (or other format) using a RESTful webservice implementing the
