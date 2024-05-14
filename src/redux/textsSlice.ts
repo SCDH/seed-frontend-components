@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 
+import log from "./logging";
 
 export type TextId = string;
 
@@ -33,6 +34,8 @@ export interface TextState {
      * The author of the text.
      */
     author: string | undefined;
+
+    doc: string | undefined;
 }
 
 /*
@@ -55,6 +58,17 @@ export interface TextsSlice {
 const initialState: TextsSlice = {
 };
 
+export const fetchText = createAsyncThunk<{ textId: string, location: string, doc: string }, { textId: string, location: string}>(
+    "texts/fetchText",
+    async ({ textId, location }): Promise<{textId: string, location: string, doc: string }> => {
+	log.info("fetching text", location);
+	const response = await fetch(location);
+	return response.text().then((t) => {
+	    return { textId: textId, location: location, doc: t };
+	});
+    }
+);
+
 const textsSlice = createSlice({
     name: "texts",
     initialState,
@@ -72,6 +86,7 @@ const textsSlice = createSlice({
 		canonicalUrl: undefined,
 		title: undefined,
 		author: undefined,
+		doc: undefined,
 	    };
 	},
 	/*
@@ -82,6 +97,30 @@ const textsSlice = createSlice({
 	    state[action.payload.textId] = action.payload.text;
 	},
     },
+    extraReducers: (builder) => {
+	builder
+	    .addCase(
+		fetchText.fulfilled,
+		(state, action: PayloadAction<{textId: string, location: string, doc: string}>) => {
+		    if (state.hasOwnProperty(action.payload.textId)) {
+			state[action.payload.textId].location = action.payload.location;
+			state[action.payload.textId].doc = action.payload.doc;
+		    } else {
+			state[action.payload.textId] = {
+			    location: action.payload.location,
+			    canonicalUrl: undefined,
+			    title: undefined,
+			    author: undefined,
+			    doc: action.payload.doc,
+			};
+		    }
+		})
+	    .addCase(
+		fetchText.rejected,
+		() => {
+		    log.error("failed to fetch text");
+		})
+    }
 });
 
 export const { initText, setText } = textsSlice.actions;
