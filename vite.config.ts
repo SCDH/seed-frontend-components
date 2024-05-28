@@ -19,8 +19,8 @@ export default defineConfig(({ command, mode }) => {
 			examples: resolve(__dirname, 'index.html'),
 			synopsis: resolve(__dirname, 'examples/synopsis.html'),
 			figures: resolve(__dirname, 'examples/figures.html'),
-			// xsltRest: resolve(__dirname, 'examples/xslt-rest.html'), // needs fix
-			// xsltSef: resolve(__dirname, 'examples/xslt-sef.html'),   // needs fix
+			xsltRest: resolve(__dirname, 'examples/xslt-rest.html'),
+			xsltSef: resolve(__dirname, 'examples/xslt-sef.html'),
 		    }
 		}
 	    },
