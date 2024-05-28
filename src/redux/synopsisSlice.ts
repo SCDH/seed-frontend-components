@@ -65,7 +65,7 @@ export const fetchRegexAlignment = createAsyncThunk<any, string>(
     async (url: string): Promise<RegexAlignment> => {
 	log.info("fetching regex alignment from ", url);
 	const response = await fetch(url);
- return response.json().then((result) => {
+	return response.json().then((result) => {
 	    return result;
 	});
     }

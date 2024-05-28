@@ -8,7 +8,6 @@
     <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
     <script type="module" src="/src/seed-app.ts"></script>
     <script type="module" src="/src/seed-config.ts"></script>
-    <script type="module" src="/src/seed-config-text.ts"></script>
     <script type="module" src="/src/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
@@ -19,9 +18,11 @@
 	  flex-direction: row;
 	  flex-wrap: nowrap;
       }
-      .synopsis seed-synopsis-text {
+      .synopsis seed-synopsis-text,
+      .synopsis seed-annotation-permanent{
 	  flex-grow: 1;
 	  min-width: 20em;
+	  max-width: 47em;
 	  margin: 2px;
       }
     </style>
@@ -29,38 +30,24 @@
   <body>
     <seed-app>
       <seed-config
-	annotations-url="Annotationen.json"
-	ontology-urls="ontology.json"
-	regex-alignment="alignment.json"></seed-config>
-      <seed-config-text text-id="foo" text-url="LXX.tei.html"></seed-config-text>
+	annotations-url="figure-annotations.json"
+	ontology-urls="figures.json"></seed-config>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
       ><seed-synopsis-text
-	 content="LXX.tei.html"
-	 id="LXX"
-	 source="LXX.words.tei.xml"
-	 annotations-per-segment-url="LXX.tei.xml.segments.json"
+	 content="lam155.tei.xml.BB.html"
+	 id="BBlam155"
+	 title="lam 155, Bashtaki Beta"
+	 source="lam155.tei.xml"
+	 annotations-per-segment-url="lam155.tei.xml.BB.segments.json"
 	 ></seed-synopsis-text
-      ><seed-synopsis-text
-	 content="MT.tei.html"
-	 id="MT" source="MT.words.tei.xml"
-	 annotations-per-segment-url="MT.tei.xml.segments.json"
-	 ></seed-synopsis-text
-      ><seed-synopsis-text
-	 content="TG.tei.html"
-	 id="TG"
-	 source="TG.words.tei.xml"
-	 annotations-per-segment-url="TG.tei.xml.segments.json"
-	 ></seed-synopsis-text
-	    ></div>
-      <div style="min-height:10px">&nbsp;</div>
-      <seed-annotation-permanent
-	title="Annotation"
+      ><seed-annotation-permanent
+	title="Figures"
 	height="auto"
 	width="auto"
 	display="inline-block"
-	></seed-annotation-permanent>
+	></seed-annotation-permanent></div>
     </seed-app>
   </body>
 

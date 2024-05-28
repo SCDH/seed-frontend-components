@@ -198,6 +198,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 			canonicalUrl: e.data.canonicalUrl,
 			title: e.data.title,
 			author: e.data.author,
+			doc: undefined,
 		    };
 		    this.store?.dispatch(initText({textId: this.id}));
 		    this.store?.dispatch(setText({textId: this.id, text: txt}));

@@ -1,0 +1,36 @@
+{
+    "lam155_v15_tawgih1": {
+	"body": "<span class=\"note-text\" lang=\"en\" style=\"direction:ltr; text-align:left;\"><i>Tawǧīh</i>: the words <i>ẓāhirī</i> and <i>muʿtazilī</i> (in rhyme position for <i>muʿtazil</i>), which denote a person adhering to the theological schools <i>Ẓāhiriyyah</i> and <i>Muʿtazilah</i> respectively, have here their common lexical meaning.<br/>Cf. art. <a href=\"https://figurenlexikon.arabistik.uni-muenster.de/figuren/tawgih#lam155_v15_tawgih1\"><i>Tawgih</i></a> in <i>Figurenlexikon<i>.</span>",
+	"predications": {
+            "http:\/\/www.w3.org\/2000\/01\/rdf-schema#type": [ 
+		{
+		    "value": "https://scdh.zivgitlabpages.uni-muenster.de/hees-alea/figurenlexikon/ontology#Tawgih",
+		    "type": "resource"
+		}
+	    ]
+	}
+    },
+    "lam155_v34_tawgih1": {
+	"body": "<span class=\"note-text\" lang=\"en\" style=\"direction:ltr; text-align:left;\"><i>Tawǧīh</i>: the words <i>munsariḥ</i> and <i>ramal</i>, the names of two poetic metres, have here their common meaning.<br/>Cf. art. <a href=\"https://figurenlexikon.arabistik.uni-muenster.de/figuren/tawgih\"><i>Tawgih</i></a> in <i>Figurenlexikon<i>.</span>",
+	"predications": {
+            "http:\/\/www.w3.org\/2000\/01\/rdf-schema#type": [ 
+		{
+		    "value": "https://scdh.zivgitlabpages.uni-muenster.de/hees-alea/figurenlexikon/ontology#Tawgih",
+		    "type": "resource"
+		}
+	    ]
+	}
+    },
+    "lam155_v10_tawriyah1": {
+	"body": "<span class=\"note-text\" lang=\"en\" style=\"direction:ltr; text-align:left;\">All manuscripts have <i>ǧadal</i>, “argument, debate, dispute”. Given the juridical context, this seems to be the correct reading, but Ibn Nubātah apparently puns on the vernacular pronunciation of the word <i>ǧaḏal</i>, “joy”.<br/>Cf. art. <a href=\"https://figurenlexikon.arabistik.uni-muenster.de/figuren/tawriyah\"><i>Tawriyah</i></a> in <i>Figurenlexikon<i>.</span>",
+	"predications": {
+            "http:\/\/www.w3.org\/2000\/01\/rdf-schema#type": [ 
+		{
+		    "value": "https://scdh.zivgitlabpages.uni-muenster.de/hees-alea/figurenlexikon/ontology#Tawriyah",
+		    "type": "resource"
+		}
+	    ]
+	}
+
+    }
+}
