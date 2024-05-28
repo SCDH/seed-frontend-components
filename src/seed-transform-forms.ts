@@ -7,7 +7,7 @@ import { XSFormFieldFactory, registerDefaultValueConverters, DefaultValueConvert
 import { FileExtractor, FileExtractorFactory } from './fileextractor'
 
 
-import styles from './seed-transform-forms.css'
+import styles from './seed-transform-forms.module.css'
 
 // define the web component
 @customElement("seed-choose-transform-rest")
