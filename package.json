@@ -14,7 +14,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "examples": "tsc && vite build --mode examples",
+    "demo": "tsc && vite build --mode demo",
     "preview": "vite preview",
     "test": "vitest",
     "webjar": "./mkwebjar.sh",
