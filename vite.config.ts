@@ -33,6 +33,10 @@ export default defineConfig(({ command, mode }) => {
 			    dest: "examples",
 			},
 			{
+			    src: normalizePath(resolve(__dirname, "examples/*.tei*html")),
+			    dest: "examples",
+			},
+			{
 			    src: normalizePath(resolve(__dirname, "examples/transformation-api/*")),
 			    dest: "examples/transformation-api",
 			},
