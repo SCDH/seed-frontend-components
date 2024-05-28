@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+    <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
+    <script type="module" src="/src/seed-app.ts"></script>
+    <script type="module" src="/src/seed-config.ts"></script>
+    <script type="module" src="/src/seed-synopsis.ts"></script>
+    <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-annotation-permanent.ts"></script>
+    <style type="text/css">
+      .synopsis {
+	  height: 80vh;
+	  display: flex;
+	  flex-direction: row;
+	  flex-wrap: nowrap;
+      }
+      .synopsis seed-synopsis-text,
+      .synopsis seed-annotation-permanent{
+	  flex-grow: 1;
+	  min-width: 20em;
+	  max-width: 47em;
+	  margin: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <seed-app>
+      <seed-config
+	annotations-url="figure-annotations.json"
+	ontology-urls="figures.json"></seed-config>
+      <!-- whitespace between synopsis texts breaks margin and may break the line up -->
+      <div
+	class="synopsis"
+      ><seed-synopsis-text
+	 content="lam155.tei.xml.BB.html"
+	 id="BBlam155"
+	 title="lam 155, Bashtaki Beta"
+	 source="lam155.tei.xml"
+	 annotations-per-segment-url="lam155.tei.xml.BB.segments.json"
+	 ></seed-synopsis-text
+      ><seed-annotation-permanent
+	title="Figures"
+	height="auto"
+	width="auto"
+	display="inline-block"
+	></seed-annotation-permanent></div>
+    </seed-app>
+  </body>
+
+  <script>
+    // Create IE + others compatible event handler
+    var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+    var eventer = window[eventMethod];
+    var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+    // Listen to message from child window
+    eventer(messageEvent,function(e) {
+	console.log("parent received message from " + e.origin + ": ", e.data);
+    },false);
+    </script>
+</html>
