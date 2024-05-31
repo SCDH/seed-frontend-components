@@ -96,8 +96,8 @@ pages:
     - ls -l dist
     - cp -av --recursive dist/* public/
     - cp -av --recursive docs public/
-    - # ls -l demo
-    - # cp -av --recursive demo/* public/
+    # - ls -l demo
+    # - cp -av --recursive demo/* public/
     - ls -lR public
   artifacts:
     paths:
