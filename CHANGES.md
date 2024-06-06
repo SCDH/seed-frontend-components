@@ -1,5 +1,11 @@
 # Changes
 
+## 0.6.5
+
+- `seed-synopsis-text`:
+  - more robust to coors by comparing event sources instead of locations
+  - initial values for variables in js injections
+
 ## 0.6.4
 
 - fixed #27
