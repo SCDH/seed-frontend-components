@@ -137,6 +137,16 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
+    protected firstUpdated(_changedProperties: PropertyValues<this>): void {
+	// Fetching annotations for this view and the entailed
+	// colorizing can only be done, after the <iframe> is
+	// present. So, putting this in the firstUpdated hook is a
+	// reasonable choice.
+	if (this.annotationsPerSegmentUrl) {
+	    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
+	}
+    }
+
     protected headerTemplate() {
 	return html`<div>
 	    <span>${this.id}:</span>
@@ -165,17 +175,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
     }
 
-    protected getContentUrl() : URL {
-	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
-	let url: string | null = iframe?.contentWindow?.location.href ?? null;
-	if (url !== null) {
-	    return new URL(url);
-	} else {
-	    log.warn("no valid location in iframe, using parent location");
-	    return new URL(this.content, window.location.href);
-	}
-    }
-
     handleScrollToInput(): void {
 	log.info("manual scroll to");
 	const scrollTarget: string = this.scrollToInput.value.trim();
@@ -187,9 +186,8 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
      * {handleMessage} dispatches redux store actions.
      */
     protected handleMessage = (e: MessageEvent) => {
-	if (e.data?.href !== undefined &&
-	    this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
-	    log.debug("filtered message: ", e, this.getContentUrl().toString());
+	if (e.source === this.iframe.contentWindow) {
+	    log.debug("filtered message on " + this.id, e);
 	    switch (e.data?.event) {
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
@@ -202,7 +200,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		    };
 		    this.store?.dispatch(initText({textId: this.id}));
 		    this.store?.dispatch(setText({textId: this.id, text: txt}));
-		    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
 		    break;
 		case "scrolled":
 		    this.position = e.data.top;

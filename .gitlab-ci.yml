@@ -26,6 +26,22 @@ build-and-run-tests:
     paths:
       - dist
 
+# build-demo:
+#   stage: build
+#   cache:
+#     key:
+#       files:
+#         - package-lock.json
+#       prefix: npm
+#     paths:
+#       - node_modules/
+#   script:
+#     - npm install
+#     - npm run demo
+#   artifacts:
+#     paths:
+#       - demo
+
 docs:
   stage: build
   cache:
@@ -75,11 +91,13 @@ deploy webjar:
 pages:
   stage: deploy
   script:
+    - mkdir -p public
     - ls -l
     - ls -l dist
-    - mkdir -p public
     - cp -av --recursive dist/* public/
     - cp -av --recursive docs public/
+    # - ls -l demo
+    # - cp -av --recursive demo/* public/
     - ls -lR public
   artifacts:
     paths:

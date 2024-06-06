@@ -1,5 +1,20 @@
 # Changes
 
+## 0.6.5
+
+- `seed-synopsis-text`:
+  - more robust to coors by comparing event sources instead of locations
+  - initial values for variables in js injections
+
+## 0.6.4
+
+- fixed #27
+
+## 0.6.1-3
+
+- silent fixes
+- examples no longer deployed, because they do not work as expected
+
 ## 0.6.0
 
 - redux-based scrolling on synopsis
@@ -12,12 +27,16 @@
     - annotations via `annotations-url` attribute
 	- ontology via `ontology-urls` attribute
     - alignments via `regex-alignment` or `mapping-alignment` attribute
+- `seed-config-text`
+  - experimentally load a text via this custom element, which has no display.
 - `seed-annotations-permanent`
   - is a window and a pure view component now
   - remove attributes `annotations-url` and `ontology-urls`
 - use CSS flex box model for setting the size of synopsis texts
   instead of widget size provider/consumer
 - `seed-synopsis` is deprecated
+- added `figures.html` example
+- deploy examples in gitlab pages
 
 ## 0.5.10
 

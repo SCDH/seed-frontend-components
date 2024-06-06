@@ -46,11 +46,11 @@ export const setScrollTarget = (view: WithScrollTarget, textViewId: string): Pos
 	    }
 	}
 	// possible by mappingAlignment?
-	const map = synopsisSlice?.mappingAlignment?.[sourceTextId]?.[targetTextId];
+	const map = synopsisSlice?.mappingAlignment?.[sourceTextId];
 	if (map === undefined) return;
 	for (const sourceSegmentId of sourceSegmentIds) {
 	    if (map.hasOwnProperty(sourceSegmentId)) {
-		view.scrollTarget = map[sourceSegmentId];
+		view.scrollTarget = map[sourceSegmentId]?.[targetTextId];
 		return; // done
 	    }
 	}
