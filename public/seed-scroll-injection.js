@@ -5,8 +5,8 @@
 if (typeof scrollBlockQuerySelector === "undefined") {
     var scrollBlockQuerySelector = "div";
 }
-let scrollBlocks;
-let scrollBlocksY;
+let scrollBlocks = [];
+let scrollBlocksY = [];
 function getScrollBlocksYPositions() {
     scrollBlocksY = scrollBlocks.map(d => d.offsetTop);
 }
