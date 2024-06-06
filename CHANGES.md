@@ -1,5 +1,14 @@
 # Changes
 
+## 0.6.4
+
+- fixed #27
+
+## 0.6.1-3
+
+- silent fixes
+- examples no longer deployed, because they do not work as expected
+
 ## 0.6.0
 
 - redux-based scrolling on synopsis
