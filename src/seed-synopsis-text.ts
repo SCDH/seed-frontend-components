@@ -137,6 +137,16 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
+    protected firstUpdated(_changedProperties: PropertyValues<this>): void {
+	// Fetching annotations for this view and the entailed
+	// colorizing can only be done, after the <iframe> is
+	// present. So, putting this in the firstUpdated hook is a
+	// reasonable choice.
+	if (this.annotationsPerSegmentUrl) {
+	    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
+	}
+    }
+
     protected headerTemplate() {
 	return html`<div>
 	    <span>${this.id}:</span>
@@ -202,7 +212,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		    };
 		    this.store?.dispatch(initText({textId: this.id}));
 		    this.store?.dispatch(setText({textId: this.id, text: txt}));
-		    this.store?.dispatch(fetchAnnotationsPerSegment({viewId_: this.id, url: this.annotationsPerSegmentUrl}));
 		    break;
 		case "scrolled":
 		    this.position = e.data.top;
