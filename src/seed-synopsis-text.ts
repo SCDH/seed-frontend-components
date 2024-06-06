@@ -175,17 +175,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
     }
 
-    protected getContentUrl() : URL {
-	let iframe: HTMLIFrameElement | null = this.renderRoot?.querySelector("iframe") ?? null;
-	let url: string | null = iframe?.contentWindow?.location.href ?? null;
-	if (url !== null) {
-	    return new URL(url);
-	} else {
-	    log.warn("no valid location in iframe, using parent location");
-	    return new URL(this.content, window.location.href);
-	}
-    }
-
     handleScrollToInput(): void {
 	log.info("manual scroll to");
 	const scrollTarget: string = this.scrollToInput.value.trim();
@@ -197,9 +186,8 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
      * {handleMessage} dispatches redux store actions.
      */
     protected handleMessage = (e: MessageEvent) => {
-	if (e.data?.href !== undefined &&
-	    this.stripFragment(e.data?.href) == this.stripFragment(this.getContentUrl().toString())) {
-	    log.debug("filtered message: ", e, this.getContentUrl().toString());
+	if (e.source === this.iframe.contentWindow) {
+	    log.debug("filtered message on " + this.id, e);
 	    switch (e.data?.event) {
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
