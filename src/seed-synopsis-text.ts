@@ -25,7 +25,10 @@ import { SeedState } from './redux/seed-store';
 export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
 
     @property({ type: String })
-    content: string = "";
+    content: string | undefined;
+
+    @property({ attribute: "text-id" })
+    textId: string | undefined;
 
     @property({ type: String })
     source: string = "";
@@ -43,13 +46,16 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     scrollTarget!: string;
 
     @query("iframe")
-    protected iframe!: HTMLIFrameElement;
+    protected iframe: HTMLIFrameElement | undefined;
 
     @query("#scrollTo")
     protected scrollToInput!: HTMLInputElement;
 
     @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
+
+    @state()
+    doc: string | undefined;
 
     storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
 
@@ -96,6 +102,20 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    }
 	}));
 
+	this.store?.dispatch(addListener({
+	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
+		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
+		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
+		return this.textId !== undefined &&
+		    currState.texts.hasOwnProperty(this.textId) &&
+		    (currState.texts[this.textId].doc !== prevState.texts[this.textId]?.doc ?? "unknown");
+	    },
+	    effect: (_action, listenerApi): void => {
+		let state: SeedState = listenerApi.getState() as SeedState;
+		this.doc = state.texts[this.textId ?? "_"].doc;
+	    }
+	}));
+
 	// this.store?.dispatch(addAppListener({
 	//     actionCreator: scrolled,
 	//     effect: setScrollTarget(this, this.id),
@@ -133,7 +153,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		"event": "sync",
 		"scrollTarget": this.scrollTarget,
 	    };
-	    this.iframe.contentWindow?.postMessage(msg, window.location.href);
+	    if (this.iframe) this.iframe.contentWindow?.postMessage(msg, window.location.href);
 	}
     }
 
@@ -155,9 +175,19 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     }
 
     protected iframeTemplate() {
-	return html`<div class="content-container" id="${this.id}-content-container">
-	    <iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
-	</div>`;
+	if (this.textId !== undefined && this.doc !== undefined) {
+	    log.info("Loading text " + this.textId + " into view " + this.id);
+	    log.info("Loading text " + this.textId + " to view " + this.id, this.doc);
+	    return html`<div class="content-container" id="${this.id}-content-container">
+<iframe sandbox="allow-scripts,allow-same-origin" referrerpolicy="same-origin" srcdoc="${this.doc}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
+	    </div>`;
+	} else if (this.content !== undefined) {
+	    return html`<div class="content-container" id="${this.id}-content-container">
+		<iframe src="${this.content}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
+	    </div>`;
+	} else {
+	    return html`<div class="content-container" id="${this.id}-content-container"><div class="error">text not available</div></div>`;
+	}
     }
 
     footerTemplate() {
@@ -186,7 +216,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
      * {handleMessage} dispatches redux store actions.
      */
     protected handleMessage = (e: MessageEvent) => {
-	if (e.source === this.iframe.contentWindow) {
+	if (this.iframe && e.source === this.iframe.contentWindow) {
 	    log.debug("filtered message on " + this.id, e);
 	    switch (e.data?.event) {
 		case "meta":
@@ -248,7 +278,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    "event": "colorize",
 	    "cssPerSegment": this.cssPerSegment,
 	};
-	this.iframe.contentWindow?.postMessage(msg, window.location.href);
+	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, window.location.href);
     }
 
     static styles: CSSResultGroup = [
