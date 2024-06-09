@@ -1,10 +1,12 @@
 import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
+import { provide } from '@lit/context';
 
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 
+import { seedTextViewContext } from "./seed-context";
 import { addAppListener } from "./redux/seed-store";
 import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
 import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
@@ -12,7 +14,7 @@ import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from
 import { CSSDefinition } from './redux/cssTypes';
 import { scrolled, syncOthers } from './redux/synopsisSlice';
 import { scrolledTextViewThunk } from './redux/synopsisActions';
-import { setScrollTarget, WithScrollTarget } from './redux/synopsisMiddleware';
+import { setScrollTarget } from './redux/synopsisMiddleware';
 
 import log from "./logging";
 
@@ -22,7 +24,10 @@ import { SeedState } from './redux/seed-store';
 
 // define the web component
 @customElement("seed-synopsis-text")
-export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
+export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)) {
+
+    @provide({ context: seedTextViewContext })
+    self_: SeedSynopsisText = this;
 
     @property({ type: String })
     content: string | undefined;
@@ -30,26 +35,14 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     @property({ attribute: "text-id" })
     textId: string | undefined;
 
-    @property({ type: String })
-    source: string = "";
-
     @property({ attribute: true, type: String})
     id!: string;
 
     @property({ attribute: "annotations-per-segment-url", type: String })
     annotationsPerSegmentUrl!: string;
 
-    @property({ attribute: false, state: true })
-    protected position!: string;
-
-    @property({ attribute: false, state: true })
-    scrollTarget!: string;
-
     @query("iframe")
     protected iframe: HTMLIFrameElement | undefined;
-
-    @query("#scrollTo")
-    protected scrollToInput!: HTMLInputElement;
 
     @state()
     cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
@@ -58,7 +51,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     doc: string | undefined;
 
     storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
-
 
     subscribeStore(): void {
 	log.debug("subscribing component to the redux store, element with Id " + this.id);
@@ -92,7 +84,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		    // && currState.textViews[this.id].textId !== null
 		    // && currState.texts.hasOwnProperty(currState.textViews[this.id]?.textId ?? "unknown")
 		    && currState.texts[currState.textViews[this.id]?.textId ?? "unknown"] !== prevState.texts[currState.textViews[this.id]?.textId ?? "unknown"];
- ;
 	    },
 	    effect: (_action, listenerApi): void => {
 		let state: SeedState = listenerApi.getState() as SeedState;
@@ -116,15 +107,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    }
 	}));
 
-	// this.store?.dispatch(addAppListener({
-	//     actionCreator: scrolled,
-	//     effect: setScrollTarget(this, this.id),
-	// }));
-	this.store?.dispatch(addAppListener({
-	    actionCreator: syncOthers,
-	    effect: setScrollTarget(this, this.id),
-	}));
-
 	// this.storeUnsubscribeListeners.push(subsc);
     }
 
@@ -133,6 +115,14 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	super.connectedCallback();
 	// set the event listener for scroll events on the post message channel
 	window.addEventListener("message", this.handleMessage);
+	// set the event listener for scrollTo events
+	this.addEventListener("scrollTo", e => {
+	    log.info("handling scroll to");
+	    if ((e as CustomEvent).detail?.scrollTo !== null) {
+		this.scrollTextTo((e as CustomEvent).detail.scrollTo);
+		e.stopPropagation();
+	    }
+	});
 	// dispatch initTextWidget action to the redux state store:
 	// this has to be done, since addText with meta information is
 	// fired lately, only after the first scrolledTo action.
@@ -146,15 +136,33 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	// TODO: store.dispatch(disposeTextView({viewId: this.id});
     }
 
-    protected willUpdate(changedProperties: PropertyValues<this>): void {
-	super.willUpdate(changedProperties);
-	if (changedProperties.has("scrollTarget" as keyof SeedSynopsisText)) {
+    /*
+     * A callback for scrolling the text to `scrollTarget` position. 
+     */
+    scrollTextTo(scrollTarget: string): void {
+	if (this.iframe) {
 	    const msg = {
 		"event": "sync",
-		"scrollTarget": this.scrollTarget,
+		"scrollTarget": scrollTarget,
 	    };
-	    if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	    this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
 	}
+    }
+
+    /*
+     * A thunk that returns a callback for scrolling the text to
+     * `scrollTarget` position. This can be used in places, where
+     * methods are not working, e.g., in middleware for a redux store.
+     */
+    scrollTextToThunk = (iframe: HTMLIFrameElement | undefined, targetOrigin: string) => {
+	return (scrollTarget: string): void => {
+	    log.info("scrolling", iframe, targetOrigin);
+	    const msg = {
+		"event": "sync",
+		"scrollTarget": scrollTarget,
+	    };
+	    iframe?.contentWindow?.postMessage(msg, targetOrigin);
+	};
     }
 
     protected firstUpdated(_changedProperties: PropertyValues<this>): void {
@@ -168,19 +176,25 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     }
 
     protected updated(_changedProperties: PropertyValues<this>): void {
+	// when using srcdoc, colorizing needs to be done on each rendering
 	this.colorizeText();
-    }
-
-    protected headerTemplate() {
-	return html`<div>
-	    <span>${this.id}:</span>
-	    <span>${this.source}</span>
-	</div>`;
+	// when using srcdoc, setting a the syncOthers listener needs
+	// to be done on each rendering
+	if (this.iframe) {
+	    // this.store?.dispatch(addAppListener({
+	    //     actionCreator: scrolled,
+	    //     effect: setScrollTarget(this.id, this.scrollTextTo),
+	    // }));
+	    this.store?.dispatch(addAppListener({
+		actionCreator: syncOthers,
+		effect: setScrollTarget(this.id, this.scrollTextToThunk(this.iframe, this.getIFrameTarget())),
+	    }));
+	}
     }
 
     protected iframeTemplate() {
 	if (this.usesSrcDoc()) {
-	    log.debug("Loading text " + this.textId + " into view " + this.id);
+	    log.debug("loading text " + this.textId + " into view " + this.id);
 	    return html`<div class="content-container" id="${this.id}-content-container">
                 <iframe srcdoc="${this.doc}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
 	    </div>`;
@@ -193,25 +207,8 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
-    footerTemplate() {
-		return html`<div>
-	    <span class="scroll-position">
-		<label for="scrollTo">Position</label>
-		<input name="scrollTo" id="scrollTo" type="text" value="${this.position}"/>
-		<button class="unicode-button" @click="${this.handleScrollToInput}" title="Go to manually entered position!">&#x21b7;</button>
-	    </span>
-	    <button class="unicode-button" @click="${this.syncOtherViews}" title="Sync others!">&#x2194;</botton>
-	</div>`;
-	}
-
     renderContent() {
 	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
-    }
-
-    handleScrollToInput(): void {
-	log.info("manual scroll to");
-	const scrollTarget: string = this.scrollToInput.value.trim();
-	this.scrollTarget = scrollTarget;
     }
 
     /*
@@ -258,8 +255,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		    this.store?.dispatch(setText({textId: this.id, text: txt}));
 		    break;
 		case "scrolled":
-		    this.position = e.data.top;
-		    this.scrollToInput.value = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    this.store?.dispatch(scrolledTextViewThunk(scrolled, this.id, [e.data.top]));
 		    break;
@@ -277,21 +272,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    }
 	    e.stopPropagation();
 	}
-    }
-
-
-    protected stripFragment(url: string): string {
-	let pos = url.indexOf("#");
-	if (pos >= 0) {
-	    return url.substring(0, pos);
-	} else {
-	    return url;
-	}
-    }
-
-    protected syncOtherViews = (_e: Event) => {
-	log.debug("syncing others");
-	this.store?.dispatch(scrolledTextViewThunk(syncOthers, this.id, [this.position]));
     }
 
     /*
@@ -318,18 +298,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
  	    }
  	    iframe {
  	    border: none; /* 1px solid silver; */
- 	    }
-	    button.unicode-button {
-	    padding: 2px;
-	    border: none;
-	    background: none;
-	    width: var(--window-button-width, auto);
-	    height: var(--window-button-height, auto);
-	    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
-	    }
-	    button.unicode-button:hover {
-	    color: red;
-	    }`
+ 	    }`
     ]
 }
 
