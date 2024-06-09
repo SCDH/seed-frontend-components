@@ -63,7 +63,10 @@ export class SeedStateScrollPosition extends storeConsumerMixin(LitElement) {
     handleScrollToInput(): void {
 	log.info("manual scroll to");
 	const scrollTarget: string = this.scrollToInput.value.trim();
-	this.dispatchEvent(new CustomEvent("scrollTo", { detail: { scrollTo: scrollTarget } }));
+	this.dispatchEvent(new CustomEvent("scrollTo", {
+	    bubbles: true,
+	    detail: { scrollTo: scrollTarget }
+	}));
     }
 
     // see https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
