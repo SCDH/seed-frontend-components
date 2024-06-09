@@ -190,7 +190,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	}
 
 	footerTemplate(): HTMLTemplateResult {
-	    return html``;
+	    return html`<slot name="status"></slot>`;
 	}
 
 	renderWindowDecoration(): HTMLTemplateResult {
