@@ -80,6 +80,10 @@ export const windowStyles = css`
     .window-visibility {
     float: right;
     }
+    .window-status-item {
+    border: none;
+    }
+    .window-status-item button,
     .window-visibility > button {
     padding: 2px;
     border: none;
