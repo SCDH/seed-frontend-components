@@ -36,13 +36,7 @@ section:before {
     color: silver;
 }
 </style>
-      <!--CSS from file:/home/clueck/src/scdh/schnocks-hiob/edition/resources/js/scroll-target-replace-prefix.js--><script type="text/javascript">function makeScrollTarget(input) {
-    var newPrefix = document.documentElement.id;
-    var rest = input.substring(input.indexOf("."));
-    return newPrefix + rest;
-}
-</script>
-      <!--CSS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-post-message-base.js--><script type="text/javascript">// assert that we have a documentMetadata variable
+      <!--JS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-post-message-base.js--><script type="text/javascript">// assert that we have a documentMetadata variable
 if (typeof documentMetadata === 'undefined') {
     var documentMetadata = {};
 }
@@ -50,31 +44,7 @@ if (typeof documentMetadata === 'undefined') {
 // channel to identify the source of various events
 let msg = { ...documentMetadata, 'origin': window.location.origin, 'href': window.location.href, 'pathname': window.location.pathname };
 </script>
-      <!--CSS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-meta-injection.js--><script type="text/javascript">// Add event listener for sending meta data through the post message channel
-// Make sure, that msg object is created first.
-window.addEventListener("load", (e) => {
-    // add metadata if present
-    let canonicalURL = document.querySelector("link[rel='canonical']");
-    if (canonicalURL) {
-	msg = { ...msg, 'canonicalUrl': canonicalURL.getAttribute("href") };
-    }
-    let canonicalSource = document.querySelector("link[rel='canonicalSource']");
-    if (canonicalSource) {
-	msg = { ...msg, 'canonicalSource': canonicalSource.getAttribute("href") };
-    }
-    let source = document.querySelector("link[rel='source']");
-    if (canonicalSource) {
-	msg = { ...msg, 'source': source.getAttribute("href") };
-    }
-    let title = document.querySelector("title");
-    if (canonicalURL) {
-	msg = { ...msg, 'title': title.innerHTML };
-    }
-
-    parent.postMessage({ ...msg, 'event': 'meta' });
-});
-</script>
-      <!--CSS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-scroll-injection.js--><script type="text/javascript">// This sets up sending and receiving scroll information through the post message channel.
+      <!--JS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-scroll-injection.js--><script type="text/javascript">// This sets up sending and receiving scroll information through the post message channel.
 // Make sure to create a msg object before, e.g., seed-synopsis-meta.js!
 
 // scroll blocks (per default div elements) and their Y positions
@@ -96,7 +66,7 @@ function notifyScrolled() {
         if (scrollBlocksY[i] >= y && scrollBlocks[i].id != "") {
             console.log("scrolled to " + i + "th div: " + scrollBlocks[i].id);
             // pass a message using the postMessage channel, cf. https://davidwalsh.name/window-iframe
-            parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.location.href);
+            window.parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.parent.location.href);
             break;
         }
     }
@@ -109,10 +79,14 @@ window.addEventListener("scroll", (event) => {
 });
 
 // callback for scroll-sync message
+// we cannot set location.href when iframe.srcdoc is used. Using window.scroll instead
 function notifySyncScroll(e) {
     if (e.data?.event == "sync") {
-        location.href = "#"; // bug fix for webkit
-        location.href = "#" + (e.data?.scrollTarget ?? "unknown");
+	const y = document.getElementById(e.data?.scrollTarget ?? "unknown")?.offsetTop;
+	console.debug("scrolling to " + e.data?.scrollTarget + " at height " + y);
+	if (y !== null) {
+	    window.scroll(0, y);
+	}
     }
 }
 
@@ -129,7 +103,7 @@ window.addEventListener("resize", (event) => {
     notifyScrolled();
 });
 </script>
-      <!--CSS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-segments-injection.js--><script type="text/javascript">// add event listener for mouse events on segments/spans
+      <!--JS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-segments-injection.js--><script type="text/javascript">// add event listener for mouse events on segments/spans
 function seedRegisterOnSegmentEvents() {
     console.debug("add event listener for mouse over and mouse out events");
     document.body.addEventListener("mouseover", seedPostMessageOnSegmentEvent("mouse-over-segment"));
@@ -145,7 +119,7 @@ const seedPostMessageOnSegmentEvent = (eventType) => {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	var ids = seedAncestorOrSelfIds(targetElement, []);
-	parent.postMessage({ ...msg, "event": eventType, "segmentIds": ids }, window.location.href);
+	window.parent.postMessage({ ...msg, "event": eventType, "segmentIds": ids }, window.parent.location.href);
     };
 }
 /*
@@ -164,7 +138,7 @@ function seedAncestorOrSelfIds(element, ids) {
     return seedAncestorOrSelfIds(element.parentNode, ids);
 }
 </script>
-      <!--CSS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-colorize-injection.js--><script type="text/javascript">// make sure that msg exists before
+      <!--JS from file:/home/clueck/src/scdh/tei-processing/seed-frontend-components/public/seed-colorize-injection.js--><script type="text/javascript">// make sure that msg exists before
 
 
 function seedColorize(e) {
