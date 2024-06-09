@@ -33,10 +33,14 @@ window.addEventListener("scroll", (event) => {
 });
 
 // callback for scroll-sync message
+// we cannot set location.href when iframe.srcdoc is used. Using window.scroll instead
 function notifySyncScroll(e) {
     if (e.data?.event == "sync") {
-        location.href = "#"; // bug fix for webkit
-        location.href = "#" + (e.data?.scrollTarget ?? "unknown");
+	const y = document.getElementById(e.data?.scrollTarget ?? "unknown")?.offsetTop;
+	console.debug("scrolling to " + e.data?.scrollTarget + " at height " + y);
+	if (y !== null) {
+	    window.scroll(0, y);
+	}
     }
 }
 
