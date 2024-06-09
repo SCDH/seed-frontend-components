@@ -167,6 +167,10 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
+    protected updated(_changedProperties: PropertyValues<this>): void {
+	this.colorizeText();
+    }
+
     protected headerTemplate() {
 	return html`<div>
 	    <span>${this.id}:</span>
