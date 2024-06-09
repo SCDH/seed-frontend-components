@@ -11,6 +11,8 @@
     <script type="module" src="/src/seed-config-text.ts"></script>
     <script type="module" src="/src/seed-synopsis.ts"></script>
     <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-state-scroll-position.ts"></script>
+    <script type="module" src="/src/seed-state-sync-others.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
     <style type="text/css">
       .synopsis {
@@ -33,6 +35,8 @@
 	ontology-urls="ontology.json"
 	regex-alignment="alignment.json"></seed-config>
       <seed-config-text text-id="foo" text-url="LXX.tei.html"></seed-config-text>
+      <seed-config-text text-id="MT" text-url="MT.tei.html"></seed-config-text>
+      <seed-config-text text-id="TG" text-url="TG.tei.html"></seed-config-text>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
@@ -41,18 +45,27 @@
 	 text-id="foo"
 	 source="LXX.words.tei.xml"
 	 annotations-per-segment-url="LXX.tei.xml.segments.json"
-	 ></seed-synopsis-text
+	 >
+	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
+	  <seed-state-sync-others slot="status"></seed-state-sync-others>
+	</seed-synopsis-text
       ><seed-synopsis-text
 	 content="MT.tei.html"
 	 id="MT" source="MT.words.tei.xml"
 	 annotations-per-segment-url="MT.tei.xml.segments.json"
-	 ></seed-synopsis-text
+	 >
+	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
+	  <seed-state-sync-others slot="status"></seed-state-sync-others>
+	</seed-synopsis-text
       ><seed-synopsis-text
-	 content="TG.tei.html"
 	 id="TG"
+	 text-id="TG"
 	 source="TG.words.tei.xml"
 	 annotations-per-segment-url="TG.tei.xml.segments.json"
-	 ></seed-synopsis-text
+	 >
+	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
+	  <seed-state-sync-others slot="status"></seed-state-sync-others>
+	</seed-synopsis-text
 	    ></div>
       <div style="min-height:10px">&nbsp;</div>
       <seed-annotation-permanent
