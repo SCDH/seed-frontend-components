@@ -153,7 +153,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		"event": "sync",
 		"scrollTarget": this.scrollTarget,
 	    };
-	    if (this.iframe) this.iframe.contentWindow?.postMessage(msg, window.location.href);
+	    if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
 	}
     }
 
@@ -175,11 +175,10 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     }
 
     protected iframeTemplate() {
-	if (this.textId !== undefined && this.doc !== undefined) {
-	    log.info("Loading text " + this.textId + " into view " + this.id);
-	    log.info("Loading text " + this.textId + " to view " + this.id, this.doc);
+	if (this.usesSrcDoc()) {
+	    log.debug("Loading text " + this.textId + " into view " + this.id);
 	    return html`<div class="content-container" id="${this.id}-content-container">
-<iframe sandbox="allow-scripts,allow-same-origin" referrerpolicy="same-origin" srcdoc="${this.doc}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
+                <iframe srcdoc="${this.doc}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
 	    </div>`;
 	} else if (this.content !== undefined) {
 	    return html`<div class="content-container" id="${this.id}-content-container">
@@ -209,6 +208,29 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	log.info("manual scroll to");
 	const scrollTarget: string = this.scrollToInput.value.trim();
 	this.scrollTarget = scrollTarget;
+    }
+
+    /*
+     * Whether or not the srcdoc Attribute of the iframe, that
+     * presents the document, is used.
+     */
+    protected usesSrcDoc(): boolean {
+	return this.textId !== undefined && this.doc !== undefined;
+    }
+
+    /*
+     * Get the target-origin for posting messages to the iframe's
+     * window. See
+     * https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#targetorigin
+     * and
+     * https://stackoverflow.com/questions/58098237/can-i-use-postmessage-on-an-iframe-whos-html-is-passed-via-srcdoc-attribute
+     */
+    protected getIFrameTarget(): string {
+	if (this.usesSrcDoc()) {
+	    return "*";
+	} else {
+	    return this.iframe?.contentWindow?.location?.href ?? "*";
+	}
     }
 
     /*
@@ -278,7 +300,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    "event": "colorize",
 	    "cssPerSegment": this.cssPerSegment,
 	};
-	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, window.location.href);
+	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
     }
 
     static styles: CSSResultGroup = [
