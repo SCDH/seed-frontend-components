@@ -45,9 +45,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
     protected iframe: HTMLIFrameElement | undefined;
 
     @state()
-    cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
-
-    @state()
     doc: string | undefined;
 
     storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
@@ -62,16 +59,16 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
 
 	// listen for changes on CSS per segment
 	this.store?.dispatch(addListener({
-	    predicate: (_action: UnknownAction, currentState, _previousState): boolean => {
+	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
 		// log.debug("checking predicate for element with Id " + this.id);
 		let currState: { textViews: TextViewsSlice } = currentState as SeedState;
-		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== this.cssPerSegment;
+		let prevState: { textViews: TextViewsSlice } = previousState as SeedState;
+		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== prevState.textViews[this.id].cssPerSegment;
 	    },
 	    effect: (_action, listenerApi): void => {
 		log.debug("cssPerSegment updated for element with Id " + this.id)
 		let state: SeedState = listenerApi.getState() as SeedState;
-		this.cssPerSegment = state.textViews[this.id].cssPerSegment;
-		this.colorizeText();
+		this.colorizeText(state.textViews[this.id].cssPerSegment);
 	    }
 	}));
 
@@ -278,11 +275,11 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
      * Pass data for colorizing the annotations in the text via the
      * post message channel down to the document displayed in the iframe.
      */
-    colorizeText(): void {
+    colorizeText(cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined): void {
 	log.debug("colorizing text in widget " + this.id);
 	const msg = {
 	    "event": "colorize",
-	    "cssPerSegment": this.cssPerSegment,
+	    "cssPerSegment": cssPerSegment,
 	};
 	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
     }
