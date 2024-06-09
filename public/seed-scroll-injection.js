@@ -20,7 +20,7 @@ function notifyScrolled() {
         if (scrollBlocksY[i] >= y && scrollBlocks[i].id != "") {
             console.log("scrolled to " + i + "th div: " + scrollBlocks[i].id);
             // pass a message using the postMessage channel, cf. https://davidwalsh.name/window-iframe
-            parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.location.href);
+            window.parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.parent.location.href);
             break;
         }
     }
@@ -33,10 +33,14 @@ window.addEventListener("scroll", (event) => {
 });
 
 // callback for scroll-sync message
+// we cannot set location.href when iframe.srcdoc is used. Using window.scroll instead
 function notifySyncScroll(e) {
     if (e.data?.event == "sync") {
-        location.href = "#"; // bug fix for webkit
-        location.href = "#" + (e.data?.scrollTarget ?? "unknown");
+	const y = document.getElementById(e.data?.scrollTarget ?? "unknown")?.offsetTop;
+	console.debug("scrolling to " + e.data?.scrollTarget + " at height " + y);
+	if (y !== null) {
+	    window.scroll(0, y);
+	}
     }
 }
 

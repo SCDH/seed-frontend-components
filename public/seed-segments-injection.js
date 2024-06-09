@@ -14,7 +14,7 @@ const seedPostMessageOnSegmentEvent = (eventType) => {
 	e = e || window.event;
 	var targetElement = e.target || e.srcElement;
 	var ids = seedAncestorOrSelfIds(targetElement, []);
-	parent.postMessage({ ...msg, "event": eventType, "segmentIds": ids }, window.location.href);
+	window.parent.postMessage({ ...msg, "event": eventType, "segmentIds": ids }, window.parent.location.href);
     };
 }
 /*

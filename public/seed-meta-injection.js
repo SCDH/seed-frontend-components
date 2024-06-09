@@ -19,5 +19,5 @@ window.addEventListener("load", (e) => {
 	msg = { ...msg, 'title': title.innerHTML };
     }
 
-    parent.postMessage({ ...msg, 'event': 'meta' });
+    window.parent.postMessage({ ...msg, 'event': 'meta' }, window.parent.location.href);
 });
