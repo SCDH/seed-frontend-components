@@ -55,7 +55,7 @@ export class SeedStateScrollPosition extends storeConsumerMixin(LitElement) {
 	    <span class="scroll-position">
 		<label for="scrollTo">Position</label>
 		<input name="scrollTo" id="scrollTo" type="text" value="${this.position}"/>
-		<button class="unicode-button" @click="${this.handleScrollToInput}" title="Go to manually entered position!">&#x21b7;</button>
+		<button class="unicode-button" @click="${this.handleScrollToInput}" title="Go to manually entered position!">&#x23ce;</button>
 	    </span>
 	</span>`;
     }
