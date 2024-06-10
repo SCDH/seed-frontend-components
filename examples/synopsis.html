@@ -35,13 +35,14 @@
 	ontology-urls="ontology.json"
 	regex-alignment="alignment.json"></seed-config>
       <seed-config-text text-id="foo" text-url="LXX.tei.html"></seed-config-text>
-      <seed-config-text text-id="MT" text-url="MT.tei.html"></seed-config-text>
-      <seed-config-text text-id="TG" text-url="TG.tei.html"></seed-config-text>
+      <seed-config-text text-id="mt" text-url="MT.tei.html"></seed-config-text>
+      <seed-config-text text-id="tg" text-url="TG.tei.html"></seed-config-text>
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
       ><seed-synopsis-text
 	 id="LXX"
+	 title="Septuaginta"
 	 text-id="foo"
 	 source="LXX.words.tei.xml"
 	 annotations-per-segment-url="LXX.tei.xml.segments.json"
@@ -50,8 +51,10 @@
 	  <seed-state-sync-others slot="status"></seed-state-sync-others>
 	</seed-synopsis-text
       ><seed-synopsis-text
-	 content="MT.tei.html"
-	 id="MT" source="MT.words.tei.xml"
+	 id="MT"
+	 text-id="mt"
+	 title="Masoreten"
+	 source="MT.words.tei.xml"
 	 annotations-per-segment-url="MT.tei.xml.segments.json"
 	 >
 	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
@@ -59,7 +62,8 @@
 	</seed-synopsis-text
       ><seed-synopsis-text
 	 id="TG"
-	 text-id="TG"
+	 text-id="tg"
+	 title="Targum"
 	 source="TG.words.tei.xml"
 	 annotations-per-segment-url="TG.tei.xml.segments.json"
 	 >
