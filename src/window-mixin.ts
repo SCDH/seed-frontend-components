@@ -101,6 +101,7 @@ export const windowStyles = css`
     .window-visibility > button.dispose {
     background: var(--window-dispose-button-bg, inherit);
     }
+    .window-status-item button:hover,
     .window-visibility > button:hover {
     color: red;
     }
@@ -114,10 +115,9 @@ export const windowStyles = css`
     }
     .window-container.minimized-window {
     }
-    .window-container.minimized-window > .window-header > .window-decoration > .window-title {
+    .window-container.minimized-window .window-title {
     display: none;
-    }
-`;
+    }`;
 
 
 type Constructor<T = {}> = new (...args: any[]) => T;
