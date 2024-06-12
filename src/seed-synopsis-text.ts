@@ -276,12 +276,14 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
      * post message channel down to the document displayed in the iframe.
      */
     colorizeText(cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined): void {
-	log.debug("colorizing text in widget " + this.id);
-	const msg = {
-	    "event": "colorize",
-	    "cssPerSegment": cssPerSegment,
-	};
-	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	if (this.iframe && cssPerSegment) {
+	    log.debug(`colorizing text in widget ${this.id}: ${Object.keys(cssPerSegment).length} segments`);
+	    const msg = {
+		"event": "colorize",
+		"cssPerSegment": cssPerSegment,
+	    };
+	    this.iframe.contentWindow?.postMessage(msg, "*");//this.getIFrameTarget());
+	}
     }
 
     static styles: CSSResultGroup = [
