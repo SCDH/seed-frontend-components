@@ -23,11 +23,11 @@ import { SeedState } from './redux/seed-store';
 
 
 // define the web component
-@customElement("seed-synopsis-text")
-export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)) {
+@customElement("seed-text-view")
+export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 
     @provide({ context: seedTextViewContext })
-    self_: SeedSynopsisText = this;
+    self_: SeedTextView = this;
 
     @property({ type: String })
     content: string | undefined;
@@ -205,7 +205,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
     }
 
     renderContent() {
-	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
+	return html`<div class="text-container">${this.iframeTemplate()}</div>`;
     }
 
     /*
@@ -289,7 +289,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
     static styles: CSSResultGroup = [
 	windowStyles,
 	css`
- 	    div.synopsis-text-container {
+ 	    div.text-container {
  	    height: 100%;
  	    }
  	    div.content-container {
@@ -304,6 +304,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
 
 declare global {
     interface HTMLElementTagNameMap {
-	"seed-synopsis-text": SeedSynopsisText;
+	"seed-text-view": SeedTextView;
     }
 }

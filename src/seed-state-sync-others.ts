@@ -9,7 +9,7 @@ import { TextViewsSlice } from "./redux/textViewsSlice";
 import { SeedState } from './redux/seed-store';
 
 import log from "./logging";
-import { SeedSynopsisText } from './seed-synopsis-text';
+import { SeedTextView } from './seed-text-view';
 import { windowStyles } from './window-mixin';
 import { seedTextViewContext } from './seed-context';
 import { storeConsumerMixin } from './store-consumer-mixin';
@@ -23,7 +23,7 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 export class SeedStateSyncOthers extends storeConsumerMixin(LitElement) {
 
     @consume({ context: seedTextViewContext })
-    protected textView!: SeedSynopsisText;
+    protected textView!: SeedTextView;
 
     position?: string;
 

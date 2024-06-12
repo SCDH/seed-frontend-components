@@ -9,8 +9,7 @@
     <script type="module" src="/src/seed-app.ts"></script>
     <script type="module" src="/src/seed-config.ts"></script>
     <script type="module" src="/src/seed-config-text.ts"></script>
-    <script type="module" src="/src/seed-synopsis.ts"></script>
-    <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-text-view.ts"></script>
     <script type="module" src="/src/seed-state-scroll-position.ts"></script>
     <script type="module" src="/src/seed-state-sync-others.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
@@ -21,7 +20,7 @@
 	  flex-direction: row;
 	  flex-wrap: nowrap;
       }
-      .synopsis seed-synopsis-text {
+      .synopsis seed-text-view {
 	  flex-grow: 1;
 	  min-width: 20em;
 	  margin: 2px;
@@ -40,7 +39,7 @@
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
-      ><seed-synopsis-text
+      ><seed-text-view
 	 id="LXX"
 	 title="Septuaginta"
 	 text-id="foo"
@@ -49,8 +48,8 @@
 	 >
 	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
 	  <seed-state-sync-others slot="status"></seed-state-sync-others>
-	</seed-synopsis-text
-      ><seed-synopsis-text
+	</seed-text-view
+      ><seed-text-view
 	 id="MT"
 	 text-id="mt"
 	 title="Masoreten"
@@ -59,8 +58,8 @@
 	 >
 	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
 	  <seed-state-sync-others slot="status"></seed-state-sync-others>
-	</seed-synopsis-text
-      ><seed-synopsis-text
+	</seed-text-view
+      ><seed-text-view
 	 id="TG"
 	 text-id="tg"
 	 title="Targum"
@@ -69,7 +68,7 @@
 	 >
 	  <seed-state-scroll-position slot="status"></seed-state-scroll-position>
 	  <seed-state-sync-others slot="status"></seed-state-sync-others>
-	</seed-synopsis-text
+	</seed-text-view
 	    ></div>
       <div style="min-height:10px">&nbsp;</div>
       <seed-annotation-permanent

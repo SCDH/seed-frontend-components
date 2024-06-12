@@ -8,7 +8,7 @@ import { SeedState } from './redux/seed-store';
 
 
 import log from "./logging";
-import { SeedSynopsisText } from './seed-synopsis-text';
+import { SeedTextView } from './seed-text-view';
 import { windowStyles } from './window-mixin';
 import { seedTextViewContext } from './seed-context';
 import { storeConsumerMixin } from './store-consumer-mixin';
@@ -24,7 +24,7 @@ export class SeedStateScrollPosition extends storeConsumerMixin(LitElement) {
 
     @state()
     @consume({ context: seedTextViewContext })
-    protected textView?: SeedSynopsisText;
+    protected textView?: SeedTextView;
 
     @state()
     protected position?: string; // binding to this.textView?.position does not work!
