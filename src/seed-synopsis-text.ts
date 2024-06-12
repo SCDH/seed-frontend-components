@@ -174,7 +174,7 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(LitElement)
 
     protected updated(_changedProperties: PropertyValues<this>): void {
 	// when using srcdoc, colorizing needs to be done on each rendering
-	this.colorizeText();
+	this.colorizeText(this.store?.getState()?.textViews?.[this.id]?.cssPerSegment);
 	// when using srcdoc, setting a the syncOthers listener needs
 	// to be done on each rendering
 	if (this.iframe) {
