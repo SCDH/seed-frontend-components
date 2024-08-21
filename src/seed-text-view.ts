@@ -47,7 +47,28 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
     @state()
     doc: string | undefined;
 
+    protected docLoaded: boolean = false;
+
+    protected msgQueue: Array<any> = [];
+
     storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
+
+    /*
+     * If the text is alread fully loaded into the iframe, the given
+     * `msg` is posted to it via the post message protocol. Otherwise
+     * it is put on a message queue, that will be worked on when a
+     * "loaded" message is received from the iframe.
+     *
+     * This method should be used instead of calling
+     * `this.iframe.window.postMessage()` directly.
+     */
+    postMsg(msg: any): void {
+	if (this.docLoaded) {
+	    this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	} else {
+	    this.msgQueue.push(msg);
+	}
+    }
 
     subscribeStore(): void {
 	log.debug("subscribing component to the redux store, element with Id " + this.id);
@@ -142,7 +163,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 		"event": "sync",
 		"scrollTarget": scrollTarget,
 	    };
-	    this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	    this.postMsg(msg);
 	}
     }
 
@@ -233,12 +254,19 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 
     /*
      * On incoming messages via the post message channel,
-     * {handleMessage} dispatches redux store actions.
+     * {handleMessage} dispatches redux store actions etc.
      */
     protected handleMessage = (e: MessageEvent) => {
 	if (this.iframe && e.source === this.iframe.contentWindow) {
 	    log.debug("filtered message on " + this.id, e);
 	    switch (e.data?.event) {
+		case "loaded":
+		    log.debug("document loaded, posting messages in queue: ", this.msgQueue.length);
+		    this.docLoaded = true;
+		    for (const msg of this.msgQueue) {
+			this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+		    }
+		    break;
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
 		    const txt: TextState = {
@@ -282,7 +310,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 		"event": "colorize",
 		"cssPerSegment": cssPerSegment,
 	    };
-	    this.iframe.contentWindow?.postMessage(msg, "*");//this.getIFrameTarget());
+	    this.postMsg(msg);
 	}
     }
 
