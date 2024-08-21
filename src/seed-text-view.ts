@@ -1,6 +1,6 @@
 import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
-import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
+import { UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
 import { provide } from '@lit/context';
 
 import { storeConsumerMixin } from './store-consumer-mixin';
@@ -8,8 +8,8 @@ import { windowMixin, windowStyles } from './window-mixin';
 
 import { seedTextViewContext } from "./seed-context";
 import { addAppListener } from "./redux/seed-store";
-import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
-import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { initText, setText, TextState } from "./redux/textsSlice";
+import { initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
 import { scrolled, syncOthers } from './redux/synopsisSlice';
@@ -79,29 +79,24 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
 
 	// listen for changes on CSS per segment
-	this.store?.dispatch(addListener({
+	this.store?.dispatch(addAppListener({
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
 		// log.debug("checking predicate for element with Id " + this.id);
-		let currState: { textViews: TextViewsSlice } = currentState as SeedState;
-		let prevState: { textViews: TextViewsSlice } = previousState as SeedState;
-		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== prevState.textViews[this.id].cssPerSegment;
+		return currentState.textViews.hasOwnProperty(this.id) && currentState.textViews[this.id].cssPerSegment !== previousState.textViews[this.id].cssPerSegment;
 	    },
 	    effect: (_action, listenerApi): void => {
 		log.debug("cssPerSegment updated for element with Id " + this.id)
-		let state: SeedState = listenerApi.getState() as SeedState;
-		this.colorizeText(state.textViews[this.id].cssPerSegment);
+		this.colorizeText(listenerApi.getState().textViews[this.id].cssPerSegment);
 	    }
 	}));
 
 	// get the text title / listen for changes
-	this.store?.dispatch(addListener({
+	this.store?.dispatch(addAppListener({
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
-		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
-		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
-		return currState.textViews.hasOwnProperty(this.id)
+		return currentState.textViews.hasOwnProperty(this.id)
 		    // && currState.textViews[this.id].textId !== null
 		    // && currState.texts.hasOwnProperty(currState.textViews[this.id]?.textId ?? "unknown")
-		    && currState.texts[currState.textViews[this.id]?.textId ?? "unknown"] !== prevState.texts[currState.textViews[this.id]?.textId ?? "unknown"];
+		    && currentState.texts[currentState.textViews[this.id]?.textId ?? "unknown"] !== previousState.texts[currentState.textViews[this.id]?.textId ?? "unknown"];
 	    },
 	    effect: (_action, listenerApi): void => {
 		let state: SeedState = listenerApi.getState() as SeedState;
@@ -111,17 +106,14 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 	    }
 	}));
 
-	this.store?.dispatch(addListener({
+	this.store?.dispatch(addAppListener({
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
-		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
-		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
 		return this.textId !== undefined &&
-		    currState.texts.hasOwnProperty(this.textId) &&
-		    (currState.texts[this.textId].doc !== prevState.texts[this.textId]?.doc ?? "unknown");
+		    currentState.texts.hasOwnProperty(this.textId) &&
+		    (currentState.texts[this.textId].doc !== previousState.texts[this.textId]?.doc ?? "unknown");
 	    },
 	    effect: (_action, listenerApi): void => {
-		let state: SeedState = listenerApi.getState() as SeedState;
-		this.doc = state.texts[this.textId ?? "_"].doc;
+		this.doc = listenerApi.getState().texts[this.textId ?? "_"].doc;
 	    }
 	}));
 
