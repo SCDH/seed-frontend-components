@@ -159,6 +159,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
      */
     scrollTextTo(scrollTarget: string): void {
 	if (this.iframe) {
+	    log.debug("scrolling via handler");
 	    const msg = {
 		"event": "sync",
 		"scrollTarget": scrollTarget,
@@ -174,7 +175,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
      */
     scrollTextToThunk = (iframe: HTMLIFrameElement | undefined, targetOrigin: string) => {
 	return (scrollTarget: string): void => {
-	    log.info("scrolling", iframe, targetOrigin);
+	    log.debug("scrolling via thunk", iframe, targetOrigin);
 	    const msg = {
 		"event": "sync",
 		"scrollTarget": scrollTarget,
