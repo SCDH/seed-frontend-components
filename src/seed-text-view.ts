@@ -64,7 +64,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
      */
     postMsg(msg: any): void {
 	if (this.docLoaded) {
-	    this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	    this.iframe?.contentWindow?.postMessage(msg, this.getIFrameTarget());
 	} else {
 	    this.msgQueue.push(msg);
 	}
@@ -264,9 +264,10 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 		case "loaded":
 		    log.debug("document loaded, posting messages in queue: ", this.msgQueue.length);
 		    this.docLoaded = true;
-		    for (const msg of this.msgQueue) {
-			this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
-		    }
+		    this.msgQueue.forEach((msg) => {
+			this.iframe?.contentWindow?.postMessage(msg, this.getIFrameTarget());
+		    });
+		    this.msgQueue = [];
 		    break;
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
