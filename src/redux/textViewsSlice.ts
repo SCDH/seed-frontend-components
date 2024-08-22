@@ -57,6 +57,11 @@ export interface TextViewState {
     annotationsPerSegment: AnnotationsPerSegment;
 
     /*
+     * The reverse of `annotationsPerSegment`.
+     */
+    segmentsPerAnnotation: SegmentsPerAnnotation;
+
+    /*
      * The CSS attributed to an segment on the base of annotations on
      * it.
      *
@@ -77,6 +82,15 @@ export interface TextViewState {
 export interface AnnotationsPerSegment {
 
     [segmentId: string]: Array<string>;
+
+}
+
+/*
+ * The reverse of {AnnotationsPerSegment}.
+ */
+export interface SegmentsPerAnnotation {
+
+    [annotId: string]: Array<string>;
 
 }
 
@@ -145,6 +159,7 @@ const textViewsSlice = createSlice({
 		scrollPosition: null,
 		annotations: [],
 		annotationsPerSegment: {},
+		segmentsPerAnnotation: {},
 		cssPerSegment: {}
 	    };
 	},
@@ -167,7 +182,13 @@ const textViewsSlice = createSlice({
 	setCssForAllSegments: (state, action: PayloadAction<{viewId: string, cssPerSegment: { [segmentId: string]: CSSDefinition }}>) => {
 	    state[action.payload.viewId].cssPerSegment = action.payload.cssPerSegment;
 	},
-
+	/*
+	 * Update the {TextViewState.segmentsPerAnnotation} property
+	 * of a text view.
+	 */
+	setSegmentsPerAnnotation: (state, action: PayloadAction<{viewId: string, segmentsPerAnnot: SegmentsPerAnnotation}>) => {
+	    state[action.payload.viewId].segmentsPerAnnotation = action.payload.segmentsPerAnnot;
+	}
     },
     extraReducers: (builder) => {
 	builder.addCase(
@@ -178,6 +199,6 @@ const textViewsSlice = createSlice({
     },
 });
 
-export const { initTextView, setText, scrolledTo, setCssForAllSegments } = textViewsSlice.actions;
+export const { initTextView, setText, scrolledTo, setCssForAllSegments, setSegmentsPerAnnotation } = textViewsSlice.actions;
 
 export default textViewsSlice.reducer;
