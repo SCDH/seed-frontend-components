@@ -8,8 +8,7 @@
     <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
     <script type="module" src="/src/seed-app.ts"></script>
     <script type="module" src="/src/seed-config.ts"></script>
-    <script type="module" src="/src/seed-synopsis.ts"></script>
-    <script type="module" src="/src/seed-synopsis-text.ts"></script>
+    <script type="module" src="/src/seed-text-view.ts"></script>
     <script type="module" src="/src/seed-annotation-permanent.ts"></script>
     <style type="text/css">
       .synopsis {
@@ -18,7 +17,7 @@
 	  flex-direction: row;
 	  flex-wrap: nowrap;
       }
-      .synopsis seed-synopsis-text,
+      .synopsis seed-text-view,
       .synopsis seed-annotation-permanent{
 	  flex-grow: 1;
 	  min-width: 20em;
@@ -35,13 +34,13 @@
       <!-- whitespace between synopsis texts breaks margin and may break the line up -->
       <div
 	class="synopsis"
-      ><seed-synopsis-text
+      ><seed-text-view
 	 content="lam155.tei.xml.BB.html"
 	 id="BBlam155"
 	 title="lam 155, Bashtaki Beta"
 	 source="lam155.tei.xml"
 	 annotations-per-segment-url="lam155.tei.xml.BB.segments.json"
-	 ></seed-synopsis-text
+	 ></seed-text-view
       ><seed-annotation-permanent
 	title="Figures"
 	height="auto"

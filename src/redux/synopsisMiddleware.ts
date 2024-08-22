@@ -5,23 +5,15 @@ import { SeedState, SeedDispatch } from "./seed-store";
 
 export type PositionChangedEffect = (_action: UnknownAction, _listenerApi: ListenerEffectAPI<SeedState, SeedDispatch, unknown>) => void | Promise<void>;
 
-export interface WithScrollTarget {
-
-    /* 
-     * A property where the text is to scroll to. This may be a reactive property.
-     */
-    scrollTarget: string | undefined;
-
-}
 
 /*
  * A thunk that returns an function to be used as an effect for
  * middleware that listens to changes on the text position stored in
  * the {synopsisSlice}.
  *
- * USAGE: store.dispatch(addAppListener({actionCreator: scrolled, effect: setScrollTarget(this, this.id)}))
+ * USAGE: store.dispatch(addAppListener({actionCreator: scrolled, effect: setScrollTarget(this.id, scrollCallback)}))
  */
-export const setScrollTarget = (view: WithScrollTarget, textViewId: string): PositionChangedEffect => {
+export const setScrollTarget = (textViewId: string, scroll: (scrollTo: string) => void): PositionChangedEffect => {
     return (_action: UnknownAction, listenerApi: ListenerEffectAPI<SeedState, SeedDispatch, unknown>): void => {
 	const synopsisSlice = listenerApi.getState().synopsis;
 	if (synopsisSlice.currentPosition === undefined) return;
@@ -40,7 +32,7 @@ export const setScrollTarget = (view: WithScrollTarget, textViewId: string): Pos
 	    const re = new RegExp(pattern.matchPattern);
 	    for (const sourceSegmentId of sourceSegmentIds) {
 		if (re.test(sourceSegmentId)) {
-		    view.scrollTarget = sourceSegmentId.replace(re, pattern.replacementPattern);
+		    scroll(sourceSegmentId.replace(re, pattern.replacementPattern));
 		    return; // done
 		}
 	    }
@@ -50,7 +42,7 @@ export const setScrollTarget = (view: WithScrollTarget, textViewId: string): Pos
 	if (map === undefined) return;
 	for (const sourceSegmentId of sourceSegmentIds) {
 	    if (map.hasOwnProperty(sourceSegmentId)) {
-		view.scrollTarget = map[sourceSegmentId]?.[targetTextId];
+		scroll(map[sourceSegmentId]?.[targetTextId]);
 		return; // done
 	    }
 	}

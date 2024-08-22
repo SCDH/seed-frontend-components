@@ -80,6 +80,10 @@ export const windowStyles = css`
     .window-visibility {
     float: right;
     }
+    .window-status-item {
+    border: none;
+    }
+    .window-status-item button,
     .window-visibility > button {
     padding: 2px;
     border: none;
@@ -97,6 +101,7 @@ export const windowStyles = css`
     .window-visibility > button.dispose {
     background: var(--window-dispose-button-bg, inherit);
     }
+    .window-status-item button:hover,
     .window-visibility > button:hover {
     color: red;
     }
@@ -110,10 +115,9 @@ export const windowStyles = css`
     }
     .window-container.minimized-window {
     }
-    .window-container.minimized-window > .window-header > .window-decoration > .window-title {
+    .window-container.minimized-window .window-title {
     display: none;
-    }
-`;
+    }`;
 
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -190,7 +194,7 @@ export const windowMixin = <T extends Constructor<LitElement>>(superClass: T) =>
 	}
 
 	footerTemplate(): HTMLTemplateResult {
-	    return html``;
+	    return html`<slot name="status"></slot>`;
 	}
 
 	renderWindowDecoration(): HTMLTemplateResult {

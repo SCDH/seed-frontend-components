@@ -1,18 +1,20 @@
 import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
-import { addListener, UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
+import { UnsubscribeListener, UnknownAction } from '@reduxjs/toolkit';
+import { provide } from '@lit/context';
 
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 
+import { seedTextViewContext } from "./seed-context";
 import { addAppListener } from "./redux/seed-store";
-import { initText, setText, TextState, TextsSlice } from "./redux/textsSlice";
-import { TextViewsSlice, initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { initText, setText, TextState } from "./redux/textsSlice";
+import { initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
 import { scrolled, syncOthers } from './redux/synopsisSlice';
 import { scrolledTextViewThunk } from './redux/synopsisActions';
-import { setScrollTarget, WithScrollTarget } from './redux/synopsisMiddleware';
+import { setScrollTarget } from './redux/synopsisMiddleware';
 
 import log from "./logging";
 
@@ -21,8 +23,11 @@ import { SeedState } from './redux/seed-store';
 
 
 // define the web component
-@customElement("seed-synopsis-text")
-export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsumerMixin(LitElement))) implements WithScrollTarget {
+@customElement("seed-text-view")
+export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
+
+    @provide({ context: seedTextViewContext })
+    self_: SeedTextView = this;
 
     @property({ type: String })
     content: string | undefined;
@@ -30,35 +35,40 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     @property({ attribute: "text-id" })
     textId: string | undefined;
 
-    @property({ type: String })
-    source: string = "";
-
     @property({ attribute: true, type: String})
     id!: string;
 
     @property({ attribute: "annotations-per-segment-url", type: String })
     annotationsPerSegmentUrl!: string;
 
-    @property({ attribute: false, state: true })
-    protected position!: string;
-
-    @property({ attribute: false, state: true })
-    scrollTarget!: string;
-
     @query("iframe")
     protected iframe: HTMLIFrameElement | undefined;
-
-    @query("#scrollTo")
-    protected scrollToInput!: HTMLInputElement;
-
-    @state()
-    cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined;
 
     @state()
     doc: string | undefined;
 
+    protected docLoaded: boolean = false;
+
+    protected msgQueue: Array<any> = [];
+
     storeUnsubscribeListeners: Array<UnsubscribeListener> = [];
 
+    /*
+     * If the text is alread fully loaded into the iframe, the given
+     * `msg` is posted to it via the post message protocol. Otherwise
+     * it is put on a message queue, that will be worked on when a
+     * "loaded" message is received from the iframe.
+     *
+     * This method should be used instead of calling
+     * `this.iframe.window.postMessage()` directly.
+     */
+    postMsg(msg: any): void {
+	if (this.docLoaded) {
+	    this.iframe?.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	} else {
+	    this.msgQueue.push(msg);
+	}
+    }
 
     subscribeStore(): void {
 	log.debug("subscribing component to the redux store, element with Id " + this.id);
@@ -69,30 +79,24 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
 
 	// listen for changes on CSS per segment
-	this.store?.dispatch(addListener({
-	    predicate: (_action: UnknownAction, currentState, _previousState): boolean => {
+	this.store?.dispatch(addAppListener({
+	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
 		// log.debug("checking predicate for element with Id " + this.id);
-		let currState: { textViews: TextViewsSlice } = currentState as SeedState;
-		return currState.textViews.hasOwnProperty(this.id) && currState.textViews[this.id].cssPerSegment !== this.cssPerSegment;
+		return currentState.textViews.hasOwnProperty(this.id) && currentState.textViews[this.id].cssPerSegment !== previousState.textViews[this.id].cssPerSegment;
 	    },
 	    effect: (_action, listenerApi): void => {
 		log.debug("cssPerSegment updated for element with Id " + this.id)
-		let state: SeedState = listenerApi.getState() as SeedState;
-		this.cssPerSegment = state.textViews[this.id].cssPerSegment;
-		this.colorizeText();
+		this.colorizeText(listenerApi.getState().textViews[this.id].cssPerSegment);
 	    }
 	}));
 
 	// get the text title / listen for changes
-	this.store?.dispatch(addListener({
+	this.store?.dispatch(addAppListener({
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
-		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
-		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
-		return currState.textViews.hasOwnProperty(this.id)
+		return currentState.textViews.hasOwnProperty(this.id)
 		    // && currState.textViews[this.id].textId !== null
 		    // && currState.texts.hasOwnProperty(currState.textViews[this.id]?.textId ?? "unknown")
-		    && currState.texts[currState.textViews[this.id]?.textId ?? "unknown"] !== prevState.texts[currState.textViews[this.id]?.textId ?? "unknown"];
- ;
+		    && currentState.texts[currentState.textViews[this.id]?.textId ?? "unknown"] !== previousState.texts[currentState.textViews[this.id]?.textId ?? "unknown"];
 	    },
 	    effect: (_action, listenerApi): void => {
 		let state: SeedState = listenerApi.getState() as SeedState;
@@ -102,27 +106,15 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	    }
 	}));
 
-	this.store?.dispatch(addListener({
+	this.store?.dispatch(addAppListener({
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
-		let currState: { textViews: TextViewsSlice, texts: TextsSlice } = currentState as SeedState;
-		let prevState: { textViews: TextViewsSlice, texts: TextsSlice } = previousState as SeedState;
 		return this.textId !== undefined &&
-		    currState.texts.hasOwnProperty(this.textId) &&
-		    (currState.texts[this.textId].doc !== prevState.texts[this.textId]?.doc ?? "unknown");
+		    currentState.texts.hasOwnProperty(this.textId) &&
+		    (currentState.texts[this.textId].doc !== previousState.texts[this.textId]?.doc ?? "unknown");
 	    },
 	    effect: (_action, listenerApi): void => {
-		let state: SeedState = listenerApi.getState() as SeedState;
-		this.doc = state.texts[this.textId ?? "_"].doc;
+		this.doc = listenerApi.getState().texts[this.textId ?? "_"].doc;
 	    }
-	}));
-
-	// this.store?.dispatch(addAppListener({
-	//     actionCreator: scrolled,
-	//     effect: setScrollTarget(this, this.id),
-	// }));
-	this.store?.dispatch(addAppListener({
-	    actionCreator: syncOthers,
-	    effect: setScrollTarget(this, this.id),
 	}));
 
 	// this.storeUnsubscribeListeners.push(subsc);
@@ -133,6 +125,14 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	super.connectedCallback();
 	// set the event listener for scroll events on the post message channel
 	window.addEventListener("message", this.handleMessage);
+	// set the event listener for scrollTo events
+	this.addEventListener("scrollTo", e => {
+	    log.info("handling scroll to");
+	    if ((e as CustomEvent).detail?.scrollTo !== null) {
+		this.scrollTextTo((e as CustomEvent).detail.scrollTo);
+		e.stopPropagation();
+	    }
+	});
 	// dispatch initTextWidget action to the redux state store:
 	// this has to be done, since addText with meta information is
 	// fired lately, only after the first scrolledTo action.
@@ -146,15 +146,34 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	// TODO: store.dispatch(disposeTextView({viewId: this.id});
     }
 
-    protected willUpdate(changedProperties: PropertyValues<this>): void {
-	super.willUpdate(changedProperties);
-	if (changedProperties.has("scrollTarget" as keyof SeedSynopsisText)) {
+    /*
+     * A callback for scrolling the text to `scrollTarget` position. 
+     */
+    scrollTextTo(scrollTarget: string): void {
+	if (this.iframe) {
+	    log.debug("scrolling via handler");
 	    const msg = {
 		"event": "sync",
-		"scrollTarget": this.scrollTarget,
+		"scrollTarget": scrollTarget,
 	    };
-	    if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+	    this.postMsg(msg);
 	}
+    }
+
+    /*
+     * A thunk that returns a callback for scrolling the text to
+     * `scrollTarget` position. This can be used in places, where
+     * methods are not working, e.g., in middleware for a redux store.
+     */
+    scrollTextToThunk = (iframe: HTMLIFrameElement | undefined, targetOrigin: string) => {
+	return (scrollTarget: string): void => {
+	    log.debug("scrolling via thunk", iframe, targetOrigin);
+	    const msg = {
+		"event": "sync",
+		"scrollTarget": scrollTarget,
+	    };
+	    iframe?.contentWindow?.postMessage(msg, targetOrigin);
+	};
     }
 
     protected firstUpdated(_changedProperties: PropertyValues<this>): void {
@@ -168,19 +187,25 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
     }
 
     protected updated(_changedProperties: PropertyValues<this>): void {
-	this.colorizeText();
-    }
-
-    protected headerTemplate() {
-	return html`<div>
-	    <span>${this.id}:</span>
-	    <span>${this.source}</span>
-	</div>`;
+	// when using srcdoc, colorizing needs to be done on each rendering
+	this.colorizeText(this.store?.getState()?.textViews?.[this.id]?.cssPerSegment);
+	// when using srcdoc, setting a the syncOthers listener needs
+	// to be done on each rendering
+	if (this.iframe) {
+	    // this.store?.dispatch(addAppListener({
+	    //     actionCreator: scrolled,
+	    //     effect: setScrollTarget(this.id, this.scrollTextTo),
+	    // }));
+	    this.store?.dispatch(addAppListener({
+		actionCreator: syncOthers,
+		effect: setScrollTarget(this.id, this.scrollTextToThunk(this.iframe, this.getIFrameTarget())),
+	    }));
+	}
     }
 
     protected iframeTemplate() {
 	if (this.usesSrcDoc()) {
-	    log.debug("Loading text " + this.textId + " into view " + this.id);
+	    log.debug("loading text " + this.textId + " into view " + this.id);
 	    return html`<div class="content-container" id="${this.id}-content-container">
                 <iframe srcdoc="${this.doc}" id="${this.id}-content" width="98%" height="100%" allowfullscreen="allowfullscreen"></iframe>
 	    </div>`;
@@ -193,25 +218,8 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
-    footerTemplate() {
-		return html`<div>
-	    <span class="scroll-position">
-		<label for="scrollTo">Position</label>
-		<input name="scrollTo" id="scrollTo" type="text" value="${this.position}"/>
-		<button class="unicode-button" @click="${this.handleScrollToInput}" title="Go to manually entered position!">&#x21b7;</button>
-	    </span>
-	    <button class="unicode-button" @click="${this.syncOtherViews}" title="Sync others!">&#x2194;</botton>
-	</div>`;
-	}
-
     renderContent() {
-	return html`<div class="synopsis-text-container">${this.iframeTemplate()}</div>`;
-    }
-
-    handleScrollToInput(): void {
-	log.info("manual scroll to");
-	const scrollTarget: string = this.scrollToInput.value.trim();
-	this.scrollTarget = scrollTarget;
+	return html`<div class="text-container">${this.iframeTemplate()}</div>`;
     }
 
     /*
@@ -239,12 +247,20 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 
     /*
      * On incoming messages via the post message channel,
-     * {handleMessage} dispatches redux store actions.
+     * {handleMessage} dispatches redux store actions etc.
      */
     protected handleMessage = (e: MessageEvent) => {
 	if (this.iframe && e.source === this.iframe.contentWindow) {
 	    log.debug("filtered message on " + this.id, e);
 	    switch (e.data?.event) {
+		case "loaded":
+		    log.debug("document loaded, posting messages in queue: ", this.msgQueue.length);
+		    this.docLoaded = true;
+		    this.msgQueue.forEach((msg) => {
+			this.iframe?.contentWindow?.postMessage(msg, this.getIFrameTarget());
+		    });
+		    this.msgQueue = [];
+		    break;
 		case "meta":
 		    // We do not destructure e.data, since we have no control over it!
 		    const txt: TextState = {
@@ -258,8 +274,6 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 		    this.store?.dispatch(setText({textId: this.id, text: txt}));
 		    break;
 		case "scrolled":
-		    this.position = e.data.top;
-		    this.scrollToInput.value = e.data.top;
 		    this.store?.dispatch(scrolledTo({viewId: this.id, position: e.data.top}));
 		    this.store?.dispatch(scrolledTextViewThunk(scrolled, this.id, [e.data.top]));
 		    break;
@@ -279,38 +293,25 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
 	}
     }
 
-
-    protected stripFragment(url: string): string {
-	let pos = url.indexOf("#");
-	if (pos >= 0) {
-	    return url.substring(0, pos);
-	} else {
-	    return url;
-	}
-    }
-
-    protected syncOtherViews = (_e: Event) => {
-	log.debug("syncing others");
-	this.store?.dispatch(scrolledTextViewThunk(syncOthers, this.id, [this.position]));
-    }
-
     /*
      * Pass data for colorizing the annotations in the text via the
      * post message channel down to the document displayed in the iframe.
      */
-    colorizeText(): void {
-	log.debug("colorizing text in widget " + this.id);
-	const msg = {
-	    "event": "colorize",
-	    "cssPerSegment": this.cssPerSegment,
-	};
-	if (this.iframe) this.iframe.contentWindow?.postMessage(msg, this.getIFrameTarget());
+    colorizeText(cssPerSegment: { [segmentId: string]: CSSDefinition } | undefined = undefined): void {
+	if (this.iframe && cssPerSegment) {
+	    log.debug(`colorizing text in widget ${this.id}: ${Object.keys(cssPerSegment).length} segments`);
+	    const msg = {
+		"event": "colorize",
+		"cssPerSegment": cssPerSegment,
+	    };
+	    this.postMsg(msg);
+	}
     }
 
     static styles: CSSResultGroup = [
 	windowStyles,
 	css`
- 	    div.synopsis-text-container {
+ 	    div.text-container {
  	    height: 100%;
  	    }
  	    div.content-container {
@@ -318,24 +319,13 @@ export class SeedSynopsisText extends windowMixin(storeConsumerMixin(storeConsum
  	    }
  	    iframe {
  	    border: none; /* 1px solid silver; */
- 	    }
-	    button.unicode-button {
-	    padding: 2px;
-	    border: none;
-	    background: none;
-	    width: var(--window-button-width, auto);
-	    height: var(--window-button-height, auto);
-	    font-family: var(--windowo-button-font-family, Helvetica, Arial, Verdana, sans-serif);
-	    }
-	    button.unicode-button:hover {
-	    color: red;
-	    }`
+ 	    }`
     ]
 }
 
 
 declare global {
     interface HTMLElementTagNameMap {
-	"seed-synopsis-text": SeedSynopsisText;
+	"seed-text-view": SeedTextView;
     }
 }

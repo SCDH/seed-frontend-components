@@ -1,5 +1,17 @@
 # Changes
 
+## dev (0.7.0)
+
+- renamed `seed-synopsis-text` to `seed-text-view`:
+  - removed all items from the status bar and made it a slot for child elements
+  - minimize updates that result to re-rendering of the component and
+    thus of the text in it
+  - allow to render a text from the textSlice choosen by `textId`
+- `seed-state-scroll-position` as child component for the status slot
+  of text views
+- `seed-state-sync-others` as child component for the status slot
+  of text views
+
 ## 0.6.5
 
 - `seed-synopsis-text`:

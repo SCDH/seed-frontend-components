@@ -142,7 +142,7 @@ function seedAncestorOrSelfIds(element, ids) {
 
 
 function seedColorize(e) {
-    console.log("seedColorize testing event type: ", e.data?.event);
+    console.log("seedColorize testing for event type 'colorize': ", e.data?.event);
     if (e.data?.event == "colorize") {
 	// get payload from message
 	const cssPerSegment = e.data.cssPerSegment;
@@ -160,6 +160,10 @@ function seedColorize(e) {
 }
 
 window.addEventListener("message", seedColorize);
+console.info("colorizing handler registered");
+
+// notify the parent window that the text (document) is fully loaded
+window.addEventListener("load", () => {window.parent.postMessage({"event": "loaded"}, window.parent?.location?.href);});
 </script></head>
    <body>
       <div class="content">
