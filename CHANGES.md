@@ -1,6 +1,6 @@
 # Changes
 
-## dev (0.7.0)
+## 0.7.0
 
 - renamed `seed-synopsis-text` to `seed-text-view`:
   - removed all items from the status bar and made it a slot for child elements
