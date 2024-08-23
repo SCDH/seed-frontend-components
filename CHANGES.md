@@ -1,5 +1,10 @@
 # Changes
 
+## 0.8.0
+
+- highlight selected annotations and annotations hovered over
+- default color for highlighting annotations
+
 ## 0.7.0
 
 - renamed `seed-synopsis-text` to `seed-text-view`:
