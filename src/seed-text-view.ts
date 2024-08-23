@@ -7,9 +7,10 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 import { windowMixin, windowStyles } from './window-mixin';
 
 import { seedTextViewContext } from "./seed-context";
-import { addAppListener } from "./redux/seed-store";
+import { addAppListener, SeedState } from "./redux/seed-store";
 import { initText, setText, TextState } from "./redux/textsSlice";
 import { initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
+import { annotationSelected, annotationsPassedBy } from './redux/annotationsSlice';
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
 import { scrolled, syncOthers } from './redux/synopsisSlice';
@@ -17,8 +18,6 @@ import { scrolledTextViewThunk } from './redux/synopsisActions';
 import { setScrollTarget } from './redux/synopsisMiddleware';
 
 import log from "./logging";
-
-import { SeedState } from './redux/seed-store';
 
 
 
@@ -46,6 +45,8 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 
     @state()
     doc: string | undefined;
+
+    protected annotationSelected: string | null = null;
 
     protected docLoaded: boolean = false;
 
@@ -117,6 +118,37 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 	    }
 	}));
 
+	this.store?.dispatch(addAppListener({
+	    actionCreator: annotationSelected,
+	    effect: (_action, listenerApi): void => {
+		// reset highlighting of previously selected annotation
+		if (this.annotationSelected) {
+		    this.colorizeAnnotation(listenerApi.getState(), this.annotationSelected, { "border": "none"});
+		}
+		// highlight currently selected annotation
+		this.annotationSelected = listenerApi.getState().annotations.annotationSelected ?? "unknown";
+		// TODO: make CSS configurable
+		this.colorizeAnnotation(listenerApi.getState(), this.annotationSelected, { "border": "1px solid red"});
+	    }
+	}));
+
+	this.store?.dispatch(addAppListener({
+	    actionCreator: annotationsPassedBy,
+	    effect: (_action, listenerApi): void => {
+		// reset highlighting of previously transient annotations:
+		// general annotation highlighting and transient
+		// highlighting are bound to the same visual category,
+		// so we can use the general highlighting for a reset
+		this.colorizeText(listenerApi.getState().textViews[this.id].cssPerSegment);
+		// highlight transient annotations
+		const annotIds: Array<string> = listenerApi.getState().annotations.annotationsTransient;
+		annotIds.forEach(annotId => {
+		    // TODO: make CSS configurable
+		    this.colorizeAnnotation(listenerApi.getState(), annotId, { "background-color": "silver"});
+		});
+	    }
+	}));
+
 	// this.storeUnsubscribeListeners.push(subsc);
     }
 
@@ -147,7 +179,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
     }
 
     /*
-     * A callback for scrolling the text to `scrollTarget` position. 
+     * A callback for scrolling the text to `scrollTarget` position.
      */
     scrollTextTo(scrollTarget: string): void {
 	if (this.iframe) {
@@ -305,6 +337,22 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 		"cssPerSegment": cssPerSegment,
 	    };
 	    this.postMsg(msg);
+	}
+    }
+
+    /*
+     * Get the text segements included in an annotation given by
+     * `annotId` and colorize them with the given CSS.
+     */
+    protected colorizeAnnotation(state: SeedState, annotId: string, css: CSSDefinition): void {
+	if (state.textViews[this.id].segmentsPerAnnotation.hasOwnProperty(annotId)) {
+	    log.debug("colorizing selected annotation in " + this.id + ": " + annotId);
+	    const segments: Array<string> = state.textViews[this.id].segmentsPerAnnotation[annotId];
+	    const cssPerSegments: { [segmentId: string]: CSSDefinition } = {};
+	    segments.forEach(seg => {
+		cssPerSegments[seg] = css;
+	    });
+	    this.colorizeText(cssPerSegments);
 	}
     }
 

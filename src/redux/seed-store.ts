@@ -46,5 +46,6 @@ export type SeedDispatch = ((action: Action<"listenerMiddleware/add">) => Unsubs
 
 export const seedListenerMiddleware = createListenerMiddleware();
 export const startAppListening = seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
+export type startAppListeningType = typeof startAppListening;
 
 export const addAppListener = addListener.withTypes<SeedState, SeedDispatch>();
