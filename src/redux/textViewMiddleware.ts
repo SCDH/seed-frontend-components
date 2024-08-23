@@ -23,7 +23,7 @@ export const addTextViewListeners = (startListening: startAppListeningType) => {
 		const annotsPerSegment: AnnotationsPerSegment = textViewsSlice[textViewId].annotationsPerSegment;
 		// start with empty object
 		const segmentsPerAnnot: SegmentsPerAnnotation = {};
-		Object.keys(annotsPerSegment).forEach((segmentId: string) => {
+		Object.keys(annotsPerSegment).filter(segmentId => segmentId.length > 0).forEach((segmentId: string) => {
 		    const annots: Array<string> = annotsPerSegment[segmentId];
 		    annots.forEach((annotId: string) => {
 			if (segmentsPerAnnot.hasOwnProperty(annotId)) {
