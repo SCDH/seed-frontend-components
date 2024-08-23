@@ -14,8 +14,9 @@ integrated in Imperia or other CMSs.
   store, etc.) to descending elements
 - `<seed-config>`: an empty element for providing config options,
   e.g., URLs where annotations or alignment information can be found
-- `<seed-synopsis-text>`: an single HTML text in a `<iframe>` element
-  with features for setting up synoptical presentation of texts
+- `<seed-text-view>`: an single HTML text in a `<iframe>` element with
+  features for setting up synoptical presentation of texts,
+  highlighting passages with annotations and selecting them.
 - `<seed-annotation-permanent>`: shows the last selected annotation
 - `<seed-transform-rest>`: transform XML input (or other format) to
   HTML (or other format) using a RESTful webservice implementing the
@@ -150,9 +151,9 @@ pages with usage examples. They are contained in the
 
 ## Design Principles / Contributing
 
-1. Follow the **events up; properies down** principle.
+1. Use RTK (Redux Toolkit) for state management.
 
-1. Write components the [Lit](https://lit.dev/docs/) way.
+1. Write components the [Lit](https://lit.dev/docs/) way. Write view components!
 
 1. Prefer TS over JS.
 
