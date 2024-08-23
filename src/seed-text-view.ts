@@ -10,7 +10,7 @@ import { seedTextViewContext } from "./seed-context";
 import { addAppListener, SeedState } from "./redux/seed-store";
 import { initText, setText, TextState } from "./redux/textsSlice";
 import { initTextView, setText as setTextViewText, scrolledTo, fetchAnnotationsPerSegment } from "./redux/textViewsSlice";
-import { annotationSelected } from './redux/annotationsSlice';
+import { annotationSelected, annotationsPassedBy } from './redux/annotationsSlice';
 import { selectAnnotationsAtSegmentThunk, passByAnnotationsAtSegmentThunk } from "./redux/selectAnnotations";
 import { CSSDefinition } from './redux/cssTypes';
 import { scrolled, syncOthers } from './redux/synopsisSlice';
@@ -121,13 +121,31 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 	this.store?.dispatch(addAppListener({
 	    actionCreator: annotationSelected,
 	    effect: (_action, listenerApi): void => {
-		// reset highlightning of priviously selected annotation
+		// reset highlighting of previously selected annotation
 		if (this.annotationSelected) {
 		    this.colorizeAnnotation(listenerApi.getState(), this.annotationSelected, { "border": "none"});
 		}
 		// highlight currently selected annotation
 		this.annotationSelected = listenerApi.getState().annotations.annotationSelected ?? "unknown";
+		// TODO: make CSS configurable
 		this.colorizeAnnotation(listenerApi.getState(), this.annotationSelected, { "border": "1px solid red"});
+	    }
+	}));
+
+	this.store?.dispatch(addAppListener({
+	    actionCreator: annotationsPassedBy,
+	    effect: (_action, listenerApi): void => {
+		// reset highlighting of previously transient annotations:
+		// general annotation highlighting and transient
+		// highlighting are bound to the same visual category,
+		// so we can use the general highlighting for a reset
+		this.colorizeText(listenerApi.getState().textViews[this.id].cssPerSegment);
+		// highlight transient annotations
+		const annotIds: Array<string> = listenerApi.getState().annotations.annotationsTransient;
+		annotIds.forEach(annotId => {
+		    // TODO: make CSS configurable
+		    this.colorizeAnnotation(listenerApi.getState(), annotId, { "background-color": "silver"});
+		});
 	    }
 	}));
 
