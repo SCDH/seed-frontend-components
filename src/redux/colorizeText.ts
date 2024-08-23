@@ -10,7 +10,8 @@ import log from "./logging";
 export const preferredColorPredicate: string = "https://intertextuality.org/annotation#preferredCssColor";
 export const colorPriorityPredicate: string = "https://intertextuality.org/annotation#colorPriority";
 
-export const defaultColor: string = "yellow";
+export const visualCategory: string = "background-color";
+export const defaultCss: CSSDefinition = { "background-color": "whitesmoke" };
 
 /*
  * A thunk for setting the CSS for all annotations. This will update
@@ -32,7 +33,7 @@ export const setCssAnnotationsThunk = () => {
 		log.debug("setting CSS for annotation : " + annotId);
 		// get the annotation by ID
 		const annotation = annots[annotId];
-		css[annotId] = {};
+		css[annotId] = { 0: defaultCss };
 		// collect attributed RDF classes into the tags variable
 		var tags: any = {}
 		// an annotation may have multiple predicates with multiple objects
@@ -50,16 +51,13 @@ export const setCssAnnotationsThunk = () => {
 				tags[clasUri] = ontology[clasUri];
 				var tag: Predications = ontology[clasUri];
 				// get the CSS properties: background color
-				if (!tag.hasOwnProperty(preferredColorPredicate)) {
-				    css[annotId][0] = new CSSStyleDeclaration();
-				    css[annotId][0]["background-color"] = defaultColor;
-				} else {
+				if (tag.hasOwnProperty(preferredColorPredicate)) {
 				    var priority: number = 0;
 				    if (tag.hasOwnProperty(colorPriorityPredicate)) {
 					priority = +tag[colorPriorityPredicate][0].value;
 				    }
 				    css[annotId][priority] = {};
-				    css[annotId][priority]["background-color"] = tag[preferredColorPredicate][0].value;
+				    css[annotId][priority][visualCategory] = tag[preferredColorPredicate][0].value;
 				}
 			    }
 			}
