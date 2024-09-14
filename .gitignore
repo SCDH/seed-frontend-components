@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist_examples
+demo
 META-INF
 target
 docs
@@ -32,3 +34,6 @@ docs
 /public/*.html
 /public/transformation-api
 /public/resources
+
+# wiki
+wiki
