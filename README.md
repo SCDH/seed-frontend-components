@@ -1,34 +1,43 @@
 # SEED Frontend Components
 
-A collection of [web
+This is a collection of [web
 components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components)
-for building frontends for electronic editions.
+for building web frontends for digital editions. It's part of the
+SEED, which is an acronym and stands for **S**EED **E**lectronic
+**Ed**itions. If you don't like recursion you can stick to **S**CDH
+**E**lectronic **Ed**itions ;-).
 
-Developing web components does not entail a decision to use a certain
-JS framework. They are framework-agnostic.  They can even be
-integrated in Imperia or other CMSs.
+Why web components?
+
+- Flexibility: Developing web components does not entail a decision to
+  use a certain Javascript framework (React, Vue.js, next.js,
+  ...). They are framework-agnostic.  They can even be integrated in
+  Imperia or other CMSs.
+- Simple building blocks: Web components encapsulate complex functions
+  in custom HTML elements which are simple to use and simple to put
+  together. Have a look at the [examples folder](examples).
+- Suitable for complex frontends: Managing state is the most crucial
+  point in a complex web frontends. This collection of web components
+  uses [Redux Toolkit (RTK)](https://redux-toolkit.js.org/) for state
+  management: The Redux store is also encapsulated in a web
+  component. Again, this does not entail a decision for React as a
+  Javascript framework.
+
 
 ## List of Web Components
 
+These are the most important building blocks:
+
 - `<seed-app>`: a container element that provides app context (Redux
   store, etc.) to descending elements
-- `<seed-config>`: an empty element for providing config options,
-  e.g., URLs where annotations or alignment information can be found
 - `<seed-text-view>`: an single HTML text in a `<iframe>` element with
-  features for setting up synoptical presentation of texts,
+  features for setting up synoptical presentation of texts and
   highlighting passages with annotations and selecting them.
 - `<seed-annotation-permanent>`: shows the last selected annotation
-- `<seed-transform-rest>`: transform XML input (or other format) to
-  HTML (or other format) using a RESTful webservice implementing the
-  [*Transformation API*](transformation-api.md).
-- `<seed-transform-sef>`: transform XML input with XSLT compiled to
-  SEF, running in the browser only.
-- `<seed-transform-form>`: a generic web form for choosing
-  transformations, input documents and runtime parameters manually by
-  the user before passing it down to either `<seed-transform-rest>` or
-  `<seed-transform-sef>`
-- `<seed-download-link>`: a consumer of the transformation result from
-  `<seed-transform-rest>` or `<seed-transform-sef>`
+- `<seed-config>`: an empty element for providing config options,
+  e.g., URLs where annotations or alignment information can be found
+
+Read the detailed documentation in the [Wiki](wiki)!
 
 
 ## Usage Examples
@@ -37,13 +46,18 @@ See the  [*example web pages*](#example-web-pages) section below.
 
 There's also a list of real-world [*use cases*](#use-cases) below.
 
-## Installation
 
-Install from the [npm registry](-/packages/6733)! The NPM package
-contains the components in the `src` folder, but neither the index
-page nor the `examples`.
+## Getting started
 
-### Registry set up
+### Installation
+
+Install from the open [npm
+registry](https://zivgitlab.uni-muenster.de/SCDH/tei-processing/seed-frontend-components/-/packages)
+of the gitlab of University of Münster! The NPM package contains the
+components in the `src` folder, but neither the index page nor the
+`examples`.
+
+#### Registry set up
 
 Put this into your package's [`.npmrc`](https://docs.npmjs.com/cli/v9/configuring-npm/npmrc):
 
@@ -56,7 +70,8 @@ Downstream packages should always use the 805 as project ID.
 
 Reason: This package has dependencies on other packages prefixed with
 `@scdh` in the SCDH toplevel group. By using the toplevel group ID,
-npm will be forwarded to the right projects by gitlab.
+npm will be forwarded to the right projects by gitlab of University of
+Münster.
 
 Alternatively, you can use the 7934 group and [configure
 npm](https://docs.gitlab.com/ee/user/packages/npm_registry/#publishing-a-package-via-the-command-line)
@@ -68,15 +83,16 @@ npm config set @scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/groups/79
 npm config set -- //zivgitlab.uni-muenster.de/api/v4/groups/7934/-/packages/npm/:_authToken=YOUR_API_READ_TOKEN 
 ```
 
+TODO: Simplify!
 
 
-### Install
+#### Install
 
 ```shell
 npm i @scdh/seed-frontend-components
 ```
 
-## Using the Compiled Library of Web Components
+### Using the Compiled Library of Web Components
 
 Instead adding this package to the dependencies of your project, you
 can simply load the compiled library of web components. The latest
@@ -93,7 +109,7 @@ https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-compone
 ```
 
 
-## Development
+### Development
 
 Run a development server, accessible through `http://localhost:5173`:
 
@@ -108,7 +124,7 @@ Run tests:
 ```shell
 npm run test
 ```
-### Example Web Pages
+#### Example Web Pages
 
 Running the [development server](#development) will bring up several
 pages with usage examples. They are contained in the
@@ -144,7 +160,7 @@ pages with usage examples. They are contained in the
   component which uses `SaxonJS` as a transformation engine instead of
   a web service.
 
-### API Docs
+#### API Docs
 
 [https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/](https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/)
 
@@ -167,6 +183,6 @@ pages with usage examples. They are contained in the
 
 ## Use Cases
 
-- [Jiob Frontend](https://zivgitlab.uni-muenster.de/SCDH/schnocks-ijob/hiob-synopsis-frontend): a synoptical view of different versions of the book of Jiob
-- [ALEA Transformations](https://zivgitlab.uni-muenster.de/SCDH/hees-alea/alea-transformations): a bundle of XSLT transformations with a simple frontend for converting DOCX and ODT to TEI
-
+- [Jiob Frontend](https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/hiob-synopsis-frontend/): a synoptical view of different versions of the book of Jiob with annotations
+- [4 Ezra](https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/esra-demo/): a synoptical view of various versions of the fourth book of Ezra
+- [ALEA Transformations](https://scdh.zivgitlabpages.uni-muenster.de/hees-alea/alea-transformations/): a bundle of XSLT transformations with a simple frontend for converting DOCX and ODT to TEI, all XSLT running in the browser
