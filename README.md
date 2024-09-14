@@ -37,7 +37,8 @@ These are the most important building blocks:
 - `<seed-config>`: an empty element for providing config options,
   e.g., URLs where annotations or alignment information can be found
 
-Read the detailed documentation in the [Wiki](wiki)!
+Read the detailed documentation in the
+[Wiki](https://github.com/scdh/seed-frontend-components/wiki)!
 
 
 ## Usage Examples
