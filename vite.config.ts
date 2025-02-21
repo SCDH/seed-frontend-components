@@ -61,5 +61,15 @@ export default defineConfig(({ command, mode }) => {
 		// 	external: mode === "production" ? "" : /^lit/,
 	    }
 	},
+	server: {
+	    // proxy for Solr dev server listening on localhost:8983
+	    proxy: {
+		"/solr": {
+		    target: "http://localhost:8983/",
+		    changeOrigin: true,
+		    secure: false,
+		}
+	    }
+	},
   }
 });
