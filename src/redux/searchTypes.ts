@@ -7,6 +7,8 @@ export interface SearchResponse {
 
     response: Response
 
+    facet_counts: undefined | FacetCounts
+
 }
 
 /*
@@ -39,7 +41,6 @@ export interface Response {
     start: number,
     numFoundExact: boolean,
     docs: Array<Document>,
-    facet_counts: undefined | FacetCounts
 
 }
 
@@ -99,12 +100,12 @@ export const initialResponse: Response = {
     start: 0,
     numFoundExact: true,
     docs: [],
-    facet_counts: undefined,
 }
 
 export const initialSearchResponse = {
     responseHeader: initialResponseHeader,
-    response: initialResponse
+    response: initialResponse,
+    facet_counts: undefined,
 }
 
 
