@@ -116,8 +116,18 @@ export const initialSearchResponse = {
  */
 export interface SearchQuery {
 
+    /*
+     * The collection to search in. Note: If we want a search that can
+     * search multiple collections, we should consider making this a
+     * property name!
+     */
     collection: string,
 
     q: string,
 
+}
+
+export const initialSearchQuery: SearchQuery = {
+    collection: "tei4", // default collection
+    q: "*%3A*",         // match all
 }
