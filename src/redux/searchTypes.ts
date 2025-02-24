@@ -125,9 +125,61 @@ export interface SearchQuery {
 
     q: string,
 
+    q_op: string,
+
+    fl: Array<string>,
+
+    indent: boolean,
+
+    /*
+     * If set to `true`, this parameter enables facet counts in the query response.
+     */
+    facet: boolean;
+
+    /*
+     * Identifies a field that should be treated as a facet. This
+     * parameter can be specified multiple times in a query to select
+     * multiple facet fields.
+     */
+    facet_fields: Array<string>,
+
+
+    params: string,
+
 }
 
 export const initialSearchQuery: SearchQuery = {
     collection: "tei4", // default collection
     q: "*%3A*",         // match all
+    q_op: "OR",
+    fl: [ "id" ],
+    indent: true,
+    facet: true,
+    facet_fields: [],
+    params: "",
+}
+
+
+export function solrSearchQuery(query: SearchQuery): string {
+    var rc: string = "";
+
+    rc += "?q=" + query.q;
+
+    rc += "&q.op=" + query.q_op;
+
+    if (query.fl.length > 0) {
+	rc += "&fl=";
+	query.fl.forEach(f => rc += f + ",");
+    }
+
+    if (query.facet) {
+	rc += "&facet=true";
+	query.facet_fields.forEach(f => {
+	    rc += "&facet.field=" + f;
+	})
+    }
+
+    rc += "&params=" + query.params;
+
+    return rc;
 }
