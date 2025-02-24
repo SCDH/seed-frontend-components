@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query'
-import type { SearchResponse, SearchQuery } from './searchTypes'
 import type { FetchBaseQueryMeta } from '@reduxjs/toolkit/query';
 import type { CombinedState, QueryDefinition, FetchArgs, FetchBaseQueryError, BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { SearchResponse, SearchQuery } from './searchTypes';
+import { solrSearchQuery } from './searchTypes';
 
 
 /*
@@ -22,7 +23,7 @@ export const searchApi = createApi({
     endpoints: (builder) => ({
 	// get documents matching the search query
 	documents: builder.query<SearchResponse, SearchQuery>({
-	    query: (qry) => `${qry.collection}/select?q=${qry.q}&q.op=OR&indent=true&fl=id&useParams=`
+	    query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
 	}),
 	// get all used field names from the solr index
 	fields: builder.query<Array<String>, string>({
