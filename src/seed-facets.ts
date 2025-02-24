@@ -1,32 +1,43 @@
-import { html, css, LitElement, CSSResultGroup, PropertyValues } from 'lit'
-import { customElement, property, state, query } from 'lit/decorators.js'
-import { UnknownAction } from '@reduxjs/toolkit';
-import { provide } from '@lit/context';
-import { QuerySubState } from '@reduxjs/toolkit/query';
+import { html, LitElement } from 'lit'
+import { customElement, property, state, } from 'lit/decorators.js'
 
 import { storeConsumerMixin } from './store-consumer-mixin';
-
-import { addAppListener, SeedState } from "./redux/seed-store";
+import { addAppListener } from "./redux/seed-store";
 import { searchApi } from './redux/searchSlice';
+import { addFacetFields } from './redux/searchQuerySlice';
 
 import log from "./logging";
 
 
 
-// define the web component
+/*
+ * The `seed-facets` web component is a container for search
+ * facets. It takes a regex pattern for filtering a list of fields of
+ * the search engine, each of which it generates a facet for. The
+ * generated facets are based on the `seed-facet` (singular) web
+ * component.
+ *
+ * If you need a fixed list of fields, simply use regex groups like
+ * this: `pattern="^(cat1|cat2)$"`.
+ */
 @customElement("seed-facets")
 export class SeedFacets extends storeConsumerMixin(LitElement) {
 
+    /*
+     * The `pattern` attribute takes a regex which is used to filter
+     * out the fields (categories) of the search index, for which
+     * facets are to be generated.
+     */
     @property()
     pattern: string = ".*_ss$";
 
     @state()
-    fields: Array<String> = [];
+    fields: Array<string> = [];
 
     @state()
     collection: string = "";
 
-    async subscribeStore() {
+    override subscribeStore() {
 	log.debug("subscribing seed-facets");
 	if (this.store === undefined) {
 	    log.debug("no store yet for element with Id ", this.id);
@@ -41,20 +52,34 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
 		log.debug("search result updated", listenerApi.getState().searchApi);
 		const flds: Array<string> = listenerApi.getState().searchApi?.queries?.[this.queryName()]?.data as Array<string> ?? [];
 		log.debug("facet fields", flds);
+		// store facet fields as local state
 		this.fields  = flds.filter(f => f.match(pattern));
+		// add facet fields to search query
+		this.store?.dispatch(addFacetFields(this.fields));
 	    }
 	}));
     }
 
-    protected queryName(): string {
-	// TODO
+    /*
+     * Make the query name, which is `fields("COLLECTION")` where
+     * `COLLECTION` is the collection parameter passed to the `fields`
+     * endpoint.
+     */
+    private queryName(): string {
 	return 'fields(\"' + this.collection + '\")';
     }
 
-    render() {
-	return html`<div>Facets:<div>${this.fields}</div></div>`;
+    override render() {
+	return this.fields.map(f => {
+	    return this.renderFacet(f);
+	});
     }
 
+    renderFacet(field: string) {
+	log.debug("rendering facet", field);
+	return html`<seed-facet field="${field}"></seed-facet>`;
+	//return html`<span>${field}</span>`;
+    }
 }
 
 
