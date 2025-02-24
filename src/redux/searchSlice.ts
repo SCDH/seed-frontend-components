@@ -4,7 +4,10 @@ import type { FetchBaseQueryMeta } from '@reduxjs/toolkit/query';
 import type { CombinedState, QueryDefinition, FetchArgs, FetchBaseQueryError, BaseQueryFn } from '@reduxjs/toolkit/query';
 
 
-
+/*
+ * The `searchApi` slice is the redux slice we get from running
+ * queries against the search engine. We are using RTK Query for this.
+ */
 export const searchApi = createApi({
     reducerPath: 'searchApi',
     baseQuery: fetchBaseQuery({
@@ -37,13 +40,12 @@ export const searchApi = createApi({
     }),
 })
 
-//export type SearchState = typeof searchApi.reducer.prototype
+//export type SearchState = typeof searchApi.reducer
 export type SearchState = CombinedState<{
     // this lists all endpoint types
     documents: QueryDefinition<SearchQuery, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, SearchResponse, "searchApi">;
     fields:    QueryDefinition<string, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, Array<String>, "searchApi">;
 }, never, "searchApi">
 
-
-// TODO: does not work
+// TODO: does not work, since it needs react hooks
 //export const { useDocumentsQuery } = searchApi
