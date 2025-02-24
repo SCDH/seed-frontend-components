@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+    <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
+    <script type="module" src="/src/seed-app.ts"></script>
+    <script type="module" src="/src/seed-config.ts"></script>
+    <script type="module" src="/src/seed-config-text.ts"></script>
+    <script type="module" src="/src/seed-search.ts"></script>
+    <script type="module" src="/src/seed-facets.ts"></script>
+    <script type="module" src="/src/seed-facet.ts"></script>
+    <style type="text/css">
+      .synopsis {
+	  height: 80vh;
+	  display: flex;
+	  flex-direction: row;
+	  flex-wrap: nowrap;
+      }
+      .synopsis seed-text-view {
+	  flex-grow: 1;
+	  min-width: 20em;
+	  margin: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <seed-app>
+      <seed-config
+	annotations-url="Annotationen.json"
+	ontology-urls="ontology.json"
+	regex-alignment="alignment.json"></seed-config>
+      <seed-search></seed-search>
+      <div>Facets:</div>
+      <seed-facets pattern="^about.*_ss$"></seed-facets>
+    </seed-app>
+  </body>
+
+  <script>
+    // // Create IE + others compatible event handler
+    // var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+    // var eventer = window[eventMethod];
+    // var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+    // // Listen to message from child window
+    // eventer(messageEvent,function(e) {
+    // 	console.log("parent received message from " + e.origin + ": ", e.data);
+    // },false);
+    </script>
+</html>
