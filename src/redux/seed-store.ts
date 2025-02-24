@@ -12,6 +12,7 @@ import { AnnotationsSlice } from "./annotationsSlice";
 import { OntologyState } from "./ontologySlice";
 import { SynopsisSlice } from "./synopsisSlice";
 import { searchApi, SearchState } from "./searchSlice";
+import { SearchQuery } from "./searchTypes";
 
 /*
  * An interface describing a store with the slices of this library.
@@ -27,6 +28,8 @@ export interface SeedState {
     ontology: OntologyState;
 
     synopsis: SynopsisSlice;
+
+    searchQuery: SearchQuery;
 
     [searchApi.reducerPath]: SearchState;
 
