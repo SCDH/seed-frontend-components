@@ -30,7 +30,7 @@ export const searchApi = createApi({
 		// https://redux-toolkit.js.org/rtk-query/api/fetchBaseQuery#parsing-a-response
 		responseHandler: (response) => response.text()
 	    }),
-	    transformResponse: (response: String, _meta: FetchBaseQueryMeta | undefined, _arg: SearchQuery) => {
+	    transformResponse: (response: String, _meta: FetchBaseQueryMeta | undefined, _arg: string) => {
 		return response.split(",");
 	    }
 	}),
@@ -41,7 +41,7 @@ export const searchApi = createApi({
 export type SearchState = CombinedState<{
     // this lists all endpoint types
     documents: QueryDefinition<SearchQuery, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, SearchResponse, "searchApi">;
-    fields:    QueryDefinition<SearchQuery, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, Array<String>, "searchApi">;
+    fields:    QueryDefinition<string, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, Array<String>, "searchApi">;
 }, never, "searchApi">
 
 

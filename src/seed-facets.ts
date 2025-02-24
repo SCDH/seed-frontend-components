@@ -39,7 +39,7 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
 	    effect: async (_action, listenerApi) => {
 		const pattern: RegExp = new RegExp(this.pattern);
 		log.debug("search result updated", listenerApi.getState().searchApi);
-		const flds: Array<string> = listenerApi.getState().searchApi.queries?.[this.queryName()]?.data as Array<string> ?? [];
+		const flds: Array<string> = listenerApi.getState().searchApi?.queries?.[this.queryName()]?.data as Array<string> ?? [];
 		log.debug("facet fields", flds);
 		this.fields  = flds.filter(f => f.match(pattern));
 	    }

@@ -72,14 +72,19 @@ export interface FacetCounts {
 }
 
 /*
- * The facet fields are similar to `Document`, but the value is an
- * array of field values interleaved with counts. Ugh, ugly!
+ * The facet fields are similar to `Document`.
  */
 export interface FacetFields {
 
-    [facet_field: string]: Array<any | Number>
+    [facet_field: string]: FacetTerms
 
 }
+
+/*
+ * The property values of `FacetFields` are arrays of field values
+ * interleaved with counts. Ugh, ugly!
+ */
+export type FacetTerms = Array<string | number>;
 
 
 export const initialResponseHeader = {
