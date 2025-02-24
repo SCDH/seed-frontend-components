@@ -8,7 +8,6 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 
 import { addAppListener, SeedState } from "./redux/seed-store";
 import { searchApi } from './redux/searchSlice';
-import { SearchQuery } from './redux/searchTypes';
 
 import log from "./logging";
 
@@ -18,22 +17,23 @@ import log from "./logging";
 @customElement("seed-facets")
 export class SeedFacets extends storeConsumerMixin(LitElement) {
 
-    query: SearchQuery = { q: "*%3A*", collection: "tei4" }
-
-
     @property()
-    pattern: string = "^about.*_ss$";
+    pattern: string = ".*_ss$";
 
     @state()
     fields: Array<String> = [];
+
+    @state()
+    collection: string = "";
 
     async subscribeStore() {
 	log.debug("subscribing seed-facets");
 	if (this.store === undefined) {
 	    log.debug("no store yet for element with Id ", this.id);
 	}
-	// This kind of subscription with store.dispatch(addListener(...)) needs a store with listener middleware, see
-	// https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
+	// TODO: get from store
+	this.collection = "tei4";
+	// get name of facets from store: 1) get all field names, 2) filter with this.pattern
 	this.store?.dispatch(addAppListener({
 	    matcher: searchApi.endpoints.fields.matchFulfilled,
 	    effect: async (_action, listenerApi) => {
@@ -48,7 +48,7 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
 
     protected queryName(): string {
 	// TODO
-	return 'fields({"collection":"tei4","q":"*%3A*"})';
+	return 'fields(\"' + this.collection + '\")';
     }
 
     render() {

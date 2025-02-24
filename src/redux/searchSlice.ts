@@ -22,9 +22,9 @@ export const searchApi = createApi({
 	    query: (qry) => `${qry.collection}/select?q=${qry.q}&q.op=OR&indent=true&fl=id&useParams=`
 	}),
 	// get all used field names from the solr index
-	fields: builder.query<Array<String>, SearchQuery>({
-	    query: (qry) => ({
-		url: `${qry.collection}/select?q=*%3A*&wt=csv&rows=0`,
+	fields: builder.query<Array<String>, string>({
+	    query: (collection) => ({
+		url: `${collection}/select?q=*%3A*&wt=csv&rows=0`,
 		// Since the response body is csv, the default
 		// response handler is not suitable. See
 		// https://redux-toolkit.js.org/rtk-query/api/fetchBaseQuery#parsing-a-response
