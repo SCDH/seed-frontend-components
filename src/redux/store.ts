@@ -6,7 +6,9 @@ import textViewsReducer from "./textViewsSlice";
 import annotationsReducer from "./annotationsSlice";
 import ontologyReducer from "./ontologySlice";
 import synopsisReducer from "./synopsisSlice";
+import searchQueryReducer from "./searchQuerySlice";
 import { searchApi } from "./searchSlice";
+
 
 import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subscribeSegmentsCssOnSegmentsUpdater } from "./colorizeText";
 import { addTextViewListeners } from "./textViewMiddleware";
@@ -26,6 +28,7 @@ export const store = configureStore({
 	annotations: annotationsReducer,
 	ontology: ontologyReducer,
 	synopsis: synopsisReducer,
+	searchQuery: searchQueryReducer,
 	[searchApi.reducerPath]: searchApi.reducer,
     },
     // add the middleware
