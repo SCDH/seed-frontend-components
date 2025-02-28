@@ -111,7 +111,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
 	    predicate: (_action: UnknownAction, currentState, previousState): boolean => {
 		return this.textId !== undefined &&
 		    currentState.texts.hasOwnProperty(this.textId) &&
-		    (currentState.texts[this.textId].doc !== previousState.texts[this.textId]?.doc ?? "unknown");
+		    (currentState.texts[this.textId].doc !== (previousState.texts?.[this.textId]?.doc ?? "unknown"));
 	    },
 	    effect: (_action, listenerApi): void => {
 		this.doc = listenerApi.getState().texts[this.textId ?? "_"].doc;
