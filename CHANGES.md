@@ -1,5 +1,9 @@
 # Changes
 
+## 0.8.1
+
+- update dependencies
+
 ## 0.8.0
 
 - highlight selected annotations and annotations hovered over
