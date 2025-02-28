@@ -141,6 +141,10 @@ export interface SearchQuery {
 
     q: string,
 
+    fq: string | undefined,
+
+    _fq_faceted: FacetFilterQuery | undefined,
+
     q_op: string,
 
     fl: Array<string>,
@@ -164,9 +168,17 @@ export interface SearchQuery {
 
 }
 
+export interface FacetFilterQuery {
+
+    [field: string]: Set<string>,
+
+}
+
 export const initialSearchQuery: SearchQuery = {
     collection: "tei4", // default collection
     q: "*%3A*",         // match all
+    fq: undefined,
+    _fq_faceted: {} as FacetFilterQuery,
     q_op: "OR",
     fl: [ "id" ],
     indent: true,
@@ -175,7 +187,9 @@ export const initialSearchQuery: SearchQuery = {
     params: "",
 }
 
-
+/*
+ * Make a Solr search query from the given `SearchQuery` object.
+ */
 export function solrSearchQuery(query: SearchQuery): string {
     var rc: string = "";
 
@@ -186,6 +200,27 @@ export function solrSearchQuery(query: SearchQuery): string {
     if (query.fl.length > 0) {
 	rc += "&fl=";
 	query.fl.forEach(f => rc += f + ",");
+    }
+
+    if (query.fq !== undefined) {
+	rc += "&fq=" + query.fq;
+    }
+
+    const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
+    for (const field of fields) {
+	const terms: Set<string> = query._fq_faceted?.[field] ?? new Set();
+    	if (terms.size > 0) {
+	    rc += "&fq=" + field + ":(";
+	    var i = 0;
+	    for (const term of terms) {
+		if (i > 0) {
+		    rc += " OR ";
+		}
+		rc += "\"" + term + "\"";
+		i++;
+	    }
+	    rc += ")";
+	}
     }
 
     if (query.facet) {
