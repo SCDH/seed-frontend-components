@@ -4,7 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js'
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { addAppListener } from "./redux/seed-store";
 import { searchApi } from './redux/searchSlice';
-import { FacetTerms, SearchResponse } from './redux/searchTypes';
+import { FacetTerms, SearchResponse, toTermCountTuples, TermCountTuple } from './redux/searchTypes';
 
 import log from "./logging";
 
@@ -23,7 +23,7 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
     threshold: number = 0;
 
     @state()
-    terms: FacetTerms = [];
+    terms: Array<TermCountTuple> = [];
 
     async subscribeStore() {
 	log.debug("subscribing seed-facet");
@@ -40,7 +40,7 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
 		    if (q.startsWith("documents")) {
 			const data: SearchResponse = listenerApi.getState().searchApi.queries[q]?.data as SearchResponse;
 			log.debug("data", data.facet_counts?.facet_fields[this.field]);
-			this.terms = data.facet_counts?.facet_fields[this.field] as FacetTerms;
+			this.terms = toTermCountTuples(data.facet_counts?.facet_fields[this.field] as FacetTerms);
 			break;
 		    }
 		}
@@ -51,21 +51,20 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
     }
 
     render() {
-	return html`<div><div>Facet: ${this.field}</div><div .innerHTML="${this.renderTerms()}"></div></div>`;
+	return html`<div><div>Facet: ${this.field}</div><div>${this.terms.map(t => this.renderTerm(t))}</div></div>`;
     }
 
-    renderTerms() {
-	log.debug("rendering terms");
-	var i: number = 0;
-	var rc: string = "";
-	while (i < this.terms.length) {
-	    log.debug(this.terms[i], this.terms[i+1]);
-	    rc += `<div><span>${this.terms[i]}</span> <span>${this.terms[i+1]}</span></div>`;
-	    i += 2;
-	}
-	return rc;
+    renderTerm(t: TermCountTuple) {
+	return html`<div><input type="checkbox" id="${t.term}" name="${this.field}" value="${t.term}" checked @change="${this.changed(t.term)}"><label for="${t.term}">${t.term}</label> <span>${t.count}</span></div>`;
     }
 
+    changed = (term: string) => {
+	return ((e: Event) => {
+	    const origin: HTMLInputElement = e.composedPath()[0] as HTMLInputElement;
+	    const checked: boolean = origin.checked ?? false;
+	    console.log("facet term changed: ", term, checked);
+	});
+    }
 
 }
 
