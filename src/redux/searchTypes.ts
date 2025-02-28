@@ -87,6 +87,21 @@ export interface FacetFields {
  */
 export type FacetTerms = Array<string | number>;
 
+export interface TermCountTuple {
+    term: string,
+    count: number,
+}
+
+export function toTermCountTuples(facetTerms: FacetTerms): Array<TermCountTuple> {
+    var rc: Array<TermCountTuple> = [];
+    var i: number = 0;
+    while (i < facetTerms.length) {
+	rc.push({ term: facetTerms[i] as string, "count": facetTerms[i+1] as number });
+	i = i + 2;
+    }
+    return rc;
+}
+
 
 export const initialResponseHeader = {
     zkConnected: false,
