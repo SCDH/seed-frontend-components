@@ -35,9 +35,9 @@
     "typedoc": "^0.27.9",
     "typescript": "^5.7.3",
     "typescript-plugin-css-modules": "^5.0.1",
-    "vite": "^5.2.12",
-    "vite-plugin-static-copy": "^1.0.5",
-    "vitest": "^0.34.6"
+    "vite": "^6.2.0",
+    "vite-plugin-static-copy": "^2.2.0",
+    "vitest": "^3.0.7"
   },
   "files": [
     "src/**/*",
