@@ -30,7 +30,7 @@ export const searchQuerySlice = createSlice({
 	},
 	removeFilter: (state: SearchQuery, action: PayloadAction<{field: string, term: string}>) => {
 	    if (state._fq_faceted !== undefined && state._fq_faceted.hasOwnProperty(action.payload.field)) {
-		state._fq_faceted[action.payload.field].filter(t => t !== action.payload.term);
+		state._fq_faceted[action.payload.field] = state._fq_faceted[action.payload.field].filter(t => t !== action.payload.term);
 		if (state._fq_faceted[action.payload.field].length == 0) {
 		    delete state._fq_faceted[action.payload.field];
 		}
