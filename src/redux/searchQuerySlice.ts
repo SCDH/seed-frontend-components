@@ -15,9 +15,30 @@ export const searchQuerySlice = createSlice({
 	    const union = new Set([...s, ...n]);
 	    state.facet_fields = Array.from(union);
 	},
+	addFilter: (state: SearchQuery, action: PayloadAction<{field: string, term: string}>) => {
+	    if (state._fq_faceted === undefined) {
+		state._fq_faceted = {};
+		state._fq_faceted[action.payload.field] = [action.payload.term];
+	    } else {
+		if (state._fq_faceted.hasOwnProperty(action.payload.field)) {
+		    const s = new Set(state._fq_faceted[action.payload.field]);
+		    state._fq_faceted[action.payload.field] = Array.from(s.add(action.payload.term));
+		} else {
+		    state._fq_faceted[action.payload.field] = [action.payload.term];
+		}
+	    }
+	},
+	removeFilter: (state: SearchQuery, action: PayloadAction<{field: string, term: string}>) => {
+	    if (state._fq_faceted !== undefined && state._fq_faceted.hasOwnProperty(action.payload.field)) {
+		state._fq_faceted[action.payload.field].filter(t => t !== action.payload.term);
+		if (state._fq_faceted[action.payload.field].length == 0) {
+		    delete state._fq_faceted[action.payload.field];
+		}
+	    }
+	}
     }
 });
 
-export const { setCollection, addFacetFields } = searchQuerySlice.actions;
+export const { setCollection, addFacetFields, addFilter, removeFilter } = searchQuerySlice.actions;
 
 export default searchQuerySlice.reducer;
