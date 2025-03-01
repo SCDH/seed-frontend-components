@@ -170,7 +170,7 @@ export interface SearchQuery {
 
 export interface FacetFilterQuery {
 
-    [field: string]: Set<string>,
+    [field: string]: Array<string>,
 
 }
 
@@ -208,8 +208,8 @@ export function solrSearchQuery(query: SearchQuery): string {
 
     const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
     for (const field of fields) {
-	const terms: Set<string> = query._fq_faceted?.[field] ?? new Set();
-    	if (terms.size > 0) {
+	const terms: Array<string> = query._fq_faceted?.[field] ?? [];
+    	if (terms.length > 0) {
 	    rc += "&fq=" + field + ":(";
 	    var i = 0;
 	    for (const term of terms) {

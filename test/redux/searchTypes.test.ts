@@ -21,7 +21,7 @@ test("should have filter query parameter from fq property", () => {
 
 test("should have filter query parameter from _fq_facets parameter", () => {
     var query2 = initialSearchQuery;
-    query2._fq_faceted = { "persons": new Set(["Major", "Sergant"])};
+    query2._fq_faceted = { "persons": ["Major", "Sergant"]};
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
@@ -32,7 +32,7 @@ test("should have filter query parameter from _fq_facets parameter", () => {
 
 test("should have filter query parameter from _fq_facets parameter with single term", () => {
     var query2 = initialSearchQuery;
-    query2._fq_faceted = { "persons": new Set(["Major"])};
+    query2._fq_faceted = { "persons": ["Major"]};
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
@@ -43,7 +43,7 @@ test("should have filter query parameter from _fq_facets parameter with single t
 
 test("should have filter query parameter from _fq_facets parameter with multiple facets", () => {
     var query2 = initialSearchQuery;
-    query2._fq_faceted = { "persons": new Set(["Major"]), "places": new Set(["Kairo"]) };
+    query2._fq_faceted = { "persons": ["Major"], "places": ["Kairo"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
