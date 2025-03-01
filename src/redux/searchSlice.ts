@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query'
 import type { FetchBaseQueryMeta } from '@reduxjs/toolkit/query';
 import type { CombinedState, QueryDefinition, FetchArgs, FetchBaseQueryError, BaseQueryFn } from '@reduxjs/toolkit/query';
+import { defaultSerializeQueryArgs } from '@reduxjs/toolkit/query';
+
 import type { SearchResponse, SearchQuery } from './searchTypes';
 import { solrSearchQuery } from './searchTypes';
 
@@ -24,6 +26,12 @@ export const searchApi = createApi({
 	// get documents matching the search query
 	documents: builder.query<SearchResponse, SearchQuery>({
 	    query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
+	    serializeQueryArgs: serializeQueryArgs,
+	}),
+	// get documents matching the search query, used after adding or removing a filter
+	filter: builder.query<SearchResponse, SearchQuery>({
+	    query: (qry) => `/solr/${qry.collection}/select${solrSearchQuery(qry)}`,
+	    serializeQueryArgs: serializeQueryArgs,
 	}),
 	// get all used field names from the solr index
 	fields: builder.query<Array<String>, string>({
@@ -40,6 +48,11 @@ export const searchApi = createApi({
 	}),
     }),
 })
+
+function serializeQueryArgs(args: { queryArgs: SearchQuery, endpointDefinition: any, endpointName: string }) {
+    const qs = solrSearchQuery(args.queryArgs);
+    return defaultSerializeQueryArgs({queryArgs: qs, endpointDefinition: args.endpointDefinition, endpointName: args.endpointName} );
+}
 
 //export type SearchState = typeof searchApi.reducer
 export type SearchState = CombinedState<{
