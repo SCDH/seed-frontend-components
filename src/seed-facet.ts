@@ -4,6 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js'
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { addAppListener } from "./redux/seed-store";
 import { searchApi } from './redux/searchSlice';
+import { addFilter, removeFilter } from './redux/searchQuerySlice';
 import { FacetTerms, SearchResponse, toTermCountTuples, TermCountTuple } from './redux/searchTypes';
 
 import log from "./logging";
@@ -55,14 +56,29 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
     }
 
     renderTerm(t: TermCountTuple) {
-	return html`<div><input type="checkbox" id="${t.term}" name="${this.field}" value="${t.term}" checked @change="${this.changed(t.term)}"><label for="${t.term}">${t.term}</label> <span>${t.count}</span></div>`;
+	return html`<div><input type="checkbox" id="${t.term}" name="${this.field}" value="${t.term}" @change="${this.changed(t.term)}"><label for="${t.term}">${t.term}</label> <span>${t.count}</span></div>`;
     }
 
     changed = (term: string) => {
 	return ((e: Event) => {
 	    const origin: HTMLInputElement = e.composedPath()[0] as HTMLInputElement;
 	    const checked: boolean = origin.checked ?? false;
-	    console.log("facet term changed: ", term, checked);
+	    log.debug("facet term changed: ", term, checked, this);
+	    if (checked) {
+		this.store?.dispatch(addFilter({field: this.field, term: term }));
+		const s = this.store?.getState().searchQuery;
+		log.debug("search query", s);
+		if (s !== undefined) {
+		    this.store?.dispatch(searchApi.endpoints.filter.initiate(s));
+		}
+	    } else {
+		this.store?.dispatch(removeFilter({field: this.field, term: term }));
+		const s = this.store?.getState().searchQuery;
+		log.debug("search query", s);
+		if (s !== undefined) {
+		    this.store?.dispatch(searchApi.endpoints.filter.initiate(s));
+		}
+	    }
 	});
     }
 
