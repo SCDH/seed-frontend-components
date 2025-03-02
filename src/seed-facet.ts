@@ -5,7 +5,7 @@ import { storeConsumerMixin } from './store-consumer-mixin';
 import { addAppListener } from "./redux/seed-store";
 import { searchApi } from './redux/searchSlice';
 import { addFilter, removeFilter } from './redux/searchQuerySlice';
-import { FacetTerms, SearchResponse, toTermCountTuples, TermCountTuple } from './redux/searchTypes';
+import { FacetTerms, SearchResponse, toTermCountTuples, TermCountTuple, solrSearchQuery } from './redux/searchTypes';
 
 import log from "./logging";
 
@@ -36,17 +36,11 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
 	    matcher: searchApi.endpoints.documents.matchFulfilled,
 	    effect: async (_action, listenerApi) => {
 		log.debug("api", listenerApi.getState().searchApi.queries);
-		// TODO: better way to access query response
-		for (var q in listenerApi.getState().searchApi.queries) {
-		    if (q.startsWith("documents")) {
-			const data: SearchResponse = listenerApi.getState().searchApi.queries[q]?.data as SearchResponse;
-			log.debug("data", data.facet_counts?.facet_fields[this.field]);
-			this.terms = toTermCountTuples(data.facet_counts?.facet_fields[this.field] as FacetTerms);
-			break;
-		    }
+		const queryId: string = searchApi.endpoints.documents.name + "(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		const data: SearchResponse | undefined = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse | undefined;
+		if (data !== undefined) {
+		    this.terms = toTermCountTuples(data.facet_counts?.facet_fields[this.field] as FacetTerms);
 		}
-		//this.terms = action.payload.response?.facet_counts?.facet_fields?[this.field] : [];
-		log.debug("terms", this.terms);
 	    }
 	}));
     }
