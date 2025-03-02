@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit'
+import { html, css, LitElement, CSSResultGroup } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 
 import { storeConsumerMixin } from './store-consumer-mixin';
@@ -46,11 +46,20 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
     }
 
     render() {
-	return html`<div><div>Facet: ${this.field}</div><div>${this.terms.map(t => this.renderTerm(t))}</div></div>`;
+	return html`<div class="facet">
+	    <div class="category">Facet: ${this.field}</div>
+	    <div>
+		${this.terms.map(t => this.renderTerm(t))}
+	    </div>
+	</div>`;
     }
 
     renderTerm(t: TermCountTuple) {
-	return html`<div><input type="checkbox" id="${t.term}" name="${this.field}" value="${t.term}" @change="${this.changed(t.term)}"><label for="${t.term}">${t.term}</label> <span>${t.count}</span></div>`;
+	return html`<div class="term">
+	    <input type="checkbox" id="${t.term}" name="${this.field}" value="${t.term}" @change="${this.changed(t.term)}">
+	    <label for="${t.term}">${t.term}</label>
+	    <span>${t.count}</span>
+	</div>`;
     }
 
     changed = (term: string) => {
@@ -75,6 +84,16 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
 	    }
 	});
     }
+
+    static styles: CSSResultGroup = [
+	css`.facet {
+	    display: inline-block;
+	    border: 1px solid var(--window-border-color, lightblue);
+	    }
+	    .catetory {
+
+	    }`
+    ]
 
 }
 
