@@ -4,7 +4,8 @@ import { customElement, state } from 'lit/decorators.js'
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { SearchResponse, Document } from "./redux/searchTypes";
+import { addFilter, removeFilter } from './redux/searchQuerySlice';
+import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
 
 
 import log from "./logging";
@@ -35,17 +36,65 @@ export class SeedSearchResult extends storeConsumerMixin(LitElement) {
 	this.store?.dispatch(addAppListener({
 	    matcher: searchApi.endpoints.documents.matchFulfilled,
 	    effect: async (_action, listenerApi) => {
-		log.debug("api", listenerApi.getState().searchApi.queries);
-		// TODO: better way to access query response
-		for (var q in listenerApi.getState().searchApi.queries) {
-		    if (q.startsWith("documents")) {
-			const data: SearchResponse = listenerApi.getState().searchApi.queries[q]?.data as SearchResponse;
-			log.debug("data", data.response);
-			this.document_count = data.response.numFound;
-			this.document_start = data.response.start;
-			this.documents = data.response.docs;
-			break;
-		    }
+		const queryId: string = "documents(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		log.debug("api document initiated", queryId, listenerApi.getState().searchApi.queries.hasOwnProperty(queryId));
+		const data: SearchResponse = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse;
+		this.document_count = data.response.numFound;
+		this.document_start = data.response.start;
+		this.documents = data.response.docs;
+	    }
+	}));
+	this.store?.dispatch(addAppListener({
+	    matcher: searchApi.endpoints.filter.matchFulfilled,
+	    effect: async (_action, listenerApi) => {
+		const queryId: string = "filter(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		log.debug("api filter initiated", queryId, listenerApi.getState().searchApi.queries.hasOwnProperty(queryId));
+		const data: SearchResponse = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse;
+		this.document_count = data.response.numFound;
+		this.document_start = data.response.start;
+		this.documents = data.response.docs;
+	    }
+	}));
+	// get result for search queries already initiated
+	// 1. filter removed, result already present from document(...) query
+	this.store?.dispatch(addAppListener({
+	    matcher: removeFilter.match,
+	    effect: (_action, listenerApi) => {
+		const queryId: string = "documents(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		log.debug("filter removed", queryId, listenerApi.getState().searchApi.queries.hasOwnProperty(queryId));
+		const data: SearchResponse | undefined = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse | undefined;
+		if (data !== undefined) {
+		    this.document_count = data.response.numFound;
+		    this.document_start = data.response.start;
+		    this.documents = data.response.docs;
+		}
+	    }
+	}));
+	// 2. filter removed, result already present from filter(...) query
+	this.store?.dispatch(addAppListener({
+	    matcher: removeFilter.match,
+	    effect: (_action, listenerApi) => {
+		const queryId: string = "filter(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		log.debug("filter removed", queryId, listenerApi.getState().searchApi.queries.hasOwnProperty(queryId));
+		const data: SearchResponse | undefined = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse | undefined;
+		if (data !== undefined) {
+		    this.document_count = data.response.numFound;
+		    this.document_start = data.response.start;
+		    this.documents = data.response.docs;
+		}
+	    }
+	}));
+	// 2. filter added, result already present from filter(...) query
+	this.store?.dispatch(addAppListener({
+	    matcher: addFilter.match,
+	    effect: (_action, listenerApi) => {
+		const queryId: string = "filter(\"" + solrSearchQuery(listenerApi.getState().searchQuery).replaceAll("\"", "\\\"") + "\")";
+		log.debug("filter removed", queryId, listenerApi.getState().searchApi.queries.hasOwnProperty(queryId));
+		const data: SearchResponse | undefined = listenerApi.getState().searchApi.queries[queryId]?.data as SearchResponse | undefined;
+		if (data !== undefined) {
+		    this.document_count = data.response.numFound;
+		    this.document_start = data.response.start;
+		    this.documents = data.response.docs;
 		}
 	    }
 	}));
@@ -58,7 +107,7 @@ export class SeedSearchResult extends storeConsumerMixin(LitElement) {
     }
 
     renderDocumentCount() {
-	return html`<div><span>Documents found:<span><span>${this.document_count}</span></div>`;
+	return html`<div><span>Documents found:</span><span>${this.document_count}</span></div>`;
     }
 
 }
