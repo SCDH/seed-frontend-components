@@ -1,6 +1,6 @@
 import { EnhancedStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { UnknownAction, ThunkDispatch } from "@reduxjs/toolkit";
-import { addListener } from "@reduxjs/toolkit";
+import { addListener, ListenerEffectAPI } from "@reduxjs/toolkit";
 import { UnsubscribeListener, Action } from "@reduxjs/toolkit";
 // import { Action, UnknownAction, Tuple } from "@reduxjs/toolkit";
 // import { Middleware } from "@reduxjs/toolkit";
@@ -53,5 +53,7 @@ export type SeedDispatch = ((action: Action<"listenerMiddleware/add">) => Unsubs
 export const seedListenerMiddleware = createListenerMiddleware();
 export const startAppListening = seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
 export type startAppListeningType = typeof startAppListening;
+
+export type SeedListenerApi = ListenerEffectAPI<SeedState, SeedDispatch, unknown>;
 
 export const addAppListener = addListener.withTypes<SeedState, SeedDispatch>();
