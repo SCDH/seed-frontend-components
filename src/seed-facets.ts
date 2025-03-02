@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit'
+import { html, css, LitElement, CSSResultGroup } from 'lit'
 import { customElement, property, state, } from 'lit/decorators.js'
 
 import { storeConsumerMixin } from './store-consumer-mixin';
@@ -70,9 +70,14 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
     }
 
     override render() {
-	return this.fields.map(f => {
-	    return this.renderFacet(f);
-	});
+	return html`<div class="facets">
+	    <div class="title">
+		<slot name="title">Facets ${this.pattern}</slot>
+	    </div>
+	    <div class="container">
+		${this.fields.map(f => this.renderFacet(f))}
+	    </div>
+	</div>`
     }
 
     renderFacet(field: string) {
@@ -80,6 +85,16 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
 	return html`<seed-facet field="${field}"></seed-facet>`;
 	//return html`<span>${field}</span>`;
     }
+
+    static styles: CSSResultGroup = [
+	css`.facets {
+	    }
+	    .container {
+	    display: flex;
+	    flex-direction: column;
+	    }`
+    ]
+
 }
 
 
