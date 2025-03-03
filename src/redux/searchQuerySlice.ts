@@ -9,6 +9,9 @@ export const searchQuerySlice = createSlice({
 	setCollection: (state: SearchQuery, action: PayloadAction<string>) => {
 	    state.collection = action.payload;
 	},
+	addFl: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
+	    state.fl = state.fl.concat(action.payload);
+	},
 	addFacetFields: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
 	    const s = new Set(state.facet_fields);
 	    const n = new Set(action.payload);
@@ -39,6 +42,6 @@ export const searchQuerySlice = createSlice({
     }
 });
 
-export const { setCollection, addFacetFields, addFilter, removeFilter } = searchQuerySlice.actions;
+export const { setCollection, addFl, addFacetFields, addFilter, removeFilter } = searchQuerySlice.actions;
 
 export default searchQuerySlice.reducer;
