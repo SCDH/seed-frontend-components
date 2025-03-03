@@ -72,7 +72,8 @@ export class SeedSearchResult extends searchResultMixin(LitElement) {
     }
 
     renderDocument(doc: Document, pattern: string): HTMLTemplateResult {
-	return html`<seed-result-doc doc-id="${doc.id}" document="${doc}" pattern="${pattern}"></seed-result-doc>`;
+	// Mind the dot!
+	return html`<seed-result-doc doc-id="${doc.id}" .document="${doc}" pattern="${pattern}"></seed-result-doc>`;
     }
 
 }
