@@ -19,6 +19,9 @@ import log from "./logging";
  *
  * If you need a fixed list of fields, simply use regex groups like
  * this: `pattern="^(cat1|cat2)$"`.
+ *
+ * If this web component is used, the seed-facet and seed-facet-term
+ * web components need to be loaded, too.
  */
 @customElement("seed-facets")
 export class SeedFacets extends storeConsumerMixin(LitElement) {
@@ -34,16 +37,21 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
     @state()
     fields: Array<string> = [];
 
-    @state()
-    collection: string = "";
+    @property()
+    collection!: string;
 
     override subscribeStore() {
 	log.debug("subscribing seed-facets");
 	if (this.store === undefined) {
 	    log.debug("no store yet for element with Id ", this.id);
 	}
-	// TODO: get from store
-	this.collection = "tei4";
+	// This container initiates a query to the fields endpoint,
+	// because without a set of fields, it cannot make up the
+	// facets given by pattern.
+	if (this.collection !== undefined) {
+	    log.debug("initiating fields query", this.collection);
+	    this.store?.dispatch(searchApi.endpoints.fields.initiate(this.collection));
+	}
 	// get name of facets from store: 1) get all field names, 2) filter with this.pattern
 	this.store?.dispatch(addAppListener({
 	    matcher: searchApi.endpoints.fields.matchFulfilled,
@@ -66,7 +74,7 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
      * endpoint.
      */
     private queryName(): string {
-	return 'fields(\"' + this.collection + '\")';
+	return searchApi.endpoints.fields.name + '(\"' + this.collection + '\")';
     }
 
     override render() {
@@ -82,8 +90,7 @@ export class SeedFacets extends storeConsumerMixin(LitElement) {
 
     renderFacet(field: string) {
 	log.debug("rendering facet", field);
-	return html`<seed-facet field="${field}"></seed-facet>`;
-	//return html`<span>${field}</span>`;
+	return html`<seed-facet collection="${this.collection}" field="${field}"></seed-facet>`;
     }
 
     static styles: CSSResultGroup = [
