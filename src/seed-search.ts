@@ -25,6 +25,9 @@ export class SeedSearch extends storeConsumerMixin(LitElement) {
     @property()
     collection!: string;
 
+    @property()
+    delay: number = 500;
+
     query: SearchQuery = initialSearchQuery;
 
     override subscribeStore() {
@@ -42,12 +45,27 @@ export class SeedSearch extends storeConsumerMixin(LitElement) {
 		this.query = listenerApi.getState().searchQuery;
 	    },
 	}));
-	// if the initiate
+	// initiate document query
+	// TODO: This needs improval. Fixed delay time may be to
+	// early. Find a working sequence!
 	if (this.initiateEmpty) {
 	    log.debug("running initial query for all documents");
 	    //window.addEventListener("load", this.initialAll(this.store)); // too early!
-	    window.setTimeout(this.initialAll(this.store), 500);  // 0.5s
+	    window.setTimeout(this.initialAll(this.store), this.delay);
 	}
+	// not working replacement
+	// if (this.initiateEmpty) {
+	//     log.debug("initiating fields query", this.collection);
+	//     this.store?.dispatch(searchApi.endpoints.fields.initiate(this.collection));
+	//     // get name of facets from store: 1) get all field names, 2) filter with this.pattern
+	//     this.store?.dispatch(addAppListener({
+	// 	matcher: searchApi.endpoints.fields.matchFulfilled,
+	// 	effect: async (_action, listenerApi) => {
+	// 	    const q: SearchQuery = listenerApi.getState().searchQuery;
+	// 	    listenerApi.dispatch(searchApi.endpoints.documents.initiate(q));
+	// 	}
+	//     }));
+	// }
     }
 
     render() {
