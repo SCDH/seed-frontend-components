@@ -17,16 +17,16 @@
     <script type="module" src="/src/seed-search-filters.ts"></script>
     <script type="module" src="/src/seed-search-filter.ts"></script>
     <style type="text/css">
-      .synopsis {
-	  height: 80vh;
+      .search {
 	  display: flex;
 	  flex-direction: row;
-	  flex-wrap: nowrap;
       }
-      .synopsis seed-text-view {
-	  flex-grow: 1;
-	  min-width: 20em;
-	  margin: 2px;
+      .search * {
+	  margin: 5px;
+
+      }
+      .facets {
+	  width: 20em;
       }
     </style>
   </head>
@@ -36,11 +36,18 @@
 	annotations-url="Annotationen.json"
 	ontology-urls="ontology.json"
 	regex-alignment="alignment.json"></seed-config>
-      <seed-search></seed-search>
-      <seed-search-result></seed-search-result>
-      <seed-search-filters></seed-search-filters>
-      <div>Facets:</div>
-      <seed-facets collection="tei4" pattern="^about.*_ss$"></seed-facets>
+      <div class="search">
+	<div class="facets">
+	  <seed-facets collection="tei4" pattern="^about.*_ss$">
+	    <span slot="title">Speaking of</span>
+	  </seed-facets>
+	</div>
+	<div>
+	  <seed-search initial-all="true"></seed-search>
+	  <seed-search-result></seed-search-result>
+	  <seed-search-filters></seed-search-filters>
+	  <div>
+	</div>
     </seed-app>
   </body>
 
