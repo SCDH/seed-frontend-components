@@ -1,11 +1,12 @@
 import { html, LitElement } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
 import { UnknownAction } from '@reduxjs/toolkit';
 
 import { storeConsumerMixin } from './store-consumer-mixin';
 import { addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
+import { SeedStore } from './redux/seed-store';
 
 
 import log from "./logging";
@@ -18,10 +19,16 @@ import log from "./logging";
 @customElement("seed-search")
 export class SeedSearch extends storeConsumerMixin(LitElement) {
 
+    @property({attribute: "initial-all", type: Boolean})
+    initiateEmpty: boolean = false;
+
+    @property()
+    collection!: string;
+
     query: SearchQuery = initialSearchQuery;
 
     override subscribeStore() {
-	log.debug("subscribing seed-facets");
+	log.debug("subscribing seed-search");
 	if (this.store === undefined) {
 	    log.debug("no store yet for element with Id ", this.id);
 	}
@@ -35,13 +42,18 @@ export class SeedSearch extends storeConsumerMixin(LitElement) {
 		this.query = listenerApi.getState().searchQuery;
 	    },
 	}));
+	// if the initiate
+	if (this.initiateEmpty) {
+	    log.debug("running initial query for all documents");
+	    //window.addEventListener("load", this.initialAll(this.store)); // too early!
+	    window.setTimeout(this.initialAll(this.store), 500);  // 0.5s
+	}
     }
 
     render() {
 	return html`
 	    <div>
 		<button @click="${this.search}">Search!</button>
-		<button @click="${this.fields}">Fields?</button>
             </div>`;
     }
 
@@ -50,10 +62,15 @@ export class SeedSearch extends storeConsumerMixin(LitElement) {
 	this.store?.dispatch(searchApi.endpoints.documents.initiate(this.query));
     }
 
-    fields():void {
-	log.debug("Fields button hit!");
-	this.store?.dispatch(searchApi.endpoints.fields.initiate("tei4"));
+    initialAll(store: SeedStore | undefined) {
+	return () => {
+	    // We have to get the current query from the store,
+	    // because it contains the facet fields.
+	    const query: SearchQuery = store?.getState()?.searchQuery ?? initialSearchQuery;
+	    store?.dispatch(searchApi.endpoints.documents.initiate(query));
+	}
     }
+
 
 }
 
