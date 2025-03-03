@@ -68,8 +68,10 @@ export class SeedFacetTerm extends storeConsumerMixin(LitElement) {
 
     render(): HTMLTemplateResult {
 	return html`<div class="term">
-<input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
-	    <label for="${this.inputId()}">${this.term}</label>
+	    <input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
+	    <label for="${this.inputId()}">
+		<span class="label-content">${this.term}</span>
+	    </label>
 	    <span class="count">${this.count}</span>
 	</div>`;
     }
@@ -104,7 +106,27 @@ export class SeedFacetTerm extends storeConsumerMixin(LitElement) {
     }
 
     static styles: CSSResultGroup = [
-	css``
+	css`.term {
+	    width: 100%;
+	    display: flex;
+	    flex-direction: row;
+	    flex-wrap: nowrap;
+	    justify-content: space-between;
+	    }
+	    label {
+	    flex-shrink: 10;
+	    overflow: hidden;
+	    position: relative;
+	    }
+	    label .label-content {
+	    overflow: fade(10%);
+	    text-align: justify;
+	    white-space: nowrap;
+	    }
+	    .count {
+	    margin-left: .75em !important;
+	    font-weight: 700;
+	    }`
     ]
 
 }

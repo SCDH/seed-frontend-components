@@ -58,16 +58,15 @@ export class SeedFacet extends storeConsumerMixin(LitElement) {
     }
 
     renderTerm(t: TermCountTuple) {
-	return html`<seed-facet-term field="${this.field}" term="${t.term}" count="${t.count}"></seed-facet-term>`;
+	return html`<seed-facet-term class="term" field="${this.field}" term="${t.term}" count="${t.count}"></seed-facet-term>`;
     }
 
     static styles: CSSResultGroup = [
 	css`.facet {
-	    display: inline-block;
 	    border: 1px solid var(--window-border-color, lightblue);
-	    }
-	    .catetory {
-
+	    display: flex;
+	    flex-direction: column;
+	    flex-wrap: nowrap;
 	    }`
     ]
 
