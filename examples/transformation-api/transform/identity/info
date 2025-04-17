@@ -1,7 +1,0 @@
-{
-    "description": "The identity transformation.",
-    "class": "de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation",
-    "location": "id.xsl",
-    "requiresSource": true,
-    "mediaType": "text/xml"
-}

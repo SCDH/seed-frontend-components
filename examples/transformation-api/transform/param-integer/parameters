@@ -1,8 +1,0 @@
-{
-    "times": {
-	"isRequired": true,
-	"itemType": "xs:integer",
-	"underlyingDeclaredType": "xs:integer",
-	"occurrenceIndicator": ""
-    }
-}
