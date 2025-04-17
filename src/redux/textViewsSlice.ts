@@ -2,7 +2,6 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { CSSDefinition } from "./cssTypes";
 import log from "./logging";
 
-
 /*
  * The state of a text view.
  *
@@ -17,7 +16,6 @@ import log from "./logging";
  * position in a text bar (Zoom 2).
  */
 export interface TextViewState {
-
     /*
      * The identifier for the represented text. This is a foreign key
      * to the text slice.
@@ -71,8 +69,7 @@ export interface TextViewState {
      * instead. See
      * https://redux.js.org/style-guide/#normalize-complex-nestedrelational-state
      */
-    cssPerSegment: { [segmentId: string]: CSSDefinition },
-
+    cssPerSegment: { [segmentId: string]: CSSDefinition };
 }
 
 /*
@@ -80,18 +77,14 @@ export interface TextViewState {
  * annotations assigned for a given segment or span ID.
  */
 export interface AnnotationsPerSegment {
-
     [segmentId: string]: Array<string>;
-
 }
 
 /*
  * The reverse of {AnnotationsPerSegment}.
  */
 export interface SegmentsPerAnnotation {
-
     [annotId: string]: Array<string>;
-
 }
 
 /*
@@ -106,99 +99,139 @@ export interface SegmentsPerAnnotation {
  * a better candidate.
  */
 export interface TextViewsSlice {
-    [viewId: string]: TextViewState
+    [viewId: string]: TextViewState;
 }
-
 
 /*
  * The initial state of the text slice is the empty mapping (empty
  * object).
  */
-const initialState: TextViewsSlice = {
-};
-
+const initialState: TextViewsSlice = {};
 
 /*
  * An async action for getting the {SegmentState} for a text widget
  * from the backend.
  */
-export const fetchAnnotationsPerSegment = createAsyncThunk<{viewId: string, segments: AnnotationsPerSegment}, {viewId_: string, url: string}>(
+export const fetchAnnotationsPerSegment = createAsyncThunk<
+    { viewId: string; segments: AnnotationsPerSegment },
+    { viewId_: string; url: string }
+>(
     // type parameters:
     // 1: type of returned Promise
     // 2: first argument to function, i.e., the type of the argument of the dispatch function
     "textViews/fetchAnnotationsPerSegment",
-    async ({viewId_, url}): Promise<{viewId: string, segments: AnnotationsPerSegment}> => {
-	log.info("fetching annotated segments from ", url);
-	const response = await fetch(url);
-	return response.json().then((result: AnnotationsPerSegment) => {
-	    return {viewId: viewId_, segments: result};
-	}).catch(() => {
-	    // If fetching failed, then let's have the empty mapping
-	    // of segment IDs to annotations IDs:
-	    return {viewId: viewId_, segments: {} };
-	});
-    }
-)
-
+    async ({
+        viewId_,
+        url,
+    }): Promise<{ viewId: string; segments: AnnotationsPerSegment }> => {
+        log.info("fetching annotated segments from ", url);
+        const response = await fetch(url);
+        return response
+            .json()
+            .then((result: AnnotationsPerSegment) => {
+                return { viewId: viewId_, segments: result };
+            })
+            .catch(() => {
+                // If fetching failed, then let's have the empty mapping
+                // of segment IDs to annotations IDs:
+                return { viewId: viewId_, segments: {} };
+            });
+    },
+);
 
 const textViewsSlice = createSlice({
     name: "textViews",
     initialState,
     reducers: {
-	/*
-	 * The {initTextView} action adds a text view of type
-	 * {TextViewState} to the slice. The properties of
-	 * {TextViewState} are all `null`. This action can be called
-	 * early in the initialization process, to make sure, that a
-	 * property with the ID of the text view is present in the
-	 * slice.
-	 */
-	initTextView: (state, action: PayloadAction<{viewId: string}>) => {
-	    state[action.payload.viewId] = {
-		textId: undefined,
-		scrollPosition: null,
-		annotations: [],
-		annotationsPerSegment: {},
-		segmentsPerAnnotation: {},
-		cssPerSegment: {}
-	    };
-	},
-	/*
-	 * The {setText} action sets the text of a text view.
-	 */
-	setText: (state, action: PayloadAction<{viewId: string, text: string}>) => {
-	    state[action.payload.viewId].textId = action.payload.text;
-	},
-	/*
-	 * The {scrolledTo} action updates the scroll position of a text widget.
-	 */
-	scrolledTo: (state, action: PayloadAction<{viewId: string, position: string}>) => {
-	    state[action.payload.viewId].scrollPosition = action.payload.position;
-	},
-	/*
-	 * The {setCssForAllSegments} action updates the
-	 * {TextViewState.cssPerSegment} property.
-	 */
-	setCssForAllSegments: (state, action: PayloadAction<{viewId: string, cssPerSegment: { [segmentId: string]: CSSDefinition }}>) => {
-	    state[action.payload.viewId].cssPerSegment = action.payload.cssPerSegment;
-	},
-	/*
-	 * Update the {TextViewState.segmentsPerAnnotation} property
-	 * of a text view.
-	 */
-	setSegmentsPerAnnotation: (state, action: PayloadAction<{viewId: string, segmentsPerAnnot: SegmentsPerAnnotation}>) => {
-	    state[action.payload.viewId].segmentsPerAnnotation = action.payload.segmentsPerAnnot;
-	}
+        /*
+         * The {initTextView} action adds a text view of type
+         * {TextViewState} to the slice. The properties of
+         * {TextViewState} are all `null`. This action can be called
+         * early in the initialization process, to make sure, that a
+         * property with the ID of the text view is present in the
+         * slice.
+         */
+        initTextView: (state, action: PayloadAction<{ viewId: string }>) => {
+            state[action.payload.viewId] = {
+                textId: undefined,
+                scrollPosition: null,
+                annotations: [],
+                annotationsPerSegment: {},
+                segmentsPerAnnotation: {},
+                cssPerSegment: {},
+            };
+        },
+        /*
+         * The {setText} action sets the text of a text view.
+         */
+        setText: (
+            state,
+            action: PayloadAction<{ viewId: string; text: string }>,
+        ) => {
+            state[action.payload.viewId].textId = action.payload.text;
+        },
+        /*
+         * The {scrolledTo} action updates the scroll position of a text widget.
+         */
+        scrolledTo: (
+            state,
+            action: PayloadAction<{ viewId: string; position: string }>,
+        ) => {
+            state[action.payload.viewId].scrollPosition =
+                action.payload.position;
+        },
+        /*
+         * The {setCssForAllSegments} action updates the
+         * {TextViewState.cssPerSegment} property.
+         */
+        setCssForAllSegments: (
+            state,
+            action: PayloadAction<{
+                viewId: string;
+                cssPerSegment: { [segmentId: string]: CSSDefinition };
+            }>,
+        ) => {
+            state[action.payload.viewId].cssPerSegment =
+                action.payload.cssPerSegment;
+        },
+        /*
+         * Update the {TextViewState.segmentsPerAnnotation} property
+         * of a text view.
+         */
+        setSegmentsPerAnnotation: (
+            state,
+            action: PayloadAction<{
+                viewId: string;
+                segmentsPerAnnot: SegmentsPerAnnotation;
+            }>,
+        ) => {
+            state[action.payload.viewId].segmentsPerAnnotation =
+                action.payload.segmentsPerAnnot;
+        },
     },
     extraReducers: (builder) => {
-	builder.addCase(
-	    fetchAnnotationsPerSegment.fulfilled,
-	    (state, action: PayloadAction<{viewId: string, segments: AnnotationsPerSegment}>) => {
-		state[action.payload.viewId].annotationsPerSegment = action.payload.segments;
-	    });
+        builder.addCase(
+            fetchAnnotationsPerSegment.fulfilled,
+            (
+                state,
+                action: PayloadAction<{
+                    viewId: string;
+                    segments: AnnotationsPerSegment;
+                }>,
+            ) => {
+                state[action.payload.viewId].annotationsPerSegment =
+                    action.payload.segments;
+            },
+        );
     },
 });
 
-export const { initTextView, setText, scrolledTo, setCssForAllSegments, setSegmentsPerAnnotation } = textViewsSlice.actions;
+export const {
+    initTextView,
+    setText,
+    scrolledTo,
+    setCssForAllSegments,
+    setSegmentsPerAnnotation,
+} = textViewsSlice.actions;
 
 export default textViewsSlice.reducer;

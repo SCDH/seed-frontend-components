@@ -1,5 +1,10 @@
-import { AnnotationsSlice, annotationSelected, annotationsSelected, annotationsPassedBy } from './annotationsSlice';
-import { TextViewsSlice } from './textViewsSlice';
+import {
+    AnnotationsSlice,
+    annotationSelected,
+    annotationsSelected,
+    annotationsPassedBy,
+} from "./annotationsSlice";
+import { TextViewsSlice } from "./textViewsSlice";
 
 /*
  * A redux thunk function that sets the
@@ -11,23 +16,36 @@ import { TextViewsSlice } from './textViewsSlice';
  * thunk is intended to be dispatched on click or other selection
  * events on portions of a text.
  */
-export const selectAnnotationsAtSegmentThunk = (textViewId: string, segmentIds: Array<string>) => {
+export const selectAnnotationsAtSegmentThunk = (
+    textViewId: string,
+    segmentIds: Array<string>,
+) => {
     return (dispatch: any, getState: any) => {
-	let state: { textViews: TextViewsSlice, annotations: AnnotationsSlice } = getState();
-	const { textViews, annotations } = state;
-	let annots: Array<string> = [];
-	for (const segmentId of segmentIds) {
-	    annots = annots.concat(textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? []);
-	}
-	if (annots.length > 0) {
-	    dispatch(annotationsSelected(annots));
-	    // if none is selected or if previously selected is not in set of selected: show the first in detail
-	    if (annotations.annotationSelected == null || (annotations.annotationSelected != null && annots.indexOf(annotations.annotationSelected) === -1)) {
-		dispatch(annotationSelected(annots[0]));
-	    }
-	}
+        let state: {
+            textViews: TextViewsSlice;
+            annotations: AnnotationsSlice;
+        } = getState();
+        const { textViews, annotations } = state;
+        let annots: Array<string> = [];
+        for (const segmentId of segmentIds) {
+            annots = annots.concat(
+                textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ??
+                    [],
+            );
+        }
+        if (annots.length > 0) {
+            dispatch(annotationsSelected(annots));
+            // if none is selected or if previously selected is not in set of selected: show the first in detail
+            if (
+                annotations.annotationSelected == null ||
+                (annotations.annotationSelected != null &&
+                    annots.indexOf(annotations.annotationSelected) === -1)
+            ) {
+                dispatch(annotationSelected(annots[0]));
+            }
+        }
     };
-}
+};
 
 /*
  * A redux thunk function that sets the
@@ -39,13 +57,20 @@ export const selectAnnotationsAtSegmentThunk = (textViewId: string, segmentIds: 
  * portions of a text and to highlight or inform about annotations
  * passed by the mouse pointer.
  */
-export const passByAnnotationsAtSegmentThunk = (textViewId: string, segmentIds: Array<string>) => {
+export const passByAnnotationsAtSegmentThunk = (
+    textViewId: string,
+    segmentIds: Array<string>,
+) => {
     return (dispatch: any, getState: any) => {
-	let state: { textViews: TextViewsSlice } = getState();
-	let annots: Array<string> = [];
-	for (const segmentId of segmentIds) {
-	    annots = annots.concat(state.textViews?.[textViewId]?.annotationsPerSegment?.[segmentId] ?? []);
-	}
-	dispatch(annotationsPassedBy(annots));
+        let state: { textViews: TextViewsSlice } = getState();
+        let annots: Array<string> = [];
+        for (const segmentId of segmentIds) {
+            annots = annots.concat(
+                state.textViews?.[textViewId]?.annotationsPerSegment?.[
+                    segmentId
+                ] ?? [],
+            );
+        }
+        dispatch(annotationsPassedBy(annots));
     };
-}
+};

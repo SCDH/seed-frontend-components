@@ -6,7 +6,11 @@ import textViewsReducer from "./textViewsSlice";
 import annotationsReducer from "./annotationsSlice";
 import ontologyReducer from "./ontologySlice";
 import synopsisReducer from "./synopsisSlice";
-import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subscribeSegmentsCssOnSegmentsUpdater } from "./colorizeText";
+import {
+    subscribeAnnotationsCssUpdater,
+    subscribeSegmentsCssOnCssUpdater,
+    subscribeSegmentsCssOnSegmentsUpdater,
+} from "./colorizeText";
 import { addTextViewListeners } from "./textViewMiddleware";
 
 /*
@@ -16,17 +20,17 @@ import { addTextViewListeners } from "./textViewMiddleware";
  * See https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
  */
 
-
 export const store = configureStore({
     reducer: {
-	texts: textsReducer,
-	textViews: textViewsReducer,
-	annotations: annotationsReducer,
-	ontology: ontologyReducer,
-	synopsis: synopsisReducer,
+        texts: textsReducer,
+        textViews: textViewsReducer,
+        annotations: annotationsReducer,
+        ontology: ontologyReducer,
+        synopsis: synopsisReducer,
     },
     // add the middleware
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(seedListenerMiddleware.middleware),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().prepend(seedListenerMiddleware.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

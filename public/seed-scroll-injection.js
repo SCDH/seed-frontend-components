@@ -8,7 +8,7 @@ if (typeof scrollBlockQuerySelector === "undefined") {
 let scrollBlocks = [];
 let scrollBlocksY = [];
 function getScrollBlocksYPositions() {
-    scrollBlocksY = scrollBlocks.map(d => d.offsetTop);
+    scrollBlocksY = scrollBlocks.map((d) => d.offsetTop);
 }
 
 // callback for scroll events: send position through postMessage channel
@@ -16,11 +16,14 @@ function notifyScrolled() {
     console.log("scrolled");
     let y = window.scrollY;
     // get the first div that is visible
-    for (i=0; i < scrollBlocks.length; i++) {
+    for (i = 0; i < scrollBlocks.length; i++) {
         if (scrollBlocksY[i] >= y && scrollBlocks[i].id != "") {
             console.log("scrolled to " + i + "th div: " + scrollBlocks[i].id);
             // pass a message using the postMessage channel, cf. https://davidwalsh.name/window-iframe
-            window.parent.postMessage({ ...msg, 'event': 'scrolled', 'top': scrollBlocks[i].id }, window.parent.location.href);
+            window.parent.postMessage(
+                { ...msg, event: "scrolled", top: scrollBlocks[i].id },
+                window.parent.location.href,
+            );
             break;
         }
     }
@@ -36,11 +39,15 @@ window.addEventListener("scroll", (event) => {
 // we cannot set location.href when iframe.srcdoc is used. Using window.scroll instead
 function notifySyncScroll(e) {
     if (e.data?.event == "sync") {
-	const y = document.getElementById(e.data?.scrollTarget ?? "unknown")?.offsetTop;
-	console.debug("scrolling to " + e.data?.scrollTarget + " at height " + y);
-	if (y !== null) {
-	    window.scroll(0, y);
-	}
+        const y = document.getElementById(
+            e.data?.scrollTarget ?? "unknown",
+        )?.offsetTop;
+        console.debug(
+            "scrolling to " + e.data?.scrollTarget + " at height " + y,
+        );
+        if (y !== null) {
+            window.scroll(0, y);
+        }
     }
 }
 
@@ -48,7 +55,9 @@ window.addEventListener("message", notifySyncScroll);
 
 // get scroll blocks on window onload and resize events
 window.addEventListener("load", (event) => {
-    scrollBlocks = Array.from(document.querySelectorAll(scrollBlockQuerySelector));
+    scrollBlocks = Array.from(
+        document.querySelectorAll(scrollBlockQuerySelector),
+    );
     getScrollBlocksYPositions();
     notifyScrolled();
 });

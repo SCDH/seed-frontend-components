@@ -11,7 +11,6 @@ export type TextId = string;
  * TextAPI (SUB Göttingen).
  */
 export interface TextState {
-
     /*
      * The origin URL, obtained by {Document.location.toString()}.
      *
@@ -47,80 +46,94 @@ export interface TextState {
  * What to use as identifiers? The canonical URL is a good candidate.
  */
 export interface TextsSlice {
-    [textId: TextId]: TextState
+    [textId: TextId]: TextState;
 }
-
 
 /*
  * The initial state of the text slice is the empty mapping (empty
  * object).
  */
-const initialState: TextsSlice = {
-};
+const initialState: TextsSlice = {};
 
-export const fetchText = createAsyncThunk<{ textId: string, location: string, doc: string }, { textId: string, location: string}>(
+export const fetchText = createAsyncThunk<
+    { textId: string; location: string; doc: string },
+    { textId: string; location: string }
+>(
     "texts/fetchText",
-    async ({ textId, location }): Promise<{textId: string, location: string, doc: string }> => {
-	log.info("fetching text", location);
-	const response = await fetch(location);
-	return response.text().then((t) => {
-	    return { textId: textId, location: location, doc: t };
-	});
-    }
+    async ({
+        textId,
+        location,
+    }): Promise<{ textId: string; location: string; doc: string }> => {
+        log.info("fetching text", location);
+        const response = await fetch(location);
+        return response.text().then((t) => {
+            return { textId: textId, location: location, doc: t };
+        });
+    },
 );
 
 const textsSlice = createSlice({
     name: "texts",
     initialState,
     reducers: {
-	/*
-	 * The {initText} action adds a text of type
-	 * {TextState} to the slice. The properties of {TextState} are
-	 * all `null` or `undefined`. This action can be called early in the
-	 * initialization process, to make sure, that a property with
-	 * the ID of the text is present in the slice.
-	 */
-	initText: (state, action: PayloadAction<{textId: TextId}>) => {
-	    state[action.payload.textId] = {
-		location: null,
-		canonicalUrl: undefined,
-		title: undefined,
-		author: undefined,
-		doc: undefined,
-	    };
-	},
-	/*
-	 * The {setText} action adds meta data of a text to the
-	 * slice's property for a text ID.
-	 */
-	setText: (state, action: PayloadAction<{textId: TextId, text: TextState}>) => {
-	    state[action.payload.textId] = action.payload.text;
-	},
+        /*
+         * The {initText} action adds a text of type
+         * {TextState} to the slice. The properties of {TextState} are
+         * all `null` or `undefined`. This action can be called early in the
+         * initialization process, to make sure, that a property with
+         * the ID of the text is present in the slice.
+         */
+        initText: (state, action: PayloadAction<{ textId: TextId }>) => {
+            state[action.payload.textId] = {
+                location: null,
+                canonicalUrl: undefined,
+                title: undefined,
+                author: undefined,
+                doc: undefined,
+            };
+        },
+        /*
+         * The {setText} action adds meta data of a text to the
+         * slice's property for a text ID.
+         */
+        setText: (
+            state,
+            action: PayloadAction<{ textId: TextId; text: TextState }>,
+        ) => {
+            state[action.payload.textId] = action.payload.text;
+        },
     },
     extraReducers: (builder) => {
-	builder
-	    .addCase(
-		fetchText.fulfilled,
-		(state, action: PayloadAction<{textId: string, location: string, doc: string}>) => {
-		    if (state.hasOwnProperty(action.payload.textId)) {
-			state[action.payload.textId].location = action.payload.location;
-			state[action.payload.textId].doc = action.payload.doc;
-		    } else {
-			state[action.payload.textId] = {
-			    location: action.payload.location,
-			    canonicalUrl: undefined,
-			    title: undefined,
-			    author: undefined,
-			    doc: action.payload.doc,
-			};
-		    }
-		})
-	    .addCase(
-		fetchText.rejected,
-		() => {
-		    log.error("failed to fetch text");
-		})
-    }
+        builder
+            .addCase(
+                fetchText.fulfilled,
+                (
+                    state,
+                    action: PayloadAction<{
+                        textId: string;
+                        location: string;
+                        doc: string;
+                    }>,
+                ) => {
+                    if (state.hasOwnProperty(action.payload.textId)) {
+                        state[action.payload.textId].location =
+                            action.payload.location;
+                        state[action.payload.textId].doc = action.payload.doc;
+                    } else {
+                        state[action.payload.textId] = {
+                            location: action.payload.location,
+                            canonicalUrl: undefined,
+                            title: undefined,
+                            author: undefined,
+                            doc: action.payload.doc,
+                        };
+                    }
+                },
+            )
+            .addCase(fetchText.rejected, () => {
+                log.error("failed to fetch text");
+            });
+    },
 });
 
 export const { initText, setText } = textsSlice.actions;

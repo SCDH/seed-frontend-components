@@ -4,20 +4,23 @@ window.addEventListener("load", (e) => {
     // add metadata if present
     let canonicalURL = document.querySelector("link[rel='canonical']");
     if (canonicalURL) {
-	msg = { ...msg, 'canonicalUrl': canonicalURL.getAttribute("href") };
+        msg = { ...msg, canonicalUrl: canonicalURL.getAttribute("href") };
     }
     let canonicalSource = document.querySelector("link[rel='canonicalSource']");
     if (canonicalSource) {
-	msg = { ...msg, 'canonicalSource': canonicalSource.getAttribute("href") };
+        msg = { ...msg, canonicalSource: canonicalSource.getAttribute("href") };
     }
     let source = document.querySelector("link[rel='source']");
     if (canonicalSource) {
-	msg = { ...msg, 'source': source.getAttribute("href") };
+        msg = { ...msg, source: source.getAttribute("href") };
     }
     let title = document.querySelector("title");
     if (canonicalURL) {
-	msg = { ...msg, 'title': title.innerHTML };
+        msg = { ...msg, title: title.innerHTML };
     }
 
-    window.parent.postMessage({ ...msg, 'event': 'meta' }, window.parent.location.href);
+    window.parent.postMessage(
+        { ...msg, event: "meta" },
+        window.parent.location.href,
+    );
 });

@@ -1,19 +1,17 @@
-import { LitElement, html } from 'lit';
-import { state } from 'lit/decorators.js';
-import { customElement } from 'lit/decorators.js'
-import { provide } from '@lit/context';
+import { LitElement, html } from "lit";
+import { state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
+import { provide } from "@lit/context";
 
 // import { ContextProvider } from '@lit/context';
 
-import { seedStoreContext } from './seed-context';
+import { seedStoreContext } from "./seed-context";
 
-import { SeedStore } from './redux/seed-store';
-import { store } from './redux/store';
+import { SeedStore } from "./redux/seed-store";
+import { store } from "./redux/store";
 
-
-@customElement('seed-app')
+@customElement("seed-app")
 export class SeedApp extends LitElement {
-
     @provide({ context: seedStoreContext })
     @state()
     seedStore: SeedStore = store;
@@ -21,13 +19,12 @@ export class SeedApp extends LitElement {
     // _provider = new ContextProvider(this, {context: seedStoreContext, initialValue: store});
 
     render() {
-	return html`<slot></slot>`;
+        return html`<slot></slot>`;
     }
-
 }
 
 declare global {
     interface HTMLElementTagNameMap {
-	"seed-app": SeedApp;
+        "seed-app": SeedApp;
     }
 }
