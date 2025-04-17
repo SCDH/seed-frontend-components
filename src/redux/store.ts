@@ -20,7 +20,6 @@ import { addTextViewListeners } from "./textViewMiddleware";
  * See https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
  */
 
-
 export const store = configureStore({
     reducer: {
 	texts: textsReducer,

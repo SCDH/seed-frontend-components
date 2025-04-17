@@ -18,7 +18,6 @@ import { SearchQuery } from "./searchTypes";
  * An interface describing a store with the slices of this library.
  */
 export interface SeedState {
-
     texts: TextsSlice;
 
     textViews: TextViewsSlice;
@@ -34,6 +33,7 @@ export interface SeedState {
     [searchApi.reducerPath]: SearchState;
 
 };
+}
 
 /*
  * A SEED store is an {EnhancedStore} parametrized with {SeedState}
@@ -48,10 +48,14 @@ export interface SeedState {
 //   P = S> = EnhancedStore<S, A, M, E>;
 
 export type SeedStore = EnhancedStore<SeedState, any, any>;
-export type SeedDispatch = ((action: Action<"listenerMiddleware/add">) => UnsubscribeListener) & ThunkDispatch<SeedState, unknown, UnknownAction>;
+export type SeedDispatch = ((
+    action: Action<"listenerMiddleware/add">,
+) => UnsubscribeListener) &
+    ThunkDispatch<SeedState, unknown, UnknownAction>;
 
 export const seedListenerMiddleware = createListenerMiddleware();
-export const startAppListening = seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
+export const startAppListening =
+    seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
 export type startAppListeningType = typeof startAppListening;
 
 export type SeedListenerApi = ListenerEffectAPI<SeedState, SeedDispatch, unknown>;
