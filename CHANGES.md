@@ -1,5 +1,10 @@
 # Changes
 
+## 0.9.0
+
+- removed components for transforming XSLT and dependency on SEED XSL
+  Transformer Client
+
 ## 0.8.1
 
 - update dependencies

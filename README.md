@@ -138,29 +138,6 @@ pages with usage examples. They are contained in the
   make the synchronized scrolling and highlighting the annotations
   etc. work.
 
-- [`examples/xslt-rest.html`](examples/xslt.html) shows how to use the
-  web components for running XSL transformations on a service
-  implementing the [`Transformation API`](transformation-api.js). The
-  example page expects a service listening on `localhost:8080`. The
-  central component for transforming is just
-  `<seed-transform-rest>`. The containing elements are for generating
-  the form around it and for passing the user input to the component.
-
-- [`examples/xslt-sef.html`](examples/sef.html) shows how to use the
-  components for running XSL transformations in the browser using
-  [SaxonJS](https://www.saxonica.com/saxon-js/documentation2/index.html#!about). All
-  the resources under the `transformation-api` subfolder belong to
-  this page: They implement the [`Transformation
-  API`](transformation-api.md) as static resources. XSLT must be
-  compiled to
-  [SEF](https://www.saxonica.com/saxon-js/documentation2/index.html#!about)
-  files. You can use
-  [oXygen](https://www.oxygenxml.com/doc/versions/25.1/ug-editor/topics/compile-xsl-for-saxon-x-tools.html)
-  for compilation. This example page is almost the same as
-  `examples/xslt-rest.html`, except the `<seed-transform-sef>`
-  component which uses `SaxonJS` as a transformation engine instead of
-  a web service.
-
 #### API Docs
 
 [https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/](https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/)
@@ -186,4 +163,3 @@ pages with usage examples. They are contained in the
 
 - [Jiob Frontend](https://scdh.zivgitlabpages.uni-muenster.de/schnocks-ijob/hiob-synopsis-frontend/): a synoptical view of different versions of the book of Jiob with annotations
 - [4 Ezra](https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/esra-demo/): a synoptical view of various versions of the fourth book of Ezra
-- [ALEA Transformations](https://scdh.zivgitlabpages.uni-muenster.de/hees-alea/alea-transformations/): a bundle of XSLT transformations with a simple frontend for converting DOCX and ODT to TEI, all XSLT running in the browser
