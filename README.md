@@ -1,3 +1,6 @@
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
+
 # SEED Frontend Components
 
 This is a collection of [web
@@ -57,34 +60,6 @@ registry](https://zivgitlab.uni-muenster.de/SCDH/tei-processing/seed-frontend-co
 of the gitlab of University of Münster! The NPM package contains the
 components in the `src` folder, but neither the index page nor the
 `examples`.
-
-#### Registry set up
-
-Put this into your package's [`.npmrc`](https://docs.npmjs.com/cli/v9/configuring-npm/npmrc):
-
-```shell
-# 805 is the group ID of SCDH toplevel group
-@scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/projects/805/packages/npm/
-```
-
-Downstream packages should always use the 805 as project ID.
-
-Reason: This package has dependencies on other packages prefixed with
-`@scdh` in the SCDH toplevel group. By using the toplevel group ID,
-npm will be forwarded to the right projects by gitlab of University of
-Münster.
-
-Alternatively, you can use the 7934 group and [configure
-npm](https://docs.gitlab.com/ee/user/packages/npm_registry/#publishing-a-package-via-the-command-line)
-to use this one:
-
-```
-rm .npmrc
-npm config set @scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/groups/7934/-/packages/npm/
-npm config set -- //zivgitlab.uni-muenster.de/api/v4/groups/7934/-/packages/npm/:_authToken=YOUR_API_READ_TOKEN 
-```
-
-TODO: Simplify!
 
 
 #### Install
