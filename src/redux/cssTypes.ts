@@ -3,7 +3,5 @@
  * properties. Properties should be a subset of {CSSStyleDeclaration}.
  */
 export interface CSSDefinition {
-
     [key: string]: any;
-
 }

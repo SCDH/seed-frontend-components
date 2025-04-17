@@ -7,14 +7,12 @@
  * an HTMLIFrameElement.
  */
 export interface SeedTextViewElement {
-
     /**
      * The srcdoc property can be used to get a text given as string
      * or File object into the element. This behaves exactly like
      * iframe/@srcdoc.
      */
     srcdoc: any;
-
 }
 
 /**
@@ -24,7 +22,9 @@ export interface SeedTextViewElement {
  * @param obj {any} - object to test
  * @return {boolean}
  */
-export function seedTextViewElementIsAssignableBy(obj: any): obj is SeedTextViewElement {
+export function seedTextViewElementIsAssignableBy(
+    obj: any,
+): obj is SeedTextViewElement {
     return `srcdoc` in obj;
 }
 
@@ -33,14 +33,11 @@ export function seedTextViewElementIsAssignableBy(obj: any): obj is SeedTextView
  * additional mediaType property.
  */
 export interface SeedTypedTextViewElement extends SeedTextViewElement {
-
     /**
      * Media Type information, e.g. "text/xml"
      */
     mediaType: string | undefined;
-
 }
-
 
 /**
  * A function for testing if a given object is (behaves as) a
@@ -49,6 +46,8 @@ export interface SeedTypedTextViewElement extends SeedTextViewElement {
  * @param obj {any} - object to test
  * @return {boolean}
  */
-export function seedTypedTextViewElementIsAssignableBy(obj: any): obj is SeedTypedTextViewElement {
+export function seedTypedTextViewElementIsAssignableBy(
+    obj: any,
+): obj is SeedTypedTextViewElement {
     return `srcdoc` in obj && `mediaType` in obj;
 }

@@ -1,10 +1,16 @@
-import { LitElement, html, HTMLTemplateResult } from 'lit';
-import { state } from 'lit/decorators.js';
-import { consume } from '@lit/context';
+import { LitElement, html, HTMLTemplateResult } from "lit";
+import { state } from "lit/decorators.js";
+import { consume } from "@lit/context";
 
-import { seedWidgetHeightContext, seedWidgetWidthContext, seedWidgetHeightMinimizedContext, seedWidgetWidthMinimizedContext, seedWidgetDisplayContext, seedWidgetMarginContext } from './seed-context';
-import { isMinimized } from './window-mixin';
-
+import {
+    seedWidgetHeightContext,
+    seedWidgetWidthContext,
+    seedWidgetHeightMinimizedContext,
+    seedWidgetWidthMinimizedContext,
+    seedWidgetDisplayContext,
+    seedWidgetMarginContext,
+} from "./seed-context";
+import { isMinimized } from "./window-mixin";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -13,10 +19,10 @@ type Constructor<T = {}> = new (...args: any[]) => T;
  *
  * A usage example can be found in `seed-synopsis-text.ts`.
  */
-export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass: T) => {
-
+export const widgetSizeConsumer = <T extends Constructor<LitElement>>(
+    superClass: T,
+) => {
     class WidgetSizeConsumer extends superClass {
-
         @state()
         @consume({ context: seedWidgetHeightContext, subscribe: true })
         widgetHeight?: number;
@@ -37,46 +43,48 @@ export const widgetSizeConsumer = <T extends Constructor<LitElement>>(superClass
         @consume({ context: seedWidgetDisplayContext, subscribe: true })
         widgetDisplay?: string;
 
-	@state()
-	@consume({ context: seedWidgetMarginContext, subscribe: true })
-	windowMargin?: number;
+        @state()
+        @consume({ context: seedWidgetMarginContext, subscribe: true })
+        windowMargin?: number;
 
         /*
          * Scoped styles with dynamic properties setting the host's dimensions.
          */
         protected styleTemplate(): HTMLTemplateResult {
             if (isMinimized(this)) {
-                return html`<style>:host {
-                    display: ${this.widgetDisplay};
-                    width: ${this.widgetWidthMinimized}px;
-                    height: ${this.widgetHeightMinimized}px;
-                    margin: ${this.windowMargin}px;
-		    ${this.hostStyleDisplayAddon()}
-                }
-	        .minimized-rotation {
-	            transform: rotate(${this.minimizedRotation()}deg);
-		}
-		</style>`;
+                return html`<style>
+                    :host {
+                                        display: ${this.widgetDisplay};
+                                        width: ${this.widgetWidthMinimized}px;
+                                        height: ${this.widgetHeightMinimized}px;
+                                        margin: ${this.windowMargin}px;
+                    		    ${this.hostStyleDisplayAddon()}
+                                    }
+                    	        .minimized-rotation {
+                    	            transform: rotate(${this.minimizedRotation()}deg);
+                    		}
+                </style>`;
             }
-            return html`<style>:host {
-                display: ${this.widgetDisplay};
-                width: ${this.widgetWidth}px;
-                height: ${this.widgetHeight}px;
-                margin: ${this.windowMargin}px;
-            }</style>`;
+            return html`<style>
+                :host {
+                    display: ${this.widgetDisplay};
+                    width: ${this.widgetWidth}px;
+                    height: ${this.widgetHeight}px;
+                    margin: ${this.windowMargin}px;
+                }
+            </style>`;
         }
 
-	hostStyleDisplayAddon(): HTMLTemplateResult {
-	    if (this.widgetDisplay !== "block") return html`vertical-align: top;`
-	    return html``;
-	}
+        hostStyleDisplayAddon(): HTMLTemplateResult {
+            if (this.widgetDisplay !== "block")
+                return html`vertical-align: top;`;
+            return html``;
+        }
 
-	minimizedRotation(): HTMLTemplateResult {
-	    if (this.widgetDisplay === "block") return html`0`;
-	    return html`-90`;
-	}
-
-    };
+        minimizedRotation(): HTMLTemplateResult {
+            if (this.widgetDisplay === "block") return html`0`;
+            return html`-90`;
+        }
+    }
     return WidgetSizeConsumer;
-
-}
+};

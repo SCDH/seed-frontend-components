@@ -1,10 +1,9 @@
-import { LitElement, PropertyValues } from 'lit';
-import { property } from 'lit/decorators.js';
-import { consume } from '@lit/context';
+import { LitElement, PropertyValues } from "lit";
+import { property } from "lit/decorators.js";
+import { consume } from "@lit/context";
 
-import { SeedStore } from './redux/seed-store';
-import { seedStoreContext } from './seed-context';
-
+import { SeedStore } from "./redux/seed-store";
+import { seedStoreContext } from "./seed-context";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -18,40 +17,41 @@ type Constructor<T = {}> = new (...args: any[]) => T;
  *
  * A usage example can be found in `seed-synopsis-text.ts`.
  */
-export const storeConsumerMixin = <T extends Constructor<LitElement>>(superClass: T) => {
-
+export const storeConsumerMixin = <T extends Constructor<LitElement>>(
+    superClass: T,
+) => {
     class StoreConsumerMixin extends superClass {
+        /*
+         * A property bound to a {SeedStore} by context.
+         */
+        @consume({ context: seedStoreContext })
+        @property({ attribute: false })
+        store?: SeedStore;
 
-	/*
-	 * A property bound to a {SeedStore} by context.
-	 */
-	@consume({ context: seedStoreContext })
-	@property({ attribute: false })
-	store?: SeedStore;
+        /*
+         * A hook for the sub class called when the {store} property
+         * is set from context for the first time. Use it to register
+         * listeners etc.
+         */
+        subscribeStore(): void {
+            // add listeners
+        }
 
-	/*
-	 * A hook for the sub class called when the {store} property
-	 * is set from context for the first time. Use it to register
-	 * listeners etc.
-	 */
-	subscribeStore(): void {
-	    // add listeners
-	}
-
-	/*
-	 * When the {StoreConsumerMixin.store} property was updated for the first time,
-	 * the element subscribes to the store by calling {subscribeStore()}.
-	 */
-	protected willUpdate(changedProperties: PropertyValues<this>): void {
-	    if (changedProperties.has("store" as keyof StoreConsumerMixin)
-		// condition: store *was* undefined
-		&& changedProperties.get("store" as keyof StoreConsumerMixin) === undefined) {
-		this.subscribeStore();
-	    }
-	    super.willUpdate(changedProperties);
-	}
-
-    };
+        /*
+         * When the {StoreConsumerMixin.store} property was updated for the first time,
+         * the element subscribes to the store by calling {subscribeStore()}.
+         */
+        protected willUpdate(changedProperties: PropertyValues<this>): void {
+            if (
+                changedProperties.has("store" as keyof StoreConsumerMixin) &&
+                // condition: store *was* undefined
+                changedProperties.get("store" as keyof StoreConsumerMixin) ===
+                    undefined
+            ) {
+                this.subscribeStore();
+            }
+            super.willUpdate(changedProperties);
+        }
+    }
     return StoreConsumerMixin;
-
-}
+};

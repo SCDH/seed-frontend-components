@@ -7,7 +7,6 @@
  * implement this in order to get sync scroll information.
  */
 export interface SeedSynopsisSyncComponent {
-
     /**
      * The `syncTarget` property must be a reactive property. It is set
      * by the synopsis container in order to pass information up to
@@ -16,7 +15,6 @@ export interface SeedSynopsisSyncComponent {
      * @type {IContentMeta}
      */
     syncTarget: IContentMeta;
-
 }
 
 /**
@@ -27,7 +25,6 @@ export interface SeedSynopsisSyncComponent {
  *
  */
 export interface IContentMeta {
-
     /**
      * The URL of the document loaded into a synopsis element. This is
      * commonly obtained by `window.location.href`.
@@ -43,5 +40,4 @@ export interface IContentMeta {
      * @type string
      */
     top?: string;
-
 }
