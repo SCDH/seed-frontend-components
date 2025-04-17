@@ -44,26 +44,26 @@ export default defineConfig(({ command, mode }) => {
         };
     }
     return {
-	build: {
-	    lib: {
-		entry: resolve(__dirname, "./src/main.ts"),
-		name: "SeedFrontendComponents",
-		fileName: "seed-frontend-components",
-		formats: ["es", "cjs"],
-	    },
-	    rollupOptions: {
-		// 	external: mode === "production" ? "" : /^lit/,
-	    }
-	},
-	server: {
-	    // proxy for Solr dev server listening on localhost:8983
-	    proxy: {
-		"/solr": {
-		    target: "http://localhost:8983/",
-		    changeOrigin: true,
-		    secure: false,
-		}
-	    }
-	},
-  }
+        build: {
+            lib: {
+                entry: resolve(__dirname, "./src/main.ts"),
+                name: "SeedFrontendComponents",
+                fileName: "seed-frontend-components",
+                formats: ["es", "cjs"],
+            },
+            rollupOptions: {
+                // 	external: mode === "production" ? "" : /^lit/,
+            },
+        },
+        server: {
+            // proxy for Solr dev server listening on localhost:8983
+            proxy: {
+                "/solr": {
+                    target: "http://localhost:8983/",
+                    changeOrigin: true,
+                    secure: false,
+                },
+            },
+        },
+    };
 });
