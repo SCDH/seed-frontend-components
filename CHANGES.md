@@ -4,6 +4,7 @@
 
 - removed components for transforming XSLT and dependency on SEED XSL
   Transformer Client
+- use prettier for code formatting
 
 ## 0.8.1
 
