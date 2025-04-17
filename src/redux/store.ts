@@ -9,8 +9,11 @@ import synopsisReducer from "./synopsisSlice";
 import searchQueryReducer from "./searchQuerySlice";
 import { searchApi } from "./searchSlice";
 
-
-import { subscribeAnnotationsCssUpdater, subscribeSegmentsCssOnCssUpdater, subscribeSegmentsCssOnSegmentsUpdater } from "./colorizeText";
+import {
+    subscribeAnnotationsCssUpdater,
+    subscribeSegmentsCssOnCssUpdater,
+    subscribeSegmentsCssOnSegmentsUpdater,
+} from "./colorizeText";
 import { addTextViewListeners } from "./textViewMiddleware";
 
 /*
@@ -22,18 +25,19 @@ import { addTextViewListeners } from "./textViewMiddleware";
 
 export const store = configureStore({
     reducer: {
-	texts: textsReducer,
-	textViews: textViewsReducer,
-	annotations: annotationsReducer,
-	ontology: ontologyReducer,
-	synopsis: synopsisReducer,
-	searchQuery: searchQueryReducer,
-	[searchApi.reducerPath]: searchApi.reducer,
+        texts: textsReducer,
+        textViews: textViewsReducer,
+        annotations: annotationsReducer,
+        ontology: ontologyReducer,
+        synopsis: synopsisReducer,
+        searchQuery: searchQueryReducer,
+        [searchApi.reducerPath]: searchApi.reducer,
     },
     // add the middleware
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware()
-	.prepend(seedListenerMiddleware.middleware)
-	.concat(searchApi.middleware),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware()
+            .prepend(seedListenerMiddleware.middleware)
+            .concat(searchApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

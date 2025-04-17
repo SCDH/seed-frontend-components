@@ -31,8 +31,6 @@ export interface SeedState {
     searchQuery: SearchQuery;
 
     [searchApi.reducerPath]: SearchState;
-
-};
 }
 
 /*
@@ -58,6 +56,10 @@ export const startAppListening =
     seedListenerMiddleware.startListening.withTypes<SeedState, SeedDispatch>();
 export type startAppListeningType = typeof startAppListening;
 
-export type SeedListenerApi = ListenerEffectAPI<SeedState, SeedDispatch, unknown>;
+export type SeedListenerApi = ListenerEffectAPI<
+    SeedState,
+    SeedDispatch,
+    unknown
+>;
 
 export const addAppListener = addListener.withTypes<SeedState, SeedDispatch>();
