@@ -14,6 +14,9 @@ export class SeedResultDoc extends storeConsumerMixin(LitElement) {
     @property({ type: Object })
     document!: Document;
 
+    @property()
+    collection!: string;
+
     @property({ attribute: "doc-id" })
     documentId!: string;
 
@@ -29,7 +32,11 @@ export class SeedResultDoc extends storeConsumerMixin(LitElement) {
             <div class="">
                 ${fields.map((f) => this.renderField(f, this.document))}
             </div>
-            <div class="link details"><a>${this.documentId}</a></div>
+            <div class="link details">
+                <a href="#/search/detail/${this.collection}/${this.documentId}"
+                    >${this.documentId}</a
+                >
+            </div>
         </div>`;
     }
 

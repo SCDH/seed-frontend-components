@@ -101,6 +101,7 @@ export class SeedSearchResult extends searchResultMixin(LitElement) {
     renderDocument(doc: Document, pattern: string): HTMLTemplateResult {
         // Mind the dot!
         return html`<seed-result-doc
+            collection="${this.collection}"
             doc-id="${doc.id}"
             .document="${doc}"
             pattern="${pattern}"
