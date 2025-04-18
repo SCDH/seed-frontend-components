@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+    <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
+    <script type="module" src="/src/seed-app.ts"></script>
+    <script type="module" src="/src/seed-config.ts"></script>
+    <script type="module" src="/src/seed-router.ts"></script>
+    <style type="text/css">
+      .search {
+	  display: flex;
+	  flex-direction: row;
+      }
+      .search * {
+	  margin: 5px;
+
+      }
+      .facets {
+	  width: 20em;
+      }
+    </style>
+  </head>
+  <body>
+    <seed-app>
+      <seed-router>
+	<div>Options:</div>
+	<seed-route path="/hello" template="#hello"></seed-route>
+	<seed-route path="/ciao" template="#ciao"></seed-route>
+	<seed-route path="/examples/router.html" template="#bye"></seed-route>
+      </seed-router>
+    </seed-app>
+    <template id="hello">
+      <div>Hello!</div>
+    </template>
+    <template id="ciao">
+      <div>Ciao!</div>
+    </template>
+    <template id="bye">
+      <div>Bye!</div>
+    </template>
+  </body>
+
+</html>
