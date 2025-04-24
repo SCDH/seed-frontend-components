@@ -4,8 +4,6 @@ import { UnsubscribeListener, UnknownAction } from "@reduxjs/toolkit";
 import { provide } from "@lit/context";
 
 import { storeConsumerMixin } from "./store-consumer-mixin";
-import { windowMixin, windowStyles } from "./window-mixin";
-
 import { seedTextViewContext } from "./seed-context";
 import { addAppListener, SeedState } from "./redux/seed-store";
 import { initText, setText, TextState } from "./redux/textsSlice";
@@ -32,7 +30,7 @@ import log from "./logging";
 
 // define the web component
 @customElement("seed-text-view")
-export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
+export class SeedTextView extends storeConsumerMixin(LitElement) {
     @provide({ context: seedTextViewContext })
     self_: SeedTextView = this;
 
@@ -374,7 +372,7 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
         }
     }
 
-    renderContent() {
+    render() {
         return html`<div class="text-container">${this.iframeTemplate()}</div>`;
     }
 
@@ -522,7 +520,6 @@ export class SeedTextView extends windowMixin(storeConsumerMixin(LitElement)) {
     }
 
     static styles: CSSResultGroup = [
-        windowStyles,
         css`
             div.text-container {
                 height: 100%;
