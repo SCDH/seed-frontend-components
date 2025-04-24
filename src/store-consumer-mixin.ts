@@ -8,6 +8,19 @@ import { seedStoreContext } from "./seed-context";
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 /*
+ * Dumb class required for workaround a Typescript limitation
+ * regarding protected and public members of mixin classes.  See [Lit
+ * docs](https://lit.dev/docs/composition/mixins/#typing-the-subclass)
+ * and the [Typescript bug
+ * 17744](https://github.com/microsoft/TypeScript/issues/17744#issuecomment-558990381)
+ */
+export declare abstract class StoreConsumerMixinInterface {
+    store?: SeedStore;
+    protected subscribeStore(): void;
+    //protected willUpdate(changedProperties: PropertyValues<this>): void;
+}
+
+/*
  * A mixin for {LitElement}s that bind to a Redux {SeedStore} via
  * context. Subclasses must override the `subscribeStore()` method,
  * in order to set up listeners etc.
@@ -33,7 +46,7 @@ export const storeConsumerMixin = <T extends Constructor<LitElement>>(
          * is set from context for the first time. Use it to register
          * listeners etc.
          */
-        subscribeStore(): void {
+        protected subscribeStore(): void {
             // add listeners
         }
 
@@ -53,5 +66,5 @@ export const storeConsumerMixin = <T extends Constructor<LitElement>>(
             super.willUpdate(changedProperties);
         }
     }
-    return StoreConsumerMixin;
+    return StoreConsumerMixin as Constructor<StoreConsumerMixinInterface> & T;
 };
