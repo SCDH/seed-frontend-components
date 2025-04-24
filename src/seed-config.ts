@@ -1,8 +1,9 @@
-import { LitElement, PropertyValues, html } from "lit";
+import { PropertyValues, html } from "lit";
 import { property } from "lit/decorators.js";
 import { customElement } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState } from "./redux/seed-store";
 import {
     fetchMappingAlignment,
     fetchRegexAlignment,
@@ -11,7 +12,7 @@ import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
 
 @customElement("seed-config")
-export class SeedConfig extends storeConsumerMixin(LitElement) {
+export class SeedConfig extends StoreConsumerElement<SeedState> {
     @property({ attribute: "ontology-urls", type: String })
     ontologyUrls!: string;
 

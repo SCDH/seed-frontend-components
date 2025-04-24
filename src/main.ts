@@ -13,7 +13,7 @@ export {
     seedWidgetWidthContext,
     seedWidgetWidthMinimizedContext,
 } from "./seed-context";
-export { storeConsumerMixin } from "./store-consumer-mixin";
+export { StoreConsumerElement } from "./store-consumer-mixin";
 export {
     windowMixin,
     windowStyles,

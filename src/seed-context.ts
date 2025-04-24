@@ -1,8 +1,10 @@
 import { createContext } from "@lit/context";
-import { SeedStore } from "./redux/seed-store";
 import { SeedTextView } from "./seed-text-view";
+import { EnhancedStore } from "@reduxjs/toolkit";
 
-export const seedStoreContext = createContext<SeedStore>(Symbol("store"));
+export const seedStoreContext = createContext<EnhancedStore<any, any, any>>(
+    Symbol("store"),
+);
 
 export const seedTextViewContext = createContext<SeedTextView>(
     Symbol("textView"),

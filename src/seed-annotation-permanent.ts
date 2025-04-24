@@ -1,8 +1,8 @@
-import { html, LitElement, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { html, CSSResultGroup, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { addListener } from "@reduxjs/toolkit";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { Annotation } from "./redux/annotationsSlice";
 import log from "./logging";
@@ -13,7 +13,7 @@ import log from "./logging";
  * `annotationSelected`.
  */
 @customElement("seed-annotation-permanent")
-export class SeedAnnotationPermanent extends storeConsumerMixin(LitElement) {
+export class SeedAnnotationPermanent extends StoreConsumerElement<SeedState> {
     @property({ state: true })
     annotationId: string | null = null;
 

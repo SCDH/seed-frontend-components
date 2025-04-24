@@ -1,9 +1,9 @@
-import { html, css, LitElement, CSSResultGroup, PropertyValues } from "lit";
+import { html, css, CSSResultGroup, PropertyValues } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { UnsubscribeListener, UnknownAction } from "@reduxjs/toolkit";
 import { provide } from "@lit/context";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 import { seedTextViewContext } from "./seed-context";
 import { addAppListener, SeedState } from "./redux/seed-store";
 import { initText, setText, TextState } from "./redux/textsSlice";
@@ -30,7 +30,7 @@ import log from "./logging";
 
 // define the web component
 @customElement("seed-text-view")
-export class SeedTextView extends storeConsumerMixin(LitElement) {
+export class SeedTextView extends StoreConsumerElement<SeedState> {
     @provide({ context: seedTextViewContext })
     self_: SeedTextView = this;
 
