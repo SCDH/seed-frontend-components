@@ -318,5 +318,5 @@ export const windowMixin = <T extends Constructor<LitElement>>(
         // see https://lit.dev/docs/components/styles/#inheriting-styles-from-a-superclass
         static styles = windowStyles as CSSResultGroup;
     }
-    return WindowMixin;
+    return WindowMixin as T;
 };
