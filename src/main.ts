@@ -21,5 +21,3 @@ export {
     isMinimized,
     WindowState,
 } from "./window-mixin";
-export { widgetSizeProvider } from "./widget-size-provider";
-export { widgetSizeConsumer } from "./widget-size-consumer";
