@@ -6,43 +6,6 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
-    if (mode === "demo") {
-        return {
-            base: "tei-processing/seed-frontend-components",
-            build: {
-                outDir: "demo",
-                assetsDir: "examples",
-                rollupOptions: {
-                    // 	external: mode === "production" ? "" : /^lit/,
-                    input: {
-                        // add examples
-                        examples: resolve(__dirname, "index.html"),
-                        synopsis: resolve(__dirname, "examples/synopsis.html"),
-                        figures: resolve(__dirname, "examples/figures.html"),
-                    },
-                },
-            },
-            publicDir: false, // do not copy /public
-            plugins: [
-                viteStaticCopy({
-                    targets: [
-                        {
-                            src: normalizePath(
-                                resolve(__dirname, "examples/*.json"),
-                            ),
-                            dest: "examples",
-                        },
-                        {
-                            src: normalizePath(
-                                resolve(__dirname, "examples/*.tei*html"),
-                            ),
-                            dest: "examples",
-                        },
-                    ],
-                }),
-            ],
-        };
-    }
     return {
         build: {
             lib: {
