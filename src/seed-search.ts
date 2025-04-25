@@ -1,9 +1,9 @@
-import { html, LitElement } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { UnknownAction } from "@reduxjs/toolkit";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener } from "./redux/seed-store";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
 import { SeedStore } from "./redux/seed-store";
@@ -14,7 +14,7 @@ import log from "./logging";
  * A simple web component for firing search queries.
  */
 @customElement("seed-search")
-export class SeedSearch extends storeConsumerMixin(LitElement) {
+export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "initial-all", type: Boolean })
     initiateEmpty: boolean = false;
 

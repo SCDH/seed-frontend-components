@@ -1,15 +1,16 @@
-import { html, LitElement, HTMLTemplateResult } from "lit";
+import { html, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 import { removeFilter } from "./redux/searchQuerySlice";
 import { searchApi } from "./redux/searchSlice";
+import { SeedState } from "./redux/seed-store";
 
 /*
  * A web component for a removable search filter displayed in a filter status view.
  */
 @customElement("seed-search-filter")
-export class SeedSearchFilter extends storeConsumerMixin(LitElement) {
+export class SeedSearchFilter extends StoreConsumerElement<SeedState, any> {
     @property()
     field!: string;
 

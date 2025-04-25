@@ -1,8 +1,8 @@
-import { html, css, LitElement, CSSResultGroup } from "lit";
+import { html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener } from "./redux/seed-store";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 //import { addFilter, removeFilter } from './redux/searchQuerySlice';
 import {
@@ -22,7 +22,7 @@ import log from "./logging";
  * has to be loaded, too.
  */
 @customElement("seed-facet")
-export class SeedFacet extends storeConsumerMixin(LitElement) {
+export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     @property()
     field!: string;
 

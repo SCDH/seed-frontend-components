@@ -1,8 +1,9 @@
-import { html, css, LitElement, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { html, css, CSSResultGroup, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 import { Document } from "./redux/searchTypes";
+import { SeedState } from "./redux/seed-store";
 
 //import log from "./logging";
 
@@ -10,7 +11,7 @@ import { Document } from "./redux/searchTypes";
  * A web component for displaying search results.
  */
 @customElement("seed-result-doc")
-export class SeedResultDoc extends storeConsumerMixin(LitElement) {
+export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
     @property({ type: Object })
     document!: Document;
 

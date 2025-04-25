@@ -1,8 +1,8 @@
-import { html, css, LitElement, CSSResultGroup } from "lit";
+import { html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener } from "./redux/seed-store";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFacetFields } from "./redux/searchQuerySlice";
 
@@ -22,7 +22,7 @@ import log from "./logging";
  * web components need to be loaded, too.
  */
 @customElement("seed-facets")
-export class SeedFacets extends storeConsumerMixin(LitElement) {
+export class SeedFacets extends StoreConsumerElement<SeedState, any> {
     /*
      * The `pattern` attribute takes a regex which is used to filter
      * out the fields (categories) of the search index, for which

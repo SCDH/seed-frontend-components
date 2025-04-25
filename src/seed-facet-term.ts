@@ -1,15 +1,8 @@
-import {
-    html,
-    css,
-    LitElement,
-    CSSResultGroup,
-    HTMLTemplateResult,
-    nothing,
-} from "lit";
+import { html, css, CSSResultGroup, HTMLTemplateResult, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener } from "./redux/seed-store";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
 
@@ -19,7 +12,7 @@ import log from "./logging";
  * The `seed-facet-term` web component renders a single search term for facet.
  */
 @customElement("seed-facet-term")
-export class SeedFacetTerm extends storeConsumerMixin(LitElement) {
+export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
     @property()
     field!: string;
 

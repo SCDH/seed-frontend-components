@@ -1,8 +1,8 @@
-import { html, LitElement, HTMLTemplateResult } from "lit";
+import { html, HTMLTemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener } from "./redux/seed-store";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
 
 import log from "./logging";
@@ -14,7 +14,7 @@ import log from "./logging";
  * must be used, too.
  */
 @customElement("seed-search-filters")
-export class SeedSearchFilters extends storeConsumerMixin(LitElement) {
+export class SeedSearchFilters extends StoreConsumerElement<SeedState, any> {
     @state()
     filters: Array<{ field: string; term: string }> = [];
 
