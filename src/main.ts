@@ -5,7 +5,6 @@ export { SeedAnnotationPermanent } from "./seed-annotation-permanent";
 export { SeedApp } from "./seed-app";
 export { SeedConfig } from "./seed-config";
 export {
-    seedStoreContext,
     seedWidgetDisplayContext,
     seedWidgetHeightContext,
     seedWidgetHeightMinimizedContext,
@@ -13,7 +12,10 @@ export {
     seedWidgetWidthContext,
     seedWidgetWidthMinimizedContext,
 } from "./seed-context";
-export { StoreConsumerElement } from "./store-consumer-mixin";
+export {
+    StoreConsumerElement,
+    reduxStoreContext,
+} from "./store-consumer-mixin";
 export {
     windowMixin,
     windowStyles,

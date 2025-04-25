@@ -1,9 +1,15 @@
 import { LitElement, PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
-import { consume } from "@lit/context";
+import { consume, createContext } from "@lit/context";
 import { EnhancedStore, Action } from "@reduxjs/toolkit";
 
-import { seedStoreContext } from "./seed-context";
+/*
+ * The symbol for the providing and consuming a redux store via the
+ * context protocol.
+ */
+export const reduxStoreContext = createContext<EnhancedStore<any, any, any>>(
+    Symbol("reduxstore"),
+);
 
 export declare class StoreConsumerInterface<S, A extends Action> {
     store?: EnhancedStore<S, A, any>;
@@ -28,7 +34,7 @@ export abstract class StoreConsumerElement<
     /*
      * A property bound to a Redux store by context.
      */
-    @consume({ context: seedStoreContext })
+    @consume({ context: reduxStoreContext })
     @property({ attribute: false })
     store?: EnhancedStore<S, A, any>;
 
@@ -103,7 +109,7 @@ export const storeConsumerMixin = <S, A extends Action>() => {
             /*
              * A property bound to a Redux store by context.
              */
-            @consume({ context: seedStoreContext })
+            @consume({ context: reduxStoreContext })
             @property({ attribute: false })
             store?: EnhancedStore<S, A, any>;
 
