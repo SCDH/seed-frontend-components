@@ -5,14 +5,14 @@ import { provide } from "@lit/context";
 
 // import { ContextProvider } from '@lit/context';
 
-import { seedStoreContext } from "./seed-context";
+import { reduxStoreContext } from "./store-consumer-mixin";
 
 import { SeedStore } from "./redux/seed-store";
 import { store } from "./redux/store";
 
 @customElement("seed-app")
 export class SeedApp extends LitElement {
-    @provide({ context: seedStoreContext })
+    @provide({ context: reduxStoreContext })
     @state()
     seedStore: SeedStore = store;
 

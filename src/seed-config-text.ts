@@ -1,13 +1,14 @@
-import { LitElement, PropertyValues, html } from "lit";
+import { PropertyValues, html } from "lit";
 import { property } from "lit/decorators.js";
 import { customElement } from "lit/decorators.js";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
+import { SeedState } from "./redux/seed-store";
 import { fetchText } from "./redux/textsSlice";
 // import { fetchAnnotationsPerSegment } from './redux/textViewsSlice';
 
 @customElement("seed-config-text")
-export class SeedConfigText extends storeConsumerMixin(LitElement) {
+export class SeedConfigText extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "text-id" })
     textId!: string;
 
