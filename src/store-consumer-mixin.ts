@@ -21,13 +21,16 @@ export declare class StoreConsumerInterface<S, A extends Action> {
  * A usage example can be found in `seed-synopsis-text.ts`.
  */
 // TODO: make this with mixin
-export abstract class StoreConsumerElement<S> extends LitElement {
+export abstract class StoreConsumerElement<
+    S,
+    A extends Action,
+> extends LitElement {
     /*
      * A property bound to a Redux store by context.
      */
     @consume({ context: seedStoreContext })
     @property({ attribute: false })
-    store?: EnhancedStore<S, any, any>;
+    store?: EnhancedStore<S, A, any>;
 
     /*
      * A hook for the sub class called when the {store} property
@@ -44,10 +47,13 @@ export abstract class StoreConsumerElement<S> extends LitElement {
      */
     protected willUpdate(changedProperties: PropertyValues<this>): void {
         if (
-            changedProperties.has("store" as keyof StoreConsumerElement<S>) &&
+            changedProperties.has(
+                "store" as keyof StoreConsumerElement<S, A>,
+            ) &&
             // condition: store *was* undefined
-            changedProperties.get("store" as keyof StoreConsumerElement<S>) ===
-                undefined
+            changedProperties.get(
+                "store" as keyof StoreConsumerElement<S, A>,
+            ) === undefined
         ) {
             this.subscribeStore();
         }

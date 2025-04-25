@@ -13,7 +13,10 @@ import log from "./logging";
  * `annotationSelected`.
  */
 @customElement("seed-annotation-permanent")
-export class SeedAnnotationPermanent extends StoreConsumerElement<SeedState> {
+export class SeedAnnotationPermanent extends StoreConsumerElement<
+    SeedState,
+    any
+> {
     @property({ state: true })
     annotationId: string | null = null;
 
