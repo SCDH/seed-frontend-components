@@ -11,6 +11,8 @@ export default defineConfig(({ command, mode }) => {
         build: {
             lib: {
                 entry: resolve(__dirname, "./src/main.ts"),
+                name: "SEED Frontend Components",
+                fileName: "main",
                 formats: ["es"],
             },
             rollupOptions: {
