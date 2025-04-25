@@ -1,11 +1,10 @@
-import { html, LitElement, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { html, CSSResultGroup, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { addListener } from "@reduxjs/toolkit";
 
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { Annotation } from "./redux/annotationsSlice";
-import { windowMixin, windowStyles } from "./window-mixin";
 import log from "./logging";
 
 /*
@@ -14,9 +13,10 @@ import log from "./logging";
  * `annotationSelected`.
  */
 @customElement("seed-annotation-permanent")
-export class SeedAnnotationPermanent extends windowMixin(
-    storeConsumerMixin(LitElement),
-) {
+export class SeedAnnotationPermanent extends StoreConsumerElement<
+    SeedState,
+    any
+> {
     @property({ state: true })
     annotationId: string | null = null;
 
@@ -79,7 +79,7 @@ export class SeedAnnotationPermanent extends windowMixin(
     /*
      * Render the web component.
      */
-    renderContent() {
+    render() {
         return html`<div class="annotation-container annotation-permanent">
             ${this.renderAnnotationId()}${this.renderAnnotationBody()}
         </div>`;
@@ -131,7 +131,7 @@ export class SeedAnnotationPermanent extends windowMixin(
         </style>`;
     }
 
-    static styles: CSSResultGroup = [windowStyles];
+    static styles: CSSResultGroup = [];
 }
 
 declare global {

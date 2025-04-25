@@ -1,4 +1,4 @@
-import { html, LitElement, CSSResultGroup, css } from "lit";
+import { html, CSSResultGroup, css } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { addListener, UnknownAction } from "@reduxjs/toolkit";
@@ -10,7 +10,7 @@ import log from "./logging";
 import { SeedTextView } from "./seed-text-view";
 import { windowStyles } from "./window-mixin";
 import { seedTextViewContext } from "./seed-context";
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 
 /*
  * `seed-state-scroll-position` is a custom HTML element to be used in
@@ -18,7 +18,10 @@ import { storeConsumerMixin } from "./store-consumer-mixin";
  * allows to scroll to user input.
  */
 @customElement("seed-state-scroll-position")
-export class SeedStateScrollPosition extends storeConsumerMixin(LitElement) {
+export class SeedStateScrollPosition extends StoreConsumerElement<
+    SeedState,
+    any
+> {
     @state()
     @consume({ context: seedTextViewContext })
     protected textView?: SeedTextView;

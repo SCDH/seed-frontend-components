@@ -2,59 +2,41 @@
 // https://dev.to/leon/vite-lit-and-storybook-43f
 import { resolve } from "path";
 import { defineConfig, normalizePath } from "vite";
+import dts from "vite-plugin-dts";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
-    if (mode === "demo") {
+    if (mode === "redux") {
         return {
-            base: "tei-processing/seed-frontend-components",
             build: {
-                outDir: "demo",
-                assetsDir: "examples",
+                outDir: "./dist/redux",
+                lib: {
+                    entry: resolve(__dirname, "./src/redux/main.ts"),
+                    name: "SEED Frontend State",
+                    fileName: "main",
+                    formats: ["es"],
+                },
                 rollupOptions: {
                     // 	external: mode === "production" ? "" : /^lit/,
-                    input: {
-                        // add examples
-                        examples: resolve(__dirname, "index.html"),
-                        synopsis: resolve(__dirname, "examples/synopsis.html"),
-                        figures: resolve(__dirname, "examples/figures.html"),
-                    },
                 },
             },
-            publicDir: false, // do not copy /public
-            plugins: [
-                viteStaticCopy({
-                    targets: [
-                        {
-                            src: normalizePath(
-                                resolve(__dirname, "examples/*.json"),
-                            ),
-                            dest: "examples",
-                        },
-                        {
-                            src: normalizePath(
-                                resolve(__dirname, "examples/*.tei*html"),
-                            ),
-                            dest: "examples",
-                        },
-                    ],
-                }),
-            ],
+            plugins: [dts({ include: ["src/redux"] })],
         };
     }
     return {
         build: {
             lib: {
                 entry: resolve(__dirname, "./src/main.ts"),
-                name: "SeedFrontendComponents",
-                fileName: "seed-frontend-components",
-                formats: ["es", "cjs"],
+                name: "SEED Frontend Components",
+                fileName: "main",
+                formats: ["es"],
             },
             rollupOptions: {
                 // 	external: mode === "production" ? "" : /^lit/,
             },
         },
+        plugins: [dts({ include: ["src"] })],
         server: {
             // proxy for Solr dev server listening on localhost:8983
             proxy: {

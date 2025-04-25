@@ -1,4 +1,4 @@
-import { html, LitElement, CSSResultGroup, css } from "lit";
+import { html, CSSResultGroup, css } from "lit";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { addListener, UnknownAction } from "@reduxjs/toolkit";
@@ -12,7 +12,7 @@ import log from "./logging";
 import { SeedTextView } from "./seed-text-view";
 import { windowStyles } from "./window-mixin";
 import { seedTextViewContext } from "./seed-context";
-import { storeConsumerMixin } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "./store-consumer-mixin";
 
 /*
  * `seed-state-sync-others` is a custom HTML element to be used in the
@@ -20,7 +20,7 @@ import { storeConsumerMixin } from "./store-consumer-mixin";
  * texts to the corresponding position in a synoptical setup.
  */
 @customElement("seed-state-sync-others")
-export class SeedStateSyncOthers extends storeConsumerMixin(LitElement) {
+export class SeedStateSyncOthers extends StoreConsumerElement<SeedState, any> {
     @consume({ context: seedTextViewContext })
     protected textView!: SeedTextView;
 
