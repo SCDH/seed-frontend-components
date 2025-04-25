@@ -30,7 +30,7 @@ import log from "./logging";
 
 // define the web component
 @customElement("seed-text-view")
-export class SeedTextView extends StoreConsumerElement<SeedState> {
+export class SeedTextView extends StoreConsumerElement<SeedState, any> {
     @provide({ context: seedTextViewContext })
     self_: SeedTextView = this;
 

@@ -18,7 +18,10 @@ import { StoreConsumerElement } from "./store-consumer-mixin";
  * allows to scroll to user input.
  */
 @customElement("seed-state-scroll-position")
-export class SeedStateScrollPosition extends StoreConsumerElement<SeedState> {
+export class SeedStateScrollPosition extends StoreConsumerElement<
+    SeedState,
+    any
+> {
     @state()
     @consume({ context: seedTextViewContext })
     protected textView?: SeedTextView;

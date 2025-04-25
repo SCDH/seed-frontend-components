@@ -8,7 +8,7 @@ import { fetchText } from "./redux/textsSlice";
 // import { fetchAnnotationsPerSegment } from './redux/textViewsSlice';
 
 @customElement("seed-config-text")
-export class SeedConfigText extends StoreConsumerElement<SeedState> {
+export class SeedConfigText extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "text-id" })
     textId!: string;
 

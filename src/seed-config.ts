@@ -12,7 +12,7 @@ import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
 
 @customElement("seed-config")
-export class SeedConfig extends StoreConsumerElement<SeedState> {
+export class SeedConfig extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "ontology-urls", type: String })
     ontologyUrls!: string;
 

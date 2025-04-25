@@ -20,7 +20,7 @@ import { StoreConsumerElement } from "./store-consumer-mixin";
  * texts to the corresponding position in a synoptical setup.
  */
 @customElement("seed-state-sync-others")
-export class SeedStateSyncOthers extends StoreConsumerElement<SeedState> {
+export class SeedStateSyncOthers extends StoreConsumerElement<SeedState, any> {
     @consume({ context: seedTextViewContext })
     protected textView!: SeedTextView;
 
