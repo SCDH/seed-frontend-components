@@ -1,7 +1,7 @@
 import { LitElement } from "lit";
 
 import { storeConsumerMixin } from "./store-consumer-mixin";
-import { addAppListener, SeedListenerApi } from "./redux/seed-store";
+import { SeedState, addAppListener, SeedListenerApi } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
 
@@ -16,7 +16,10 @@ type Constructor<T = {}> = new (...args: any[]) => T;
 export const searchResultMixin = <T extends Constructor<LitElement>>(
     superClass: T,
 ) => {
-    abstract class SearchResultMixin extends storeConsumerMixin(superClass) {
+    abstract class SearchResultMixin extends storeConsumerMixin<
+        SeedState,
+        any
+    >()(superClass) {
         /*
          * Override the `subscribeStore()` method from the
          * `storeConsumerMixin`. It subscribes to store actions that
