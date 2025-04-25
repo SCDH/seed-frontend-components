@@ -2,6 +2,8 @@ import { LitElement, PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
 import { consume, createContext } from "@lit/context";
 import { EnhancedStore, Action } from "@reduxjs/toolkit";
+//import type { Dispatch } from "@reduxjs/toolkit";
+//import { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 
 /*
  * The symbol for the providing and consuming a redux store via the
@@ -12,9 +14,15 @@ export const reduxStoreContext = createContext<EnhancedStore<any, any, any>>(
 );
 
 export declare class StoreConsumerInterface<S, A extends Action> {
-    store?: EnhancedStore<S, A, any>;
+    public store?: EnhancedStore<S, A, any>;
     protected subscribeStore(): void;
+    public listeners: Array<((cls: any) => any) | null>;
 }
+
+export type UnsubcribeDispatch =
+    | { payload: any; type: "listenerMiddleware/add" }
+    | null
+    | undefined;
 
 /*
  * A subclass of {LitElement}s that binds to a Redux store via
@@ -31,6 +39,20 @@ export abstract class StoreConsumerElement<
     S,
     A extends Action,
 > extends LitElement {
+    /*
+     * A queue of functions that add listener middleware to the
+     * store. They are added to the middleware, as soon as the store
+     * is connected.
+     *
+     * This is used by, e.g., decorators, which cannot add to the
+     * middleware themselves, because their setup is too early, when
+     * the store is not connected. Since it is used by decorators,
+     * this property also has to be public.
+     */
+    //listeners: Array< (store: EnhancedStore<S,A,any>) => Dispatch<A> > = [];
+    //listeners: Array< ((cls: StoreConsumerElement<S,A>) => UnsubcribeDispatch) | null > = [];
+    listeners!: Array<((cls: any) => any) | null>;
+
     /*
      * A property bound to a Redux store by context.
      */
@@ -61,6 +83,12 @@ export abstract class StoreConsumerElement<
                 "store" as keyof StoreConsumerElement<S, A>,
             ) === undefined
         ) {
+            // add dynamic middleware in this.listeners to the store
+            this.listeners
+                ?.filter((f) => f !== null)
+                ?.forEach((fun) => fun(this));
+
+            // call hook for adding dynamic middleware
             this.subscribeStore();
         }
         super.willUpdate(changedProperties);
@@ -71,7 +99,9 @@ export abstract class StoreConsumerElement<
 
 type GenericConstructor<T = {}> = new (...args: any[]) => T;
 
-//type StoreConsumerConstructor<S, A extends Action> = GenericConstructor<StoreConsumerInterface<S, A>>;
+export type StoreConsumerConstructor<S, A extends Action> = GenericConstructor<
+    StoreConsumerInterface<S, A>
+>;
 
 /*
  * A mixin that connects a {LitElement} to a redux store via context.
@@ -131,11 +161,11 @@ export const storeConsumerMixin = <S, A extends Action>() => {
             ): void {
                 if (
                     changedProperties.has(
-                        "store" as keyof StoreConsumerInterface<S, A>,
+                        "store" as keyof StoreConsumerMixin,
                     ) &&
                     // condition: store *was* undefined
                     changedProperties.get(
-                        "store" as keyof StoreConsumerInterface<S, A>,
+                        "store" as keyof StoreConsumerMixin,
                     ) === undefined
                 ) {
                     this.subscribeStore();
