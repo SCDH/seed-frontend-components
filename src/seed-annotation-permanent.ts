@@ -1,11 +1,10 @@
-import { html, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { html, CSSResultGroup, HTMLTemplateResult, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { addListener } from "@reduxjs/toolkit";
 
 import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { Annotation } from "./redux/annotationsSlice";
-import log from "./logging";
+import { changed } from "./store-consumer-decorators";
 
 /*
  * The {SeedAnnotationPermanent} object is Lit web component for
@@ -18,7 +17,8 @@ export class SeedAnnotationPermanent extends StoreConsumerElement<
     any
 > {
     @property({ state: true })
-    annotationId: string | null = null;
+    @changed<SeedState, String | null>((s) => s.annotations.annotationSelected)
+    annotationId!: string;
 
     @property({ state: true })
     annotationBody: string | null = null;
@@ -38,42 +38,14 @@ export class SeedAnnotationPermanent extends StoreConsumerElement<
     @property({ attribute: true })
     clas: string = "annotations";
 
-    subscribeStore(): void {
-        log.debug(
-            "subscribing component to the redux store, element with Id " +
-                this.id,
-        );
-        if (this.store === undefined) {
-            log.debug("no store yet for element with Id ", this.id);
+    protected override willUpdate(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.willUpdate(changedProperties);
+        if (changedProperties.has("annotationId")) {
+            let state = this.store?.getState() as SeedState;
+            this.annotation = state.annotations.annotations[this.annotationId];
         }
-        // This kind of subscription with store.dispatch(addListener(...)) needs a store with listener middleware, see
-        // https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
-
-        // listen for changes on annotation[this.annotationId]
-        this.store?.dispatch(
-            addListener({
-                predicate: (_action, currentState, previousState): boolean => {
-                    // log.debug("checking predicate for element with Id " + this.id);
-                    let currState: SeedState = currentState as SeedState;
-                    let prevState: SeedState = previousState as SeedState;
-                    return (
-                        prevState.annotations.annotationSelected !==
-                        currState.annotations.annotationSelected
-                    );
-                },
-                effect: (_action, listenerApi): void => {
-                    log.debug(
-                        "cssPerSegment updated for element with Id " + this.id,
-                    );
-                    let state: SeedState = listenerApi.getState() as SeedState;
-                    this.annotationId = state.annotations.annotationSelected;
-                    if (this.annotationId) {
-                        this.annotation =
-                            state.annotations.annotations[this.annotationId];
-                    }
-                },
-            }),
-        );
     }
 
     /*
