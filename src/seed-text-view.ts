@@ -1,5 +1,5 @@
 import { html, css, CSSResultGroup, PropertyValues } from "lit";
-import { customElement, property, state, query } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import { UnsubscribeListener, UnknownAction } from "@reduxjs/toolkit";
 import { provide } from "@lit/context";
 
@@ -25,6 +25,7 @@ import { CSSDefinition } from "./redux/cssTypes";
 import { scrolled, syncOthers } from "./redux/synopsisSlice";
 import { scrolledTextViewThunk } from "./redux/synopsisActions";
 import { setScrollTarget } from "./redux/synopsisMiddleware";
+import { changed } from "./store-consumer-decorators";
 
 import log from "./logging";
 
@@ -49,7 +50,9 @@ export class SeedTextView extends StoreConsumerElement<SeedState, any> {
     @query("iframe")
     protected iframe: HTMLIFrameElement | undefined;
 
-    @state()
+    @changed<SeedState, SeedTextView, String | undefined>(
+        (s, c) => s.texts[c?.textId ?? "_"]?.doc,
+    )
     doc: string | undefined;
 
     protected annotationSelected: string | null = null;
@@ -148,28 +151,6 @@ export class SeedTextView extends StoreConsumerElement<SeedState, any> {
                             state.textViews[this.id]?.textId ?? "unknown"
                         ].author ??
                         "unknown";
-                },
-            }),
-        );
-
-        this.store?.dispatch(
-            addAppListener({
-                predicate: (
-                    _action: UnknownAction,
-                    currentState,
-                    previousState,
-                ): boolean => {
-                    return (
-                        this.textId !== undefined &&
-                        currentState.texts.hasOwnProperty(this.textId) &&
-                        currentState.texts[this.textId].doc !==
-                            (previousState.texts?.[this.textId]?.doc ??
-                                "unknown")
-                    );
-                },
-                effect: (_action, listenerApi): void => {
-                    this.doc =
-                        listenerApi.getState().texts[this.textId ?? "_"].doc;
                 },
             }),
         );
