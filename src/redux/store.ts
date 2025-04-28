@@ -8,6 +8,7 @@ import ontologyReducer from "./ontologySlice";
 import synopsisReducer from "./synopsisSlice";
 import searchQueryReducer from "./searchQuerySlice";
 import { searchApi } from "./searchSlice";
+import dataLabelReducer from "./dataLabelSlice";
 
 import {
     subscribeAnnotationsCssUpdater,
@@ -32,6 +33,7 @@ export const store = configureStore({
         synopsis: synopsisReducer,
         searchQuery: searchQueryReducer,
         [searchApi.reducerPath]: searchApi.reducer,
+        dataLabels: dataLabelReducer,
     },
     // add the middleware
     middleware: (getDefaultMiddleware) =>
