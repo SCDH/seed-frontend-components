@@ -17,7 +17,9 @@ export class SeedAnnotationPermanent extends StoreConsumerElement<
     any
 > {
     @property({ state: true })
-    @changed<SeedState, String | null>((s) => s.annotations.annotationSelected)
+    @changed<SeedState, SeedAnnotationPermanent, String | null>(
+        (s) => s.annotations.annotationSelected,
+    )
     annotationId!: string;
 
     @property({ state: true })
