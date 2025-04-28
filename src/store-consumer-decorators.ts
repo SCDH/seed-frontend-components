@@ -87,3 +87,67 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
         }
     };
 }
+
+/*
+ * This decorator subscribes an instance property to action calls in a
+ * redux store.
+ *
+ * @param action - the action creator
+ *
+ * @param select - a selector function that extracts the value for the
+ * target property from the store. The function takes the state and
+ * the target object as parameters.
+ *
+ * @param _option? - decorator options
+ *
+ * This function takes three type parameters:
+ *
+ * @typeParam S – the type of the root state of the redux store
+ * @typeParam C - the target's type
+ *
+ * @typeParam V - the type of the decorated property. i.e. the return
+ * type of the function passed in the `select` parameter
+ */
+export function taken<S, C extends StoreConsumerElement<S, any>, V>(
+    action: any,
+    select: (state: S, connectedTarget?: C) => V,
+    _options?: DecoratorOptions<any, C>,
+) {
+    return function (target: C, key: string) {
+        // In the early stage of setup, the store is always undefined!
+        // Thus, we push a function on a stack of functions for adding
+        // listener middleware.
+        log.debug("changed decorator setup for property " + key);
+        const changeListener = (c: C & { [key]: V }) => {
+            log.debug(
+                "changed decorator adds listener middleware to the store for property '" +
+                    key +
+                    "' on element",
+                c,
+            );
+            const unsubscribe = c?.store?.dispatch(
+                addListener({
+                    actionCreator: action,
+                    effect: (_action, listenerApi): void => {
+                        log.info("changed decorator effect");
+                        let state: S = listenerApi.getState() as S;
+                        let next: V = select(state, c);
+                        let k = key as keyof C;
+                        let oldValue = c[k];
+                        c[k] = next as any;
+                        // run the update lifecycle
+                        c.requestUpdate(k, oldValue);
+                    },
+                }),
+            );
+            return unsubscribe;
+        };
+        // push the changeListener function on the target's listener
+        // stack, which may still by undefined
+        if (target.hasOwnProperty("listeners")) {
+            target.listeners.push(changeListener);
+        } else {
+            target["listeners"] = [changeListener];
+        }
+    };
+}
