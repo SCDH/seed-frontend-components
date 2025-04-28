@@ -1,5 +1,5 @@
 import { html, css, CSSResultGroup, PropertyValues } from "lit";
-import { customElement, property, state, query } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import { UnsubscribeListener, UnknownAction } from "@reduxjs/toolkit";
 import { provide } from "@lit/context";
 
