@@ -33,6 +33,19 @@ export interface DataLabelSlice {
     [id: string]: DataLabel;
 }
 
+/*
+ * Make a `DataLabel` with a default label only or "unknown".
+ *
+ * @param s - optionally the default label
+ */
+export function mkDefaultLabel(s?: string): DataLabel {
+    if (s !== undefined) {
+        return { default: s, languages: {} };
+    } else {
+        return { default: "unknown", languages: {} };
+    }
+}
+
 const initialState: DataLabelSlice = {};
 
 /*
