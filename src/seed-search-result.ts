@@ -1,7 +1,7 @@
-import { html, LitElement, HTMLTemplateResult } from "lit";
+import { html, HTMLTemplateResult } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 
-import { searchResultMixin } from "./search-result-mixin";
+import { SearchResultElement } from "./search-result-mixin";
 import { SeedListenerApi, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
@@ -13,7 +13,7 @@ import log from "./logging";
  * A web component for displaying search results.
  */
 @customElement("seed-search-result")
-export class SeedSearchResult extends searchResultMixin(LitElement) {
+export class SeedSearchResult extends SearchResultElement {
     @property()
     collection!: string;
 
