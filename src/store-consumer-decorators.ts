@@ -3,6 +3,10 @@ import { addListener } from "@reduxjs/toolkit";
 import log from "./logging";
 import { StoreConsumerElement } from "./store-consumer-mixin";
 
+export interface DecoratorOptions<S, C> {
+    predicatePrecondition?: (state: S, connectedTarget: C) => boolean;
+}
+
 /*
  * This decorator subscribes an instance property to changes in the
  * redux store. It makes the property a reactive property by
@@ -27,6 +31,7 @@ import { StoreConsumerElement } from "./store-consumer-mixin";
  */
 export function changed<S, C extends StoreConsumerElement<S, any>, V>(
     selector: (state: S, connectedTarget?: C) => V,
+    options?: DecoratorOptions<S, C>,
 ) {
     return function (target: C, key: string) {
         // In the early stage of setup, the store is always undefined!
@@ -34,12 +39,26 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
         // listener middleware.
         log.debug("changed decorator setup for property " + key);
         const changeListener = (c: C & { [key]: V }) => {
+            // make a clone for passing to the selector function
             log.debug(
-                "changed decorator adds listener middleware to the store ...",
+                "changed decorator adds listener middleware to the store for property '" +
+                    key +
+                    "' on element",
+                c,
             );
             const unsubscribe = c?.store?.dispatch(
                 addListener({
                     predicate: (_action, currentState, previousState) => {
+                        if (options?.predicatePrecondition !== undefined) {
+                            if (
+                                !options.predicatePrecondition(
+                                    currentState as S,
+                                    c,
+                                )
+                            ) {
+                                return false;
+                            }
+                        }
                         return (
                             selector(currentState as S, c) !==
                             selector(previousState as S, c)
