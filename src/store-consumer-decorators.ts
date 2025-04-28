@@ -12,19 +12,37 @@ export interface DecoratorOptions<S, C> {
  * redux store. It makes the property a reactive property by
  * triggering the update lifecycle when the change occurs.
  *
- * Usage:
+ * @example
+ * This sets up subscribes the `annoationId` property to the selected
+ * annotation:
+ *
  * ```
- * @changed<RootState, String | null>(s => s.annotations.annotationSelected)
+ * @changed<RootState, SeedAnnotationPermanent, String | null>(s => s.annotations.annotationSelected)
  * annotationId!: string;
  * ```
  *
- * The two type parameters are 1) the type of the root state of the redux
- * store and 2) the type of the state property returned.
+ * @param selector - a function that extracts a value from the
+ * store. It is used to set up a predicate that compares the value
+ * from the current state with the value of the previous state and for
+ * setting the decorated property's value when current and previous
+ * values differ. The selector function takes the state and optionally
+ * the target object as input. It is thus possible to use properties
+ * of the target in the selector function. However, it's the property
+ * value at the time, when the dynamic middleware is set up for the
+ * target object: **when the store is first connected**.
  *
- * The parameter is a type-save selector function on the root state, where
- * `s: RootState`.
+ * @param options? - decorator options
  *
- * @Remark: This kind of subscription with
+ * This function takes two type parameters:
+ * @typeParam S - the type of the root state of the redux store
+ * @typeParam C - the type of the target
+ * @typeParam V - the type of the state property returned
+ *
+ * @remarks
+ * The `C` type parameter is there for providing type save selector
+ * functions when accessing properties of the target instance.
+ *
+ * @remarks: This kind of subscription with
  * `store.dispatch(addListener(...))` needs a store with listener
  * middleware, see
  * https://stackoverflow.com/questions/73832645/redux-toolkit-addlistener-action-does-not-register-dynamic-middleware
@@ -39,7 +57,6 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
         // listener middleware.
         log.debug("changed decorator setup for property " + key);
         const changeListener = (c: C & { [key]: V }) => {
-            // make a clone for passing to the selector function
             log.debug(
                 "changed decorator adds listener middleware to the store for property '" +
                     key +
@@ -90,7 +107,8 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
 
 /*
  * This decorator subscribes an instance property to action calls in a
- * redux store.
+ * redux store.  It makes the property a reactive property by
+ * triggering the update lifecycle when the change occurs.
  *
  * @param action - the action creator
  *
