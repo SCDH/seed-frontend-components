@@ -10,6 +10,7 @@ import {
 } from "./redux/synopsisSlice";
 import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
+import { fetchDataLabels } from "./redux/dataLabelSlice";
 
 @customElement("seed-config")
 export class SeedConfig extends StoreConsumerElement<SeedState, any> {
@@ -24,6 +25,9 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
 
     @property({ attribute: "mapping-alignment" })
     mappingAlignment!: string;
+
+    @property({ attribute: "data-labels" })
+    dataLabels!: string;
 
     protected willUpdate(changedProperties: PropertyValues<this>): void {
         if (changedProperties.has("annotationsUrl" as keyof SeedConfig)) {
@@ -43,6 +47,9 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
             this.mappingAlignment
         ) {
             this.store?.dispatch(fetchMappingAlignment(this.mappingAlignment));
+        }
+        if (changedProperties.has("dataLabels" as keyof SeedConfig)) {
+            this.store?.dispatch(fetchDataLabels(this.dataLabels));
         }
         super.willUpdate(changedProperties);
     }
