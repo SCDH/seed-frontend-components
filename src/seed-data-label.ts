@@ -42,11 +42,15 @@ export class SeedDataLabel extends StoreConsumerElement<SeedState, any> {
             if (s?.dataLabels[c.key] !== undefined) return s.dataLabels[c.key];
             else return mkDefaultLabel(c?.key);
     })
-    label!: string;
+    label!: DataLabel;
 
     override render(): HTMLTemplateResult {
+        let lang = navigator.language; // TODO: strip country?
         if (this.label !== undefined)
-            return html`<span data-key="${this.key}">${this.label}</span>`;
+            return html`<span data-key="${this.key}"
+                >${this.label[lang as keyof DataLabel] ??
+                this.label.default}</span
+            >`;
         else return html`<span data-key="${this.key}">${this.key}</span>`;
     }
 }
