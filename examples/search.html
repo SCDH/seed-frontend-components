@@ -17,6 +17,7 @@
     <script type="module" src="/src/seed-facet-term.ts"></script>
     <script type="module" src="/src/seed-search-filters.ts"></script>
     <script type="module" src="/src/seed-search-filter.ts"></script>
+    <script type="module" src="/src/seed-data-label.ts"></script>
     <style type="text/css">
       .search {
 	  display: flex;
@@ -36,7 +37,8 @@
       <seed-config
 	annotations-url="Annotationen.json"
 	ontology-urls="ontology.json"
-	regex-alignment="alignment.json"></seed-config>
+	regex-alignment="alignment.json"
+	data-labels="/examples/data-labels.json"></seed-config>
       <div class="search">
 	<div class="facets">
 	  <seed-facets collection="tei4" pattern="^about.*_ss$">
