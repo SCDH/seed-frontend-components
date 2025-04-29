@@ -18,11 +18,17 @@ export class SeedSearchFilter extends StoreConsumerElement<SeedState, any> {
     term!: string;
 
     override render(): HTMLTemplateResult {
-        return html`<button class="removable-filter" type="button" @click="${this.rmFilter}" title="remove this filter">
-	    <span class="remove-filter-symbol dispose">&#x1F5D9;</span>
-	    <span>${this.field}</span><span class="field-term-sep">:</span
-	    <span>${this.term}</span>
-	</button>`;
+        return html`<button
+            class="removable-filter"
+            type="button"
+            @click="${this.rmFilter}"
+            title="remove this filter"
+        >
+            <span class="remove-filter-symbol dispose">&#x1F5D9;</span>
+            <seed-data-label key="${this.field}"></seed-data-label
+            ><span class="field-term-sep">:</span>
+            <seed-data-label key="${this.term}"></seed-data-label>
+        </button>`;
     }
 
     rmFilter(): void {
