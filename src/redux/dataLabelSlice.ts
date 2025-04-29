@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { deepmerge } from "deepmerge-ts";
 
 import log from "./logging";
 
@@ -56,27 +57,38 @@ const initialState: DataLabelSlice = {};
  * dispatch(fetchDataLabels(MyURL))
  * ```
  */
-export const fetchDataLabels = createAsyncThunk<
-    DataLabelSlice,
-    { url: string }
->("dataLabel/fetchDataLabels", async ({ url }): Promise<DataLabelSlice> => {
-    log.info("Fetching data labels from", url);
-    const response = await fetch(url);
-    return response.json().then((obj) => {
-        return obj;
-    });
-});
+export const fetchDataLabels = createAsyncThunk<DataLabelSlice, string>(
+    "dataLabels/fetchDataLabels",
+    async (url): Promise<DataLabelSlice> => {
+        log.info("Fetching data labels from", url);
+        const response = await fetch(url);
+        return response
+            .json()
+            .then((result) => {
+                return result as DataLabelSlice;
+            })
+            .catch(() => {
+                log.error("failed to fetch data labels from ", url);
+                return {};
+            });
+    },
+);
 
 export const dataLabelSlice = createSlice({
-    name: "dataLabel",
+    name: "dataLabels",
     initialState,
-    reducers: {},
+    reducers: {
+        reset: (state, _action: PayloadAction<any>) => {
+            log.info("reset of data labels", state);
+            state = {};
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(
                 fetchDataLabels.fulfilled,
-                (_state, action: PayloadAction<DataLabelSlice>) => {
-                    _state = action.payload;
+                (state, action: PayloadAction<DataLabelSlice>) => {
+                    return deepmerge(state, action.payload);
                 },
             )
             .addCase(fetchDataLabels.rejected, () => {
@@ -85,4 +97,5 @@ export const dataLabelSlice = createSlice({
     },
 });
 
+export const { reset } = dataLabelSlice.actions;
 export default dataLabelSlice.reducer;
