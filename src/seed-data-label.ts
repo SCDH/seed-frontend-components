@@ -1,10 +1,11 @@
-import { HTMLTemplateResult, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { HTMLTemplateResult, html, PropertyValues } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 
 import { StoreConsumerElement } from "./store-consumer-mixin";
-import { changed } from "./store-consumer-decorators";
 import { SeedState } from "./redux/seed-store";
-import { DataLabel, mkDefaultLabel } from "./redux/dataLabelSlice";
+import { DataLabel } from "./redux/dataLabelSlice";
+
+import log from "./logging";
 
 /*
  * A custom element that make a label from the identifier given as the
@@ -37,20 +38,29 @@ export class SeedDataLabel extends StoreConsumerElement<SeedState, any> {
     /*
      * The label is extracted from the stores `dataLabels` slice.
      */
-    @changed<SeedState, SeedDataLabel, DataLabel | undefined>((s, c) => {
-        if (c?.key !== undefined)
-            if (s?.dataLabels[c.key] !== undefined) return s.dataLabels[c.key];
-            else return mkDefaultLabel(c?.key);
-    })
+    @state()
     label!: DataLabel;
+
+    protected override firstUpdated(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.firstUpdated(changedProperties);
+        // Listening to changes in the redux state store would not be
+        // the right thing here, since the data labels are loaded when
+        // the application starts up. So we can just read the label
+        // once in the lifecycle of this web component.
+        if (this.store !== undefined && this.key !== undefined)
+            this.label = this.store.getState().dataLabels[this.key];
+    }
 
     override render(): HTMLTemplateResult {
         let lang = navigator.language; // TODO: strip country?
-        if (this.label !== undefined)
+        if (this.label !== undefined) {
+            log.info("label present");
             return html`<span data-key="${this.key}"
                 >${this.label[lang as keyof DataLabel] ??
                 this.label.default}</span
             >`;
-        else return html`<span data-key="${this.key}">${this.key}</span>`;
+        } else return html`<span data-key="${this.key}">${this.key}</span>`;
     }
 }
