@@ -14,6 +14,7 @@ import { SynopsisSlice } from "./synopsisSlice";
 import { searchApi, SearchState } from "./searchSlice";
 import { SearchQuery } from "./searchTypes";
 import { DataLabelSlice } from "./dataLabelSlice";
+import { RouterSlice } from "./routerSlice";
 
 /*
  * An interface describing a store with the slices of this library.
@@ -34,6 +35,8 @@ export interface SeedState {
     [searchApi.reducerPath]: SearchState;
 
     dataLabels: DataLabelSlice;
+
+    routes: RouterSlice;
 }
 
 /*
