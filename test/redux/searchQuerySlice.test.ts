@@ -5,6 +5,8 @@ import reducer, {
     addFilter,
     removeFilter,
     addFl,
+    addSingleDocFilter,
+    removeSingleDocFilter,
 } from "../../src/redux/searchQuerySlice";
 
 test("should return the initial state", () => {
@@ -61,4 +63,14 @@ test("should add search fields", () => {
     expect(newState.fl).toContain("title");
     expect(newState.fl).toContain("genre");
     expect(newState.fl).toHaveLength(4);
+});
+
+test("should add and remove id filter", () => {
+    var newState: SearchQuery = reducer(
+        initialSearchQuery,
+        addSingleDocFilter("dial911"),
+    );
+    expect(newState._fq_id).toContain("dial911");
+    newState = reducer(newState, removeSingleDocFilter());
+    expect(newState._fq_id).toBe(undefined);
 });

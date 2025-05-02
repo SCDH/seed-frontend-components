@@ -131,7 +131,15 @@ export interface SearchQuery {
 
     fq: string | undefined;
 
+    /*
+     * Use for setting up facet filtering via the fq parameter.
+     */
     _fq_faceted: FacetFilterQuery | undefined;
+
+    /*
+     * Use for restricting result to a single document!
+     */
+    _fq_id: string | undefined;
 
     q_op: string;
 
@@ -162,6 +170,7 @@ export const initialSearchQuery: SearchQuery = {
     collection: "tei4", // default collection
     q: "*%3A*", // match all
     fq: undefined,
+    _fq_id: undefined,
     _fq_faceted: {} as FacetFilterQuery,
     q_op: "OR",
     fl: ["id"],
@@ -181,37 +190,45 @@ export function solrSearchQuery(query: SearchQuery): string {
 
     rc += "&q.op=" + query.q_op;
 
-    if (query.fl.length > 0) {
-        rc += "&fl=";
-        query.fl.forEach((f) => (rc += f + ","));
-    }
-
-    if (query.fq !== undefined) {
-        rc += "&fq=" + query.fq;
-    }
-
-    const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
-    for (const field of fields) {
-        const terms: Array<string> = query._fq_faceted?.[field] ?? [];
-        if (terms.length > 0) {
-            rc += "&fq=" + field + ":(";
-            var i = 0;
-            for (const term of terms) {
-                if (i > 0) {
-                    rc += " OR ";
-                }
-                rc += '"' + term + '"';
-                i++;
-            }
-            rc += ")";
+    // Apply facet filters and select fields if and only if the query
+    // is not for a single document. Reason: We want all fields if we
+    // query a single document and we want it only once (per query in
+    // the q parameter).
+    if (query._fq_id !== undefined) {
+        rc += "&fq=id:" + query._fq_id;
+    } else {
+        if (query.fl.length > 0) {
+            rc += "&fl=";
+            query.fl.forEach((f) => (rc += f + ","));
         }
-    }
 
-    if (query.facet) {
-        rc += "&facet=true";
-        query.facet_fields.forEach((f) => {
-            rc += "&facet.field=" + f;
-        });
+        if (query.fq !== undefined) {
+            rc += "&fq=" + query.fq;
+        }
+
+        const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
+        for (const field of fields) {
+            const terms: Array<string> = query._fq_faceted?.[field] ?? [];
+            if (terms.length > 0) {
+                rc += "&fq=" + field + ":(";
+                var i = 0;
+                for (const term of terms) {
+                    if (i > 0) {
+                        rc += " OR ";
+                    }
+                    rc += '"' + term + '"';
+                    i++;
+                }
+                rc += ")";
+            }
+        }
+
+        if (query.facet) {
+            rc += "&facet=true";
+            query.facet_fields.forEach((f) => {
+                rc += "&facet.field=" + f;
+            });
+        }
     }
 
     rc += "&params=" + query.params;

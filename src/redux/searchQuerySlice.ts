@@ -56,10 +56,29 @@ export const searchQuerySlice = createSlice({
                 }
             }
         },
+        addSingleDocFilter: (
+            state: SearchQuery,
+            action: PayloadAction<string>,
+        ) => {
+            state._fq_id = action.payload;
+        },
+        removeSingleDocFilter: (
+            state: SearchQuery,
+            _action: PayloadAction<void>,
+        ) => {
+            state._fq_id = undefined;
+        },
     },
 });
 
-export const { setCollection, addFl, addFacetFields, addFilter, removeFilter } =
-    searchQuerySlice.actions;
+export const {
+    setCollection,
+    addFl,
+    addFacetFields,
+    addFilter,
+    removeFilter,
+    addSingleDocFilter,
+    removeSingleDocFilter,
+} = searchQuerySlice.actions;
 
 export default searchQuerySlice.reducer;
