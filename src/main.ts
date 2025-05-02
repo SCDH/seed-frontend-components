@@ -32,3 +32,4 @@ export { SeedDataLabel } from "./seed-data-label.ts";
 export { SeedSearchFilter } from "./seed-search-filter.ts";
 export { SeedSearchFilters } from "./seed-search-filters.ts";
 export { SeedResultDetailsLink } from "./seed-result-details-link.ts";
+export { SeedResultDetails } from "./seed-result-details.ts";
