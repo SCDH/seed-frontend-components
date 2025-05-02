@@ -16,7 +16,6 @@ export class SeedResultDetailsLink extends LitElement {
     searchPath: string = "/search/";
 
     protected override render(): HTMLTemplateResult {
-        console.info("rendering link");
         return html`<a
             href="${this.searchPath}${this.collection}/detail/${this
                 .documentId}"
