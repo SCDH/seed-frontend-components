@@ -39,6 +39,11 @@ export const searchApi = createApi({
                 `/solr/${qry.collection}/select${solrSearchQuery(qry)}`,
             serializeQueryArgs: serializeQueryArgs,
         }),
+        // get a single document matching the search query. _fq_id should be set in the query.
+        document: builder.query<SearchResponse, SearchQuery>({
+            query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
+            serializeQueryArgs: serializeQueryArgs,
+        }),
         // get all used field names from the solr index
         fields: builder.query<Array<String>, string>({
             query: (collection) => ({
@@ -77,6 +82,19 @@ export type SearchState = CombinedState<
     {
         // this lists all endpoint types
         documents: QueryDefinition<
+            SearchQuery,
+            BaseQueryFn<
+                string | FetchArgs,
+                unknown,
+                FetchBaseQueryError,
+                {},
+                FetchBaseQueryMeta
+            >,
+            never,
+            SearchResponse,
+            "searchApi"
+        >;
+        document: QueryDefinition<
             SearchQuery,
             BaseQueryFn<
                 string | FetchArgs,
