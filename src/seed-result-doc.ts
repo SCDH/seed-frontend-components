@@ -8,18 +8,15 @@ import { SeedState } from "./redux/seed-store";
 //import log from "./logging";
 
 /*
- * A web component for displaying search results.
+ * This web component displays text fields of a document in search
+ * result. Which fields are presented is determined by the regular
+ * expression passed in as the `pattern` attribute: It is used to
+ * filter the fields in passed in `document`.
  */
 @customElement("seed-result-doc")
 export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
     @property({ type: Object })
     document!: Document;
-
-    @property()
-    collection!: string;
-
-    @property({ attribute: "doc-id" })
-    documentId!: string;
 
     @property()
     pattern: string = "^(meta|author|title)";
@@ -29,22 +26,15 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
         const fields: Array<string> = Object.keys(this.document ?? {}).filter(
             (f) => f.match(regex),
         );
-        return html`<div class="result-document">
-            <div class="">
-                ${fields.map((f) => this.renderField(f, this.document))}
-            </div>
-            <div class="link details">
-                <a href="#/search/detail/${this.collection}/${this.documentId}"
-                    >${this.documentId}</a
-                >
-            </div>
+        return html`<div class="fields">
+            ${fields.map((f) => this.renderField(f, this.document))}
         </div>`;
     }
 
     renderField(field: string, document: Document): HTMLTemplateResult {
         return html`<div class="field">
             <span class="field-name">
-                <span class="name">${field}</span
+                <span class="name"><seed-data-label key="${field}"><seed-data-label></span
                 ><span class="field-name-value-sep">: </span>
             </span>
             <span class="field-value">${document[field]}</span>
@@ -53,11 +43,6 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
 
     static styles: CSSResultGroup = [
         css`
-            .result-document {
-                margin: 5px;
-                border: 5px solid var(--window-border-color, lightblue);
-                padding: 5px;
-            }
             .field {
                 display: flex;
                 flex-direction: row;

@@ -1,4 +1,4 @@
-import { html, HTMLTemplateResult } from "lit";
+import { html, HTMLTemplateResult, css, CSSResultGroup } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 
 import { SearchResultElement } from "./search-result-mixin";
@@ -17,8 +17,15 @@ export class SeedSearchResult extends SearchResultElement {
     @property()
     collection!: string;
 
-    @property()
-    pattern: string = "^(meta|author|title)";
+    @property({ attribute: "field-pattern" })
+    fieldPattern: string = "^(meta|author|title)";
+
+    /*
+     * Path segment to search, used for in the path to details
+     * view. This is passed through to all the links to detail pages.
+     */
+    @property({ attribute: "search-path" })
+    searchPath: string = "/search/";
 
     @state()
     documents: Array<Document> = [];
@@ -43,7 +50,7 @@ export class SeedSearchResult extends SearchResultElement {
                     const flds: Array<string> =
                         (listenerApi.getState().searchApi?.queries?.[queryId]
                             ?.data as Array<string>) ?? [];
-                    const regex: RegExp = new RegExp(this.pattern);
+                    const regex: RegExp = new RegExp(this.fieldPattern);
                     const fl: Array<string> = flds.filter((f) =>
                         f.match(regex),
                     );
@@ -86,7 +93,7 @@ export class SeedSearchResult extends SearchResultElement {
             ${this.renderDocumentCount()}
             <div class="result-documents">
                 ${this.documents.map((d) =>
-                    this.renderDocument(d, this.pattern),
+                    this.renderDocument(d, this.fieldPattern),
                 )}
             </div>
         </div>`;
@@ -98,15 +105,35 @@ export class SeedSearchResult extends SearchResultElement {
         </div>`;
     }
 
-    renderDocument(doc: Document, pattern: string): HTMLTemplateResult {
+    renderDocument(doc: Document, fieldPattern: string): HTMLTemplateResult {
         // Mind the dot!
-        return html`<seed-result-doc
-            collection="${this.collection}"
-            doc-id="${doc.id}"
-            .document="${doc}"
-            pattern="${pattern}"
-        ></seed-result-doc>`;
+        return html`<div class="result-document">
+            <seed-result-doc
+                collection="${this.collection}"
+                doc-id="${doc.id}"
+                .document="${doc}"
+                pattern="${fieldPattern}"
+            ></seed-result-doc>
+            <seed-result-details-link
+                collection="${this.collection}"
+                doc-id="${doc.id}"
+                search-path="${this.searchPath}"
+            ></seed-result-details-link>
+        </div>`;
     }
+
+    static styles: CSSResultGroup = [
+        css`
+            .result-document {
+                margin: 5px;
+                border: var(
+                    --search-result-border,
+                    5px solid var(--window-border-color, lightblue)
+                );
+                padding: 5px;
+            }
+        `,
+    ];
 }
 
 declare global {
