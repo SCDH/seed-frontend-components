@@ -8,8 +8,8 @@ export interface DecoratorOptions<S, C> {
 }
 
 /*
- * This decorator subscribes an instance property to changes in the
- * redux store. It makes the property a reactive property by
+ * The `@changed` decorator subscribes an instance property to changes
+ * in the redux store. It makes the property a reactive property by
  * triggering the update lifecycle when the change occurs.
  *
  * @example
@@ -82,7 +82,7 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
                         );
                     },
                     effect: (_action, listenerApi): void => {
-                        log.info("changed decorator effect");
+                        log.debug("changed decorator effect on:", key, c);
                         let state: S = listenerApi.getState() as S;
                         let next: V = selector(state, c);
                         let k = key as keyof C;
@@ -106,9 +106,9 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
 }
 
 /*
- * This decorator subscribes an instance property to action calls in a
- * redux store.  It makes the property a reactive property by
- * triggering the update lifecycle when the change occurs.
+ * The `@taken` decorator subscribes an instance property to action
+ * calls in a redux store.  It makes the property a reactive property
+ * by triggering the update lifecycle when the change occurs.
  *
  * @param action - the action creator
  *
@@ -116,7 +116,7 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
  * target property from the store. The function takes the state and
  * the target object as parameters.
  *
- * @param _option? - decorator options
+ * @param _options? - decorator options
  *
  * This function takes three type parameters:
  *
@@ -135,10 +135,10 @@ export function taken<S, C extends StoreConsumerElement<S, any>, V>(
         // In the early stage of setup, the store is always undefined!
         // Thus, we push a function on a stack of functions for adding
         // listener middleware.
-        log.debug("changed decorator setup for property " + key);
+        log.debug("taken decorator setup for property " + key);
         const changeListener = (c: C & { [key]: V }) => {
             log.debug(
-                "changed decorator adds listener middleware to the store for property '" +
+                "taken decorator adds listener middleware to the store for property '" +
                     key +
                     "' on element",
                 c,
@@ -147,7 +147,7 @@ export function taken<S, C extends StoreConsumerElement<S, any>, V>(
                 addListener({
                     actionCreator: action,
                     effect: (_action, listenerApi): void => {
-                        log.info("changed decorator effect");
+                        log.debug("taken decorator effect on", key, c);
                         let state: S = listenerApi.getState() as S;
                         let next: V = select(state, c);
                         let k = key as keyof C;
