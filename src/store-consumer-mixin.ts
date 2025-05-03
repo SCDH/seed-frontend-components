@@ -1,9 +1,11 @@
 import { LitElement, PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
 import { consume, createContext } from "@lit/context";
-import { EnhancedStore, Action } from "@reduxjs/toolkit";
+import { EnhancedStore, Action, UnsubscribeListener } from "@reduxjs/toolkit";
 //import type { Dispatch } from "@reduxjs/toolkit";
 //import { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
+
+import log from "./logging";
 
 /*
  * The symbol for the providing and consuming a redux store via the
@@ -53,6 +55,8 @@ export abstract class StoreConsumerElement<
     //listeners: Array< ((cls: StoreConsumerElement<S,A>) => UnsubcribeDispatch) | null > = [];
     listeners!: Array<((cls: any) => any) | null>;
 
+    _unsubscribers: Array<UnsubscribeListener | undefined> = [];
+
     /*
      * A property bound to a Redux store by context.
      */
@@ -92,6 +96,18 @@ export abstract class StoreConsumerElement<
             this.subscribeStore();
         }
         super.willUpdate(changedProperties);
+    }
+
+    disconnectedCallback(): void {
+        this._unsubscribers
+            .filter((o) => o !== undefined)
+            .forEach((unsubscriber) => {
+                log.debug("unsubscribing middleware", unsubscriber, this);
+                //const u = { ... unsubscriber, ...{type: "listenerMiddleware/remove"}};
+                //this.store?.dispatch(removeListener(unsubscriber));
+                unsubscriber();
+            });
+        super.disconnectedCallback();
     }
 }
 

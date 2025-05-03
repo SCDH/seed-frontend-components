@@ -1,4 +1,4 @@
-import { addListener } from "@reduxjs/toolkit";
+import { addListener, UnsubscribeListener } from "@reduxjs/toolkit";
 
 import log from "./logging";
 import { StoreConsumerElement } from "./store-consumer-mixin";
@@ -56,7 +56,7 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
         // Thus, we push a function on a stack of functions for adding
         // listener middleware.
         log.debug("changed decorator setup for property " + key);
-        const changeListener = (c: C & { [key]: V }) => {
+        const changeListener = (c: C & { [key]: V }): void => {
             log.debug(
                 "changed decorator adds listener middleware to the store for property '" +
                     key +
@@ -93,7 +93,10 @@ export function changed<S, C extends StoreConsumerElement<S, any>, V>(
                     },
                 }),
             );
-            return unsubscribe;
+            // see https://github.com/reduxjs/redux-toolkit/discussions/2798
+            target?._unsubscribers?.push(
+                unsubscribe as unknown as UnsubscribeListener,
+            );
         };
         // push the changeListener function on the target's listener
         // stack, which may still by undefined
@@ -136,7 +139,7 @@ export function taken<S, C extends StoreConsumerElement<S, any>, V>(
         // Thus, we push a function on a stack of functions for adding
         // listener middleware.
         log.debug("taken decorator setup for property " + key);
-        const changeListener = (c: C & { [key]: V }) => {
+        const changeListener = (c: C & { [key]: V }): void => {
             log.debug(
                 "taken decorator adds listener middleware to the store for property '" +
                     key +
@@ -158,7 +161,10 @@ export function taken<S, C extends StoreConsumerElement<S, any>, V>(
                     },
                 }),
             );
-            return unsubscribe;
+            // see https://github.com/reduxjs/redux-toolkit/discussions/2798
+            target?._unsubscribers?.push(
+                unsubscribe as unknown as UnsubscribeListener,
+            );
         };
         // push the changeListener function on the target's listener
         // stack, which may still by undefined
@@ -201,7 +207,7 @@ export function matched<S, C extends StoreConsumerElement<S, any>, V>(
         // undefined!  Thus, we push a function on a stack of
         // functions for adding listener middleware.
         log.debug("matched decorator setup for property " + key);
-        const listener = (c: C & { [key]: V }) => {
+        const listener = (c: C & { [key]: V }): void => {
             log.debug(
                 "matched decorator adds listener middleware to the store for property '" +
                     key +
@@ -223,7 +229,10 @@ export function matched<S, C extends StoreConsumerElement<S, any>, V>(
                     },
                 }),
             );
-            return unsubscribe;
+            // see https://github.com/reduxjs/redux-toolkit/discussions/2798
+            target?._unsubscribers?.push(
+                unsubscribe as unknown as UnsubscribeListener,
+            );
         };
         // push the listener function on the target's listener
         // stack, which may still by undefined
