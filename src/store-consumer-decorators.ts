@@ -169,3 +169,68 @@ export function taken<S, C extends StoreConsumerElement<S, any>, V>(
         }
     };
 }
+
+/*
+ * The `@matched` decorator subscribes an instance property to action
+ * matchers in a redux store.  It makes the property a reactive
+ * property by triggering the update lifecycle when the change occurs.
+ *
+ * @param matcher - the action matcher
+ *
+ * @param select - a selector function that extracts the value for the
+ * target property from the store. The function takes the state and
+ * the target object as parameters.
+ *
+ * @param _options? - decorator options
+ *
+ * This function takes three type parameters:
+ *
+ * @typeParam S – the type of the root state of the redux store
+ * @typeParam C - the target's type
+ *
+ * @typeParam V - the type of the decorated property. i.e. the return
+ * type of the function passed in the `select` parameter
+ */
+export function matched<S, C extends StoreConsumerElement<S, any>, V>(
+    matcher: any,
+    select: (state: S, connectedTarget?: C) => V,
+    _options?: DecoratorOptions<any, C>,
+) {
+    return function (target: C, key: string) {
+        // In the early stage of setup, the store is not always
+        // undefined!  Thus, we push a function on a stack of
+        // functions for adding listener middleware.
+        log.debug("matched decorator setup for property " + key);
+        const listener = (c: C & { [key]: V }) => {
+            log.debug(
+                "matched decorator adds listener middleware to the store for property '" +
+                    key +
+                    "' on element",
+                c,
+            );
+            const unsubscribe = c?.store?.dispatch(
+                addListener({
+                    matcher,
+                    effect: (_action, listenerApi): void => {
+                        log.debug("matched decorator effect on:", key, c);
+                        let state: S = listenerApi.getState() as S;
+                        let next: V = select(state, c);
+                        let k = key as keyof C;
+                        let oldValue = c[k];
+                        c[k] = next as any;
+                        // run the update lifecycle
+                        c.requestUpdate(k, oldValue);
+                    },
+                }),
+            );
+            return unsubscribe;
+        };
+        // push the listener function on the target's listener
+        // stack, which may still by undefined
+        if (target.hasOwnProperty("listeners")) {
+            target.listeners.push(listener);
+        } else {
+            target["listeners"] = [listener];
+        }
+    };
+}
