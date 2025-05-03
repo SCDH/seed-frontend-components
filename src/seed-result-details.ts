@@ -44,19 +44,20 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     document!: Document;
 
     subscribeStore(): void {
-        // make query
-        this.store?.dispatch(setCollection(this.collection));
-        this.store?.dispatch(addSingleDocFilter(this.documentId));
-        const qry: SearchQuery =
-            this.store?.getState()?.searchQuery ?? initialSearchQuery;
         // add listener to the store, that reports when the query is fulfilled
         this.store?.dispatch(
             addAppListener({
                 matcher: searchApi.endpoints.document.matchFulfilled,
                 effect: (_action, listenerApi) => {
+                    // In the effect, the query at the time when the
+                    // match occurs is used, not the query at the time
+                    // of subscribing the listener. This allows us to
+                    // update this costum element with other
+                    // documents. We just have to make a new query.
+                    const q: SearchQuery = listenerApi.getState().searchQuery;
                     const queryId: string =
                         'document("' +
-                        solrSearchQuery(qry).replaceAll('"', '\\"') +
+                        solrSearchQuery(q).replaceAll('"', '\\"') +
                         '")';
                     log.debug(
                         "retrieved single document",
@@ -72,13 +73,24 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 },
             }),
         );
+        // query the document
+        this.query();
+    }
+
+    protected query() {
+        // set up query
+        this.store?.dispatch(setCollection(this.collection));
+        this.store?.dispatch(addSingleDocFilter(this.documentId));
+        // query at the time of subscription
+        const qry: SearchQuery =
+            this.store?.getState()?.searchQuery ?? initialSearchQuery;
         // initiate this query
         this.store?.dispatch(searchApi.endpoints.document.initiate(qry));
     }
 
     protected override render(): HTMLTemplateResult {
         if (this.result?.response?.numFound != 1) {
-            return html`An error occurred`;
+            return html`Getting document with ID ${this.documentId} ...`;
         }
         return html`<div>
             ${this.result?.response?.numFound ?? "failed"} ${this.document.id}
