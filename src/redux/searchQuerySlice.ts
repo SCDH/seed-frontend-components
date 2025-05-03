@@ -11,6 +11,13 @@ export const searchQuerySlice = createSlice({
         addFl: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
             state.fl = state.fl.concat(action.payload);
         },
+        setFl: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
+            if (action.payload.includes("id")) {
+                state.fl = action.payload;
+            } else {
+                state.fl = [...action.payload, "id"];
+            }
+        },
         addFacetFields: (
             state: SearchQuery,
             action: PayloadAction<Array<string>>,
@@ -74,6 +81,7 @@ export const searchQuerySlice = createSlice({
 export const {
     setCollection,
     addFl,
+    setFl,
     addFacetFields,
     addFilter,
     removeFilter,

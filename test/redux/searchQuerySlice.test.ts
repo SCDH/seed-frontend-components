@@ -5,6 +5,7 @@ import reducer, {
     addFilter,
     removeFilter,
     addFl,
+    setFl,
     addSingleDocFilter,
     removeSingleDocFilter,
 } from "../../src/redux/searchQuerySlice";
@@ -63,6 +64,16 @@ test("should add search fields", () => {
     expect(newState.fl).toContain("title");
     expect(newState.fl).toContain("genre");
     expect(newState.fl).toHaveLength(4);
+});
+
+test("should set search fields and keep the 'id' field", () => {
+    var newState: SearchQuery = reducer(undefined, { type: "unknown" });
+    expect(newState.fl).toContain("id");
+    expect(newState.fl).toHaveLength(1);
+    newState = reducer(newState, setFl(["author"]));
+    expect(newState.fl).toContain("id");
+    expect(newState.fl).toContain("author");
+    expect(newState.fl).toHaveLength(2);
 });
 
 test("should add and remove id filter", () => {
