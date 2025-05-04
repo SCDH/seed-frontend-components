@@ -2,7 +2,7 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import { SearchResultElement } from "./search-result-mixin";
-import { SeedListenerApi } from "./redux/seed-store";
+import { SeedState } from "./redux/seed-store";
 import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
 
 import log from "./logging";
@@ -21,25 +21,19 @@ export class SeedSearchResultCount extends SearchResultElement {
     @state()
     document_start: number = 0;
 
-    override updateEffect(
-        endpoint: string,
-        listenerApi: SeedListenerApi,
-    ): void {
+    override updateEffect(endpoint: string, s: SeedState): void {
         const queryId: string =
             endpoint +
             '("' +
-            solrSearchQuery(listenerApi.getState().searchQuery).replaceAll(
-                '"',
-                '\\"',
-            ) +
+            solrSearchQuery(s.searchQuery).replaceAll('"', '\\"') +
             '")';
         log.debug(
             "updating search result",
             queryId,
-            listenerApi.getState().searchApi.queries.hasOwnProperty(queryId),
+            s.searchApi.queries.hasOwnProperty(queryId),
         );
-        const data: SearchResponse | undefined = listenerApi.getState()
-            .searchApi.queries[queryId]?.data as SearchResponse | undefined;
+        const data: SearchResponse | undefined = s.searchApi.queries[queryId]
+            ?.data as SearchResponse | undefined;
         if (data !== undefined) {
             this.document_count = data.response.numFound;
             this.document_start = data.response.start;

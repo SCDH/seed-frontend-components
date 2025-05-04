@@ -1,9 +1,10 @@
 //import { LitElement } from "lit";
 
 import { StoreConsumerElement } from "./store-consumer-mixin";
-import { SeedState, addAppListener, SeedListenerApi } from "./redux/seed-store";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
+import { SearchQuery, solrSearchQuery } from "./redux/searchTypes";
 
 import log from "./logging";
 
@@ -46,7 +47,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                 effect: async (_action, listenerApi) =>
                     this.updateEffect(
                         searchApi.endpoints.documents.name,
-                        listenerApi,
+                        listenerApi.getState(),
                     ),
             }),
         );
@@ -57,7 +58,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                 effect: async (_action, listenerApi) =>
                     this.updateEffect(
                         searchApi.endpoints.filter.name,
-                        listenerApi,
+                        listenerApi.getState(),
                     ),
             }),
         );
@@ -69,7 +70,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                 effect: (_action, listenerApi) =>
                     this.updateEffect(
                         searchApi.endpoints.documents.name,
-                        listenerApi,
+                        listenerApi.getState(),
                     ),
             }),
         );
@@ -80,7 +81,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                 effect: (_action, listenerApi) =>
                     this.updateEffect(
                         searchApi.endpoints.filter.name,
-                        listenerApi,
+                        listenerApi.getState(),
                     ),
             }),
         );
@@ -91,15 +92,33 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                 effect: (_action, listenerApi) =>
                     this.updateEffect(
                         searchApi.endpoints.filter.name,
-                        listenerApi,
+                        listenerApi.getState(),
                     ),
             }),
         );
+        // at the end:
+        // call update effect, if the query was already processed
+        const q: SearchQuery | undefined = this.store?.getState().searchQuery;
+        if (q !== undefined) {
+            const queryId: string =
+                searchApi.endpoints.document.name +
+                '("' +
+                solrSearchQuery(q).replaceAll('"', '\\"') +
+                '")';
+            if (
+                this.store?.getState().searchApi.queries.hasOwnProperty(queryId)
+            ) {
+                this.updateEffect(
+                    searchApi.endpoints.document.name,
+                    this.store.getState(),
+                );
+            }
+        }
     }
 
     /*
      * The `updateEffect` function is called as effect when the search
      * result is updated. Subclasses must implement it.
      */
-    abstract updateEffect(endpoint: string, listenerApi: SeedListenerApi): void;
+    abstract updateEffect(endpoint: string, state: SeedState): void;
 }
