@@ -13,6 +13,7 @@ import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
+import { FacetFilterQuery } from "./redux/searchTypes";
 
 import log from "./logging";
 
@@ -38,12 +39,14 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
 
     subscribeStore() {
         log.debug("subscribing seed-facet-term");
-        this.active = this.store?.getState()?.searchQuery._fq_faceted
-            ? [this.field ?? "unknown"]?.includes(this.term ?? "unknown")
-            : false;
         if (this.store === undefined) {
-            log.debug("no store yet for element with Id ", this.id);
+            log.debug("no store yet for element ", this.id);
+            return;
         }
+        // look up the state, if term is active
+        const terms: FacetFilterQuery | undefined =
+            this.store.getState().searchQuery._fq_faceted ?? {};
+        this.active = (terms[this.field] ?? []).includes(this.term);
         // subscribe to addFilter actions
         let unsubscriber = this.store?.dispatch(
             addAppListener({
