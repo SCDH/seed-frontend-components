@@ -49,6 +49,11 @@ export const searchApi = createApi({
                 `/solr/${qry.collection}/select${solrSearchQuery(qry, docId)}`,
             serializeQueryArgs: serializeQueryArgsDict,
         }),
+        facetTerms: builder.query<SearchResponse, SearchQuery>({
+            query: (qry) =>
+                `/solr/${qry.collection}/select${solrSearchQuery(qry, false, true)}`,
+            serializeQueryArgs: serializeFacetTerms,
+        }),
         // get all used field names from the solr index
         fields: builder.query<Array<String>, string>({
             query: (collection) => ({
@@ -95,6 +100,19 @@ function serializeQueryArgsDict(args: {
     });
 }
 
+function serializeFacetTerms(args: {
+    queryArgs: SearchQuery;
+    endpointDefinition: any;
+    endpointName: string;
+}) {
+    const qs = solrSearchQuery(args.queryArgs, false, true);
+    return defaultSerializeQueryArgs({
+        queryArgs: qs,
+        endpointDefinition: args.endpointDefinition,
+        endpointName: args.endpointName,
+    });
+}
+
 //export type SearchState = typeof searchApi.reducer
 export type SearchState = CombinedState<
     {
@@ -127,6 +145,19 @@ export type SearchState = CombinedState<
         >;
         document: QueryDefinition<
             { query: SearchQuery; documentId: string | undefined },
+            BaseQueryFn<
+                string | FetchArgs,
+                unknown,
+                FetchBaseQueryError,
+                {},
+                FetchBaseQueryMeta
+            >,
+            never,
+            SearchResponse,
+            "searchApi"
+        >;
+        facetTerms: QueryDefinition<
+            SearchQuery,
             BaseQueryFn<
                 string | FetchArgs,
                 unknown,
