@@ -2,10 +2,10 @@ import { html, HTMLTemplateResult, css, CSSResultGroup } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 
 import { SearchResultElement } from "./search-result-mixin";
-import { SeedListenerApi, addAppListener } from "./redux/seed-store";
+import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
-import { addFl } from "./redux/searchQuerySlice";
+import { setFl } from "./redux/searchQuerySlice";
 
 import log from "./logging";
 
@@ -38,49 +38,52 @@ export class SeedSearchResult extends SearchResultElement {
 
     override subscribeStore(): void {
         // add fields to be included in the response, by adding them to the query parameter fl
-        this.store?.dispatch(
-            addAppListener({
-                matcher: searchApi.endpoints.fields.matchFulfilled,
-                effect: (_action, listenerApi) => {
-                    const queryId: string =
-                        searchApi.endpoints.fields.name +
-                        '("' +
-                        this.collection +
-                        '")';
-                    const flds: Array<string> =
-                        (listenerApi.getState().searchApi?.queries?.[queryId]
-                            ?.data as Array<string>) ?? [];
-                    const regex: RegExp = new RegExp(this.fieldPattern);
-                    const fl: Array<string> = flds.filter((f) =>
-                        f.match(regex),
-                    );
-                    log.debug("adding fields to query", queryId, fl);
-                    listenerApi.dispatch(addFl(fl));
-                },
-            }),
-        );
+        if (
+            this.store
+                ?.getState()
+                .searchApi.queries.hasOwnProperty(this.fieldsQueryId())
+        ) {
+            this.store.dispatch(setFl(this.setFields(this.store.getState())));
+        } else {
+            this.store?.dispatch(
+                addAppListener({
+                    matcher: searchApi.endpoints.fields.matchFulfilled,
+                    effect: (_action, listenerApi) => {
+                        listenerApi.dispatch(
+                            setFl(this.setFields(listenerApi.getState())),
+                        );
+                    },
+                }),
+            );
+        }
         super.subscribeStore();
     }
 
-    override updateEffect(
-        endpoint: string,
-        listenerApi: SeedListenerApi,
-    ): void {
+    private fieldsQueryId(): string {
+        return searchApi.endpoints.fields.name + '("' + this.collection + '")';
+    }
+
+    private setFields(state: SeedState): Array<string> {
+        const flds: Array<string> =
+            (state.searchApi?.queries?.[this.fieldsQueryId()]
+                ?.data as Array<string>) ?? [];
+        const regex: RegExp = new RegExp(this.fieldPattern);
+        return flds.filter((f) => f.match(regex));
+    }
+
+    override updateEffect(endpoint: string, s: SeedState): void {
         const queryId: string =
             endpoint +
             '("' +
-            solrSearchQuery(listenerApi.getState().searchQuery).replaceAll(
-                '"',
-                '\\"',
-            ) +
+            solrSearchQuery(s.searchQuery).replaceAll('"', '\\"') +
             '")';
         log.debug(
             "updating search result",
             queryId,
-            listenerApi.getState().searchApi.queries.hasOwnProperty(queryId),
+            s.searchApi.queries.hasOwnProperty(queryId),
         );
-        const data: SearchResponse | undefined = listenerApi.getState()
-            .searchApi.queries[queryId]?.data as SearchResponse | undefined;
+        const data: SearchResponse | undefined = s.searchApi.queries[queryId]
+            ?.data as SearchResponse | undefined;
         if (data !== undefined) {
             this.document_count = data.response.numFound;
             this.document_start = data.response.start;

@@ -5,11 +5,7 @@ import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { StoreConsumerElement } from "./store-consumer-mixin";
 import { matched } from "./store-consumer-decorators";
-import {
-    addSingleDocFilter,
-    removeSingleDocFilter,
-    setCollection,
-} from "./redux/searchQuerySlice";
+import { setCollection } from "./redux/searchQuerySlice";
 import {
     SearchResponse,
     Document,
@@ -61,12 +57,12 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @state()
     document!: Document;
 
-    override disconnectedCallback(): void {
-        // When the element is removed from the dom, the single
-        // document filter must be removed from the search query slice.
-        this.store?.dispatch(removeSingleDocFilter());
-        super.disconnectedCallback();
-    }
+    // override disconnectedCallback(): void {
+    //     // When the element is removed from the dom, the single
+    //     // document filter must be removed from the search query slice.
+    //     this.store?.dispatch(removeSingleDocFilter());
+    //     super.disconnectedCallback();
+    // }
 
     /*
      * Initiates a request for the document given by ID in the `documentId` property.
@@ -75,12 +71,17 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
         log.debug("initiate request for document", this.documentId);
         // set up query
         this.store?.dispatch(setCollection(this.collection));
-        this.store?.dispatch(addSingleDocFilter(this.documentId));
+        //this.store?.dispatch(addSingleDocFilter(this.documentId));
         // query at the time of subscription
         const qry: SearchQuery =
             this.store?.getState()?.searchQuery ?? initialSearchQuery;
         // initiate this query
-        this.store?.dispatch(searchApi.endpoints.document.initiate(qry));
+        this.store?.dispatch(
+            searchApi.endpoints.document.initiate({
+                query: qry,
+                documentId: this.documentId,
+            }),
+        );
     }
 
     protected override willUpdate(

@@ -182,8 +182,23 @@ export const initialSearchQuery: SearchQuery = {
 
 /*
  * Make a Solr search query from the given `SearchQuery` object.
+ *
+ * @param query - the search query, mostly taken from the slice
+ *
+ * @param singleDocumentId - this may optionally be a string of a
+ * single document to retrieve. If this a string, the facet filters
+ * will be ignored and all existing fields will be returned for the
+ * document ID.
+ *
+ * @param facetSetup - this may optionally set to `true` and is usable
+ * for initiating a query to get all facet terms. When true, facet
+ * filters will be removed from the query.
  */
-export function solrSearchQuery(query: SearchQuery): string {
+export function solrSearchQuery(
+    query: SearchQuery,
+    singleDocumentId?: string | false,
+    facetSetup?: boolean,
+): string {
     var rc: string = "";
 
     rc += "?q=" + query.q;
@@ -194,8 +209,12 @@ export function solrSearchQuery(query: SearchQuery): string {
     // is not for a single document. Reason: We want all fields if we
     // query a single document and we want it only once (per query in
     // the q parameter).
-    if (query._fq_id !== undefined) {
-        rc += "&fq=id:" + query._fq_id;
+    if (query._fq_id || singleDocumentId) {
+        if (query._fq_id) {
+            rc += "&fq=id:" + query._fq_id;
+        } else {
+            rc += "&fq=id:" + singleDocumentId;
+        }
     } else {
         if (query.fl.length > 0) {
             rc += "&fl=";
@@ -206,24 +225,26 @@ export function solrSearchQuery(query: SearchQuery): string {
             rc += "&fq=" + query.fq;
         }
 
-        const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
-        for (const field of fields) {
-            const terms: Array<string> = query._fq_faceted?.[field] ?? [];
-            if (terms.length > 0) {
-                rc += "&fq=" + field + ":(";
-                var i = 0;
-                for (const term of terms) {
-                    if (i > 0) {
-                        rc += " OR ";
+        if (!facetSetup) {
+            const fields: Array<string> = Object.keys(query._fq_faceted ?? {});
+            for (const field of fields) {
+                const terms: Array<string> = query._fq_faceted?.[field] ?? [];
+                if (terms.length > 0) {
+                    rc += "&fq=" + field + ":(";
+                    var i = 0;
+                    for (const term of terms) {
+                        if (i > 0) {
+                            rc += " OR ";
+                        }
+                        rc += '"' + term + '"';
+                        i++;
                     }
-                    rc += '"' + term + '"';
-                    i++;
+                    rc += ")";
                 }
-                rc += ")";
             }
         }
 
-        if (query.facet) {
+        if (query.facet || facetSetup) {
             rc += "&facet=true";
             query.facet_fields.forEach((f) => {
                 rc += "&facet.field=" + f;

@@ -4,6 +4,7 @@ import { customElement, state } from "lit/decorators.js";
 import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
+import { FacetFilterQuery } from "./redux/searchTypes";
 
 import log from "./logging";
 
@@ -22,7 +23,20 @@ export class SeedSearchFilters extends StoreConsumerElement<SeedState, any> {
     count: number = 0;
 
     override subscribeStore(): void {
-        // filter added
+        if (this.store === undefined) {
+            log.debug("no store yet for element ", this.id);
+            return;
+        }
+        // look up the state for active filters and add them
+        const activeFilters: FacetFilterQuery | undefined =
+            this.store.getState().searchQuery._fq_faceted ?? {};
+        for (const field in activeFilters) {
+            activeFilters[field].forEach((term) => {
+                this.filters.push({ field, term });
+                this.count++;
+            });
+        }
+        // listen to filter added
         this.store?.dispatch(
             addAppListener({
                 matcher: addFilter.match,
@@ -35,7 +49,7 @@ export class SeedSearchFilters extends StoreConsumerElement<SeedState, any> {
                 },
             }),
         );
-        // filter removed
+        // listen to filter removed
         this.store?.dispatch(
             addAppListener({
                 matcher: removeFilter.match,
