@@ -112,19 +112,32 @@ export type SearchState = CombinedState<
             SearchResponse,
             "searchApi"
         >;
-        // document: QueryDefinition<
-        //     { query: SearchQuery; documentId?: string | undefined },
-        //     BaseQueryFn<
-        //         string | FetchArgs,
-        //         unknown,
-        //         FetchBaseQueryError,
-        //         {},
-        //         FetchBaseQueryMeta
-        //     >,
-        //     never,
-        //     SearchResponse,
-        //     "searchApi"
-        // >;
+        filter: QueryDefinition<
+            SearchQuery,
+            BaseQueryFn<
+                string | FetchArgs,
+                unknown,
+                FetchBaseQueryError,
+                {},
+                FetchBaseQueryMeta
+            >,
+            never,
+            SearchResponse,
+            "searchApi"
+        >;
+        document: QueryDefinition<
+            { query: SearchQuery; documentId: string | undefined },
+            BaseQueryFn<
+                string | FetchArgs,
+                unknown,
+                FetchBaseQueryError,
+                {},
+                FetchBaseQueryMeta
+            >,
+            never,
+            SearchResponse,
+            "searchApi"
+        >;
         fields: QueryDefinition<
             string,
             BaseQueryFn<
