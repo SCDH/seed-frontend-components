@@ -20,7 +20,7 @@ export const searchApi = createApi({
     reducerPath: "searchApi",
     baseQuery: fetchBaseQuery({
         // TODO: make this configurable, see https://redux-toolkit.js.org/rtk-query/usage/customizing-queries#constructing-a-dynamic-base-url-using-redux-state
-        baseUrl: "/solr/",
+        //baseUrl: "/solr/",
         prepareHeaders: (headers) => {
             headers.set("Authorization", "Basic c29scjpTb2xyUm9ja3M=");
             // headers.set("Origin", "*");
@@ -30,12 +30,14 @@ export const searchApi = createApi({
     endpoints: (builder) => ({
         // get documents matching the search query
         documents: builder.query<SearchResponse, SearchQuery>({
-            query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
+            query: (qry) =>
+                `/solr/${qry.collection}/select${solrSearchQuery(qry)}`,
             serializeQueryArgs: serializeQueryArgs,
         }),
         // get documents matching the search query, used after adding or removing a filter
         filter: builder.query<SearchResponse, SearchQuery>({
-            query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
+            query: (qry) =>
+                `/solr/${qry.collection}/select${solrSearchQuery(qry)}`,
             serializeQueryArgs: serializeQueryArgs,
         }),
         // get a single document matching the search query. _fq_id should be set in the query.
@@ -44,13 +46,13 @@ export const searchApi = createApi({
             { query: SearchQuery; documentId: string | undefined }
         >({
             query: ({ query: qry, documentId: docId }) =>
-                `${qry.collection}/select${solrSearchQuery(qry, docId)}`,
+                `/solr/${qry.collection}/select${solrSearchQuery(qry, docId)}`,
             serializeQueryArgs: serializeQueryArgsDict,
         }),
         // get all used field names from the solr index
         fields: builder.query<Array<String>, string>({
             query: (collection) => ({
-                url: `${collection}/select?q=*%3A*&wt=csv&rows=0`,
+                url: `/solr/${collection}/select?q=*%3A*&wt=csv&rows=0`,
                 // Since the response body is csv, the default
                 // response handler is not suitable. See
                 // https://redux-toolkit.js.org/rtk-query/api/fetchBaseQuery#parsing-a-response
