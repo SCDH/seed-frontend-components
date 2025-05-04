@@ -32,37 +32,67 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     @state()
     terms: Array<TermCountTuple> = [];
 
-    async subscribeStore() {
+    protected override subscribeStore() {
         log.debug("subscribing seed-facet");
         if (this.store === undefined) {
-            log.debug("no store yet for element with Id ", this.id);
+            log.error("no store yet for element", this);
+            return;
         }
-        // get name of facets from store: 1) get all field names, 2) filter with this.pattern
-        this.store?.dispatch(
-            addAppListener({
-                matcher: searchApi.endpoints.documents.matchFulfilled,
-                effect: async (_action, listenerApi) => {
-                    log.debug("api", listenerApi.getState().searchApi.queries);
-                    const queryId: string =
-                        searchApi.endpoints.documents.name +
-                        '("' +
-                        solrSearchQuery(
-                            listenerApi.getState().searchQuery,
-                        ).replaceAll('"', '\\"') +
-                        '")';
-                    const data: SearchResponse | undefined =
-                        listenerApi.getState().searchApi.queries[queryId]
-                            ?.data as SearchResponse | undefined;
-                    if (data !== undefined) {
-                        this.terms = toTermCountTuples(
-                            data.facet_counts?.facet_fields[
-                                this.field
-                            ] as FacetTerms,
+        // If the non-filtered query has already be processed
+        // successfully, then the terms property can be set up from
+        // the query response present in the redux store.
+        if (
+            this.store
+                .getState()
+                .searchApi.queries.hasOwnProperty(
+                    this.nonFilteredQuery(this.store.getState()),
+                )
+        ) {
+            this.setTerms(this.store.getState());
+        } else {
+            // Otherwise we set up a listener which set the terms when
+            // the query is processed.
+            this.store?.dispatch(
+                addAppListener({
+                    matcher: searchApi.endpoints.documents.matchFulfilled,
+                    effect: async (_action, listenerApi) => {
+                        log.debug(
+                            "api",
+                            listenerApi.getState().searchApi.queries,
                         );
-                    }
-                },
-            }),
+                        this.setTerms(listenerApi.getState());
+                    },
+                }),
+            );
+        }
+    }
+
+    /*
+     * Returns the query ID of the non-filtered query, which is is
+     * used for making up terms with correct counts.
+     */
+    private nonFilteredQuery(state: SeedState): string {
+        return (
+            searchApi.endpoints.documents.name +
+            '("' +
+            solrSearchQuery(state.searchQuery).replaceAll('"', '\\"') +
+            '")'
         );
+    }
+
+    /*
+     * Set the terms property. Get name of facets from store: 1) get
+     * all field names, 2) filter with this.pattern.
+     */
+    private setTerms(state: SeedState): void {
+        const data: SearchResponse | undefined = state.searchApi.queries[
+            this.nonFilteredQuery(state)
+        ]?.data as SearchResponse | undefined;
+        if (data !== undefined) {
+            this.terms = toTermCountTuples(
+                data.facet_counts?.facet_fields[this.field] as FacetTerms,
+            );
+        }
     }
 
     render() {

@@ -1,5 +1,13 @@
-import { html, css, CSSResultGroup, HTMLTemplateResult, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import {
+    html,
+    css,
+    CSSResultGroup,
+    HTMLTemplateResult,
+    nothing,
+    PropertyValues,
+} from "lit";
+import { customElement, property, query, state } from "lit/decorators.js";
+import { UnsubscribeListener } from "@reduxjs/toolkit";
 
 import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
@@ -22,19 +30,22 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
     @property()
     count!: number;
 
-    @property()
+    @state()
     active: boolean = false;
 
     @query("input")
     checkbox!: HTMLInputElement;
 
-    async subscribeStore() {
+    subscribeStore() {
         log.debug("subscribing seed-facet-term");
+        this.active = this.store?.getState()?.searchQuery._fq_faceted
+            ? [this.field ?? "unknown"]?.includes(this.term ?? "unknown")
+            : false;
         if (this.store === undefined) {
             log.debug("no store yet for element with Id ", this.id);
         }
         // subscribe to addFilter actions
-        this.store?.dispatch(
+        let unsubscriber = this.store?.dispatch(
             addAppListener({
                 actionCreator: addFilter,
                 effect: async (action, _listenerApi) => {
@@ -44,13 +55,15 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
                         action.payload.term == this.term
                     ) {
                         this.active = true;
-                        this.checkbox.checked = true; // required
                     }
                 },
             }),
         );
+        this._unsubscribers.push(
+            unsubscriber as unknown as UnsubscribeListener,
+        );
         // subscribe to addFilter actions
-        this.store?.dispatch(
+        unsubscriber = this.store?.dispatch(
             addAppListener({
                 actionCreator: removeFilter,
                 effect: async (action, _listenerApi) => {
@@ -60,11 +73,23 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
                     ) {
                         log.debug("facet term de-activated", action.payload);
                         this.active = false;
-                        this.checkbox.checked = false; // required
                     }
                 },
             }),
         );
+        this._unsubscribers.push(
+            unsubscriber as unknown as UnsubscribeListener,
+        );
+    }
+
+    protected override willUpdate(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.willUpdate(changedProperties);
+        // It is required to set checkbox.checked to make things work in Lit template.
+        if (changedProperties.has("active") && this.checkbox) {
+            this.checkbox.checked = this.active;
+        }
     }
 
     /*
