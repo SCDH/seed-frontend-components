@@ -183,7 +183,10 @@ export const initialSearchQuery: SearchQuery = {
 /*
  * Make a Solr search query from the given `SearchQuery` object.
  */
-export function solrSearchQuery(query: SearchQuery): string {
+export function solrSearchQuery(
+    query: SearchQuery,
+    singleDocumentId?: string | false,
+): string {
     var rc: string = "";
 
     rc += "?q=" + query.q;
@@ -194,8 +197,12 @@ export function solrSearchQuery(query: SearchQuery): string {
     // is not for a single document. Reason: We want all fields if we
     // query a single document and we want it only once (per query in
     // the q parameter).
-    if (query._fq_id !== undefined) {
-        rc += "&fq=id:" + query._fq_id;
+    if (query._fq_id || singleDocumentId) {
+        if (query._fq_id) {
+            rc += "&fq=id:" + query._fq_id;
+        } else {
+            rc += "&fq=id:" + singleDocumentId;
+        }
     } else {
         if (query.fl.length > 0) {
             rc += "&fl=";

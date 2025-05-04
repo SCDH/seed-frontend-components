@@ -35,14 +35,17 @@ export const searchApi = createApi({
         }),
         // get documents matching the search query, used after adding or removing a filter
         filter: builder.query<SearchResponse, SearchQuery>({
-            query: (qry) =>
-                `/solr/${qry.collection}/select${solrSearchQuery(qry)}`,
+            query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
             serializeQueryArgs: serializeQueryArgs,
         }),
         // get a single document matching the search query. _fq_id should be set in the query.
-        document: builder.query<SearchResponse, SearchQuery>({
-            query: (qry) => `${qry.collection}/select${solrSearchQuery(qry)}`,
-            serializeQueryArgs: serializeQueryArgs,
+        document: builder.query<
+            SearchResponse,
+            { query: SearchQuery; documentId: string | undefined }
+        >({
+            query: ({ query: qry, documentId: docId }) =>
+                `${qry.collection}/select${solrSearchQuery(qry, docId)}`,
+            serializeQueryArgs: serializeQueryArgsDict,
         }),
         // get all used field names from the solr index
         fields: builder.query<Array<String>, string>({
@@ -77,6 +80,19 @@ function serializeQueryArgs(args: {
     });
 }
 
+function serializeQueryArgsDict(args: {
+    queryArgs: { query: SearchQuery; documentId?: string | undefined };
+    endpointDefinition: any;
+    endpointName: string;
+}) {
+    const qs = solrSearchQuery(args.queryArgs.query, args.queryArgs.documentId);
+    return defaultSerializeQueryArgs({
+        queryArgs: qs,
+        endpointDefinition: args.endpointDefinition,
+        endpointName: args.endpointName,
+    });
+}
+
 //export type SearchState = typeof searchApi.reducer
 export type SearchState = CombinedState<
     {
@@ -94,19 +110,19 @@ export type SearchState = CombinedState<
             SearchResponse,
             "searchApi"
         >;
-        document: QueryDefinition<
-            SearchQuery,
-            BaseQueryFn<
-                string | FetchArgs,
-                unknown,
-                FetchBaseQueryError,
-                {},
-                FetchBaseQueryMeta
-            >,
-            never,
-            SearchResponse,
-            "searchApi"
-        >;
+        // document: QueryDefinition<
+        //     { query: SearchQuery; documentId?: string | undefined },
+        //     BaseQueryFn<
+        //         string | FetchArgs,
+        //         unknown,
+        //         FetchBaseQueryError,
+        //         {},
+        //         FetchBaseQueryMeta
+        //     >,
+        //     never,
+        //     SearchResponse,
+        //     "searchApi"
+        // >;
         fields: QueryDefinition<
             string,
             BaseQueryFn<
