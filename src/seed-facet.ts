@@ -45,7 +45,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
             this.store
                 .getState()
                 .searchApi.queries.hasOwnProperty(
-                    this.nonFilteredQuery(this.store.getState()),
+                    this.facetTermsQuery(this.store.getState()),
                 )
         ) {
             this.setTerms(this.store.getState());
@@ -54,7 +54,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
             // the query is processed.
             this.store?.dispatch(
                 addAppListener({
-                    matcher: searchApi.endpoints.documents.matchFulfilled,
+                    matcher: searchApi.endpoints.facetTerms.matchFulfilled,
                     effect: async (_action, listenerApi) => {
                         log.debug(
                             "api",
@@ -64,18 +64,27 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                     },
                 }),
             );
+            // initiate a facetTerms query
+            this.store.dispatch(
+                searchApi.endpoints.facetTerms.initiate(
+                    this.store.getState().searchQuery,
+                ),
+            );
         }
     }
 
     /*
-     * Returns the query ID of the non-filtered query, which is is
+     * Returns the query ID of the query for facet terms, which is is
      * used for making up terms with correct counts.
      */
-    private nonFilteredQuery(state: SeedState): string {
+    private facetTermsQuery(state: SeedState): string {
         return (
-            searchApi.endpoints.documents.name +
+            searchApi.endpoints.facetTerms.name +
             '("' +
-            solrSearchQuery(state.searchQuery).replaceAll('"', '\\"') +
+            solrSearchQuery(state.searchQuery, false, true).replaceAll(
+                '"',
+                '\\"',
+            ) +
             '")'
         );
     }
@@ -86,7 +95,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
      */
     private setTerms(state: SeedState): void {
         const data: SearchResponse | undefined = state.searchApi.queries[
-            this.nonFilteredQuery(state)
+            this.facetTermsQuery(state)
         ]?.data as SearchResponse | undefined;
         if (data !== undefined) {
             this.terms = toTermCountTuples(
