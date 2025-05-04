@@ -1,5 +1,6 @@
 import { html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { UnsubscribeListener } from "@reduxjs/toolkit";
 
 import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
@@ -40,39 +41,51 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
     override subscribeStore() {
         log.debug("subscribing seed-facets");
         if (this.store === undefined) {
-            log.debug("no store yet for element with Id ", this.id);
+            log.error("no store yet for element", this);
+            return;
         }
-        // This container initiates a query to the fields endpoint,
-        // because without a set of fields, it cannot make up the
-        // facets given by pattern.
-        if (this.collection !== undefined) {
+        // If the field name in the search index were already
+        // requested, take them from the redux store and set up the
+        // fields property.
+        if (
+            this.store
+                ?.getState()
+                ?.searchApi?.queries?.hasOwnProperty(this.queryName()) ??
+            false
+        ) {
+            this.setFields(this.store?.getState());
+        } else {
+            // If not already in the request, initiate a request and
+            // set up a listener, that sets the fields property.
             log.debug("initiating fields query", this.collection);
             this.store?.dispatch(
                 searchApi.endpoints.fields.initiate(this.collection),
             );
+            const unsubscriber = this.store?.dispatch(
+                addAppListener({
+                    matcher: searchApi.endpoints.fields.matchFulfilled,
+                    effect: async (_action, listenerApi) => {
+                        this.setFields(listenerApi.getState());
+                    },
+                }),
+            );
+            this._unsubscribers.push(
+                unsubscriber as unknown as UnsubscribeListener,
+            );
         }
-        // get name of facets from store: 1) get all field names, 2) filter with this.pattern
-        this.store?.dispatch(
-            addAppListener({
-                matcher: searchApi.endpoints.fields.matchFulfilled,
-                effect: async (_action, listenerApi) => {
-                    const pattern: RegExp = new RegExp(this.pattern);
-                    log.debug(
-                        "search result updated",
-                        listenerApi.getState().searchApi,
-                    );
-                    const flds: Array<string> =
-                        (listenerApi.getState().searchApi?.queries?.[
-                            this.queryName()
-                        ]?.data as Array<string>) ?? [];
-                    log.debug("facet fields", flds);
-                    // store facet fields as local state
-                    this.fields = flds.filter((f) => f.match(pattern));
-                    // add facet fields to search query
-                    this.store?.dispatch(addFacetFields(this.fields));
-                },
-            }),
-        );
+    }
+
+    // get name of facets from store: 1) get all field names, 2) filter with this.pattern
+    private setFields(state: SeedState): void {
+        const pattern: RegExp = new RegExp(this.pattern);
+        const flds: Array<string> =
+            (state.searchApi?.queries?.[this.queryName()]
+                ?.data as Array<string>) ?? [];
+        log.debug("facet fields", flds);
+        // store facet fields as local state
+        this.fields = flds.filter((f) => f.match(pattern));
+        // add facet fields to search query
+        this.store?.dispatch(addFacetFields(this.fields));
     }
 
     /*
