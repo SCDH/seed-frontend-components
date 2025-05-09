@@ -1,8 +1,8 @@
 import { html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { UnsubscribeListener } from "@reduxjs/toolkit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFacetFields } from "./redux/searchQuerySlice";
