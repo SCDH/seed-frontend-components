@@ -6,6 +6,6 @@ import anylogger from "anylogger";
  *
  * See https://www.npmjs.com/package/anylogger
  */
-const log = anylogger("seed-frontend-components/redux");
+const log = anylogger("@scdh/seed-frontend-components/redux");
 
 export default log;
