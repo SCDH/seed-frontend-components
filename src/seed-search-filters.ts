@@ -1,7 +1,7 @@
 import { html, HTMLTemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
 import { FacetFilterQuery } from "./redux/searchTypes";

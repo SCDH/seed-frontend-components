@@ -1,8 +1,8 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { UnknownAction } from "@reduxjs/toolkit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";

@@ -1,6 +1,6 @@
 //import { LitElement } from "lit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
