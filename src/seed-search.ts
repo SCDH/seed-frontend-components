@@ -1,11 +1,17 @@
-import { html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { html, css, HTMLTemplateResult, CSSResultGroup } from "lit";
+import { customElement, property, query } from "lit/decorators.js";
 import { UnknownAction } from "@reduxjs/toolkit";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
+import {
+    simpleQuery,
+    resetQuery,
+    setDefaultField,
+    resetDefaultField,
+} from "./redux/searchQuerySlice";
 import { SeedStore } from "./redux/seed-store";
 
 import log from "./logging";
@@ -25,6 +31,12 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     delay: number = 500;
 
     query: SearchQuery = initialSearchQuery;
+
+    @query("#search")
+    input!: HTMLInputElement;
+
+    @property()
+    field!: string;
 
     override subscribeStore() {
         log.debug("subscribing seed-search");
@@ -72,14 +84,46 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         // }
     }
 
-    render() {
-        return html` <div>
-            <button @click="${this.search}">Search!</button>
-        </div>`;
+    render(): HTMLTemplateResult {
+        return html`<host>
+<div class="search-form-wrapper">
+<input id="search" name="search" type="text" placeholder="search"></input/>
+<button @click="${this.search}">🔍</button>
+</div>
+</host>`;
     }
+
+    static styles: CSSResultGroup = [
+        css`
+            host {
+            }
+            .search-form-wrapper {
+                display: flex;
+                flex-direction: row;
+                border: 1px solid red;
+                border-radius: 25px;
+                padding: 6px 12px;
+            }
+            .search-form-wrapper input,
+            .search-form-wrapper button {
+                border: none;
+                background-color: inherit;
+            }
+        `,
+    ];
 
     search(): void {
         log.debug("Search button hit!");
+        if (this.input?.value === "" && this.input?.value === undefined) {
+            this.store?.dispatch(resetQuery());
+        } else {
+            this.store?.dispatch(simpleQuery(this.input.value));
+        }
+        if (this.field) {
+            this.store?.dispatch(setDefaultField(this.field));
+        } else {
+            this.store?.dispatch(resetDefaultField());
+        }
         this.store?.dispatch(
             searchApi.endpoints.documents.initiate(this.query),
         );
