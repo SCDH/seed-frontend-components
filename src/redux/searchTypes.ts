@@ -145,6 +145,11 @@ export interface SearchQuery {
 
     fl: Array<string>;
 
+    /*
+     * Specifies a default searchable field.
+     */
+    df: string | undefined;
+
     indent: boolean;
 
     /*
@@ -219,6 +224,10 @@ export function solrSearchQuery(
         if (query.fl.length > 0) {
             rc += "&fl=";
             query.fl.forEach((f) => (rc += f + ","));
+        }
+
+        if (query.df !== undefined) {
+            rc += "&df=" + query.df;
         }
 
         if (query.fq !== undefined) {

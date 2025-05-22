@@ -18,6 +18,24 @@ export const searchQuerySlice = createSlice({
                 state.fl = [...action.payload, "id"];
             }
         },
+        simpleQuery: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.q = action.payload;
+        },
+        resetQuery: (state: SearchQuery, _action: PayloadAction<void>) => {
+            state.q = initialSearchQuery.q;
+        },
+        setDefaultField: (
+            state: SearchQuery,
+            action: PayloadAction<string>,
+        ) => {
+            state.df = action.payload;
+        },
+        resetDefaultField: (
+            state: SearchQuery,
+            _action: PayloadAction<void>,
+        ) => {
+            state.df = undefined;
+        },
         addFacetFields: (
             state: SearchQuery,
             action: PayloadAction<Array<string>>,
@@ -82,6 +100,10 @@ export const {
     setCollection,
     addFl,
     setFl,
+    simpleQuery,
+    resetQuery,
+    setDefaultField,
+    resetDefaultField,
     addFacetFields,
     addFilter,
     removeFilter,
