@@ -4,7 +4,7 @@ import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-//import { addFilter, removeFilter } from './redux/searchQuerySlice';
+import { resetQuery } from "./redux/searchQuerySlice";
 import {
     FacetTerms,
     SearchResponse,
@@ -74,6 +74,26 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                 ),
             );
         }
+        this.store.dispatch(
+            this.addAppListener({
+                matcher: searchApi.endpoints.documents.matchFulfilled,
+                effect: (_action, listenerApi) => {
+                    listenerApi.dispatch(
+                        searchApi.endpoints.facetTerms.initiate(
+                            listenerApi.getState().searchQuery,
+                        ),
+                    );
+                },
+            }),
+        );
+        this.store.dispatch(
+            this.addAppListener({
+                actionCreator: resetQuery,
+                effect: (_action, listenerApi) => {
+                    this.setTerms(listenerApi.getState());
+                },
+            }),
+        );
     }
 
     /*
