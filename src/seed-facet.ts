@@ -46,7 +46,10 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                 .getState()
                 .searchApi.queries.hasOwnProperty(
                     this.facetTermsQuery(this.store.getState()),
-                )
+                ) &&
+            this.store.getState().searchApi.queries[
+                this.facetTermsQuery(this.store.getState())
+            ]?.status == "fulfilled"
         ) {
             this.setTerms(this.store.getState());
         } else {
