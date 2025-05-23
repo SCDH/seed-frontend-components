@@ -103,13 +103,17 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
     }
 
     render(): HTMLTemplateResult {
-        return html`<div class="term">
-	    <input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
-	    <label for="${this.inputId()}">
-		<seed-data-label class="label-content" key="${this.term}"></seed-data-label>
-	    </label>
-	    <span class="count">${this.count}</span>
-	</div>`;
+        if (this.count > 0) {
+            return html`<div class="term">
+<input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
+<label for="${this.inputId()}">
+<seed-data-label class="label-content" key="${this.term}"></seed-data-label>
+</label>
+<span class="count">${this.count}</span>
+</div>`;
+        } else {
+            return html``;
+        }
     }
 
     isChecked(): HTMLTemplateResult {
