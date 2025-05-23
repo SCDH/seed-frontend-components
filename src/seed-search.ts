@@ -178,7 +178,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
 
     search(): void {
         log.debug("Search button hit!");
-        if (this.input?.value === "" && this.input?.value === undefined) {
+        if (this.input?.value === "" || this.input?.value === undefined) {
             this.store?.dispatch(resetQuery());
         } else {
             this.store?.dispatch(simpleQuery(this.input.value));
