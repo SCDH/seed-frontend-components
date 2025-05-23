@@ -52,7 +52,7 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
             addAppListener({
                 actionCreator: addFilter,
                 effect: async (action, _listenerApi) => {
-                    log.debug("facet term added", action.payload);
+                    // log.debug("facet term added", action.payload);
                     if (
                         action.payload.field == this.field &&
                         action.payload.term == this.term
