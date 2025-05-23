@@ -49,10 +49,12 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
         // fields property.
         if (
             this.store
-                ?.getState()
-                ?.searchApi?.queries?.hasOwnProperty(this.queryName()) ??
-            false
+                .getState()
+                .searchApi.queries.hasOwnProperty(this.queryName()) &&
+            this.store.getState().searchApi.queries[this.queryName()]?.status ==
+                "fulfilled"
         ) {
+            log.debug("fields ALREAD queried when setting up facets");
             this.setFields(this.store?.getState());
         } else {
             // If not already in the request, initiate a request and
