@@ -3,7 +3,7 @@ import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { addFilter, removeFilter } from "./redux/searchQuerySlice";
+import { addFilter, removeFilter, resetQuery } from "./redux/searchQuerySlice";
 import { SearchQuery, solrSearchQuery } from "./redux/searchTypes";
 
 import log from "./logging";
@@ -94,6 +94,18 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                         searchApi.endpoints.filter.name,
                         listenerApi.getState(),
                     ),
+            }),
+        );
+        // search reset
+        this.store?.dispatch(
+            addAppListener({
+                actionCreator: resetQuery,
+                effect: (_action, listenerApi) => {
+                    this.updateEffect(
+                        searchApi.endpoints.documents.name,
+                        listenerApi.getState(),
+                    );
+                },
             }),
         );
         // at the end:
