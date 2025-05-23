@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { SearchResultElement } from "@scdh/lit-redux-consumer";
 
+import { SearchResultElement } from "./search-result-mixin";
 import { SeedState } from "./redux/seed-store";
 import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
 

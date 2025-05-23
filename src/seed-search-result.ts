@@ -37,12 +37,16 @@ export class SeedSearchResult extends SearchResultElement {
     document_start: number = 0;
 
     override subscribeStore(): void {
-        // add fields to be included in the response, by adding them to the query parameter fl
+        // add fields to be included in the response, by adding them to the query parameter fl.
+        // Note that the query may already have been initiated, but not been yet fulfilled.
         if (
             this.store
                 ?.getState()
-                .searchApi.queries.hasOwnProperty(this.fieldsQueryId())
+                .searchApi.queries.hasOwnProperty(this.fieldsQueryId()) &&
+            this.store?.getState()?.searchApi?.queries[this.fieldsQueryId()]
+                ?.status == "fulfilled"
         ) {
+            log.debug("fields query already fulfilled");
             this.store.dispatch(setFl(this.setFields(this.store.getState())));
         } else {
             this.store?.dispatch(
