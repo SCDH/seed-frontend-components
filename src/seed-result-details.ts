@@ -45,7 +45,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
             const queryId: string =
                 searchApi.endpoints.document.name +
                 '("' +
-                solrSearchQuery(q).replaceAll('"', '\\"') +
+                solrSearchQuery(q) +
                 '")';
             return s.searchApi.queries[queryId]?.data as
                 | SearchResponse

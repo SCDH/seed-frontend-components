@@ -1,8 +1,9 @@
-import { PropertyValues, html } from "lit";
+import { html } from "lit";
 import { property } from "lit/decorators.js";
 import { customElement } from "lit/decorators.js";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+
 import { SeedState } from "./redux/seed-store";
 import {
     fetchMappingAlignment,
@@ -11,6 +12,7 @@ import {
 import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
 import { fetchDataLabels } from "./redux/dataLabelSlice";
+import { setDefType } from "./redux/searchQuerySlice";
 
 @customElement("seed-config")
 export class SeedConfig extends StoreConsumerElement<SeedState, any> {
@@ -29,29 +31,24 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "data-labels" })
     dataLabels!: string;
 
-    protected willUpdate(changedProperties: PropertyValues<this>): void {
-        if (changedProperties.has("annotationsUrl" as keyof SeedConfig)) {
+    @property({ attribute: "solr-query-parser" })
+    solrQueryParser!: string;
+
+    override subscribeStore(): void {
+        // Dispatch actions so that config properties are propagated
+        // to the redux store.
+        if (this.solrQueryParser)
+            this.store?.dispatch(setDefType(this.solrQueryParser));
+        if (this.annotationsUrl)
             this.store?.dispatch(fetchAnnotations(this.annotationsUrl));
-        }
-        if (changedProperties.has("ontologyUrls" as keyof SeedConfig)) {
-            this.store?.dispatch(fetchResourceCenteredJson(this.ontologyUrls));
-        }
-        if (
-            changedProperties.has("regexAlignment" as keyof SeedConfig) &&
-            this.regexAlignment
-        ) {
+        if (this.regexAlignment)
             this.store?.dispatch(fetchRegexAlignment(this.regexAlignment));
-        }
-        if (
-            changedProperties.has("mappingAlignment" as keyof SeedConfig) &&
-            this.mappingAlignment
-        ) {
+        if (this.mappingAlignment)
             this.store?.dispatch(fetchMappingAlignment(this.mappingAlignment));
-        }
-        if (changedProperties.has("dataLabels" as keyof SeedConfig)) {
+        if (this.dataLabels)
             this.store?.dispatch(fetchDataLabels(this.dataLabels));
-        }
-        super.willUpdate(changedProperties);
+        if (this.ontologyUrls)
+            this.store?.dispatch(fetchResourceCenteredJson(this.ontologyUrls));
     }
 
     render() {

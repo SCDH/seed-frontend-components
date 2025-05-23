@@ -8,6 +8,9 @@ export const searchQuerySlice = createSlice({
         setCollection: (state: SearchQuery, action: PayloadAction<string>) => {
             state.collection = action.payload;
         },
+        setDefType: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.defType = action.payload;
+        },
         addFl: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
             state.fl = state.fl.concat(action.payload);
         },
@@ -23,6 +26,12 @@ export const searchQuerySlice = createSlice({
         },
         resetQuery: (state: SearchQuery, _action: PayloadAction<void>) => {
             state.q = initialSearchQuery.q;
+        },
+        setQueryFields: (
+            state: SearchQuery,
+            action: PayloadAction<Array<string>>,
+        ) => {
+            state.qf = action.payload;
         },
         setDefaultField: (
             state: SearchQuery,
@@ -98,10 +107,12 @@ export const searchQuerySlice = createSlice({
 
 export const {
     setCollection,
+    setDefType,
     addFl,
     setFl,
     simpleQuery,
     resetQuery,
+    setQueryFields,
     setDefaultField,
     resetDefaultField,
     addFacetFields,

@@ -127,6 +127,11 @@ export interface SearchQuery {
      */
     collection: string;
 
+    /*
+     * Selects the query parser.
+     */
+    defType: string;
+
     q: string;
 
     fq: string | undefined;
@@ -146,9 +151,14 @@ export interface SearchQuery {
     fl: Array<string>;
 
     /*
-     * Specifies a default searchable field.
+     * Specifies a default searchable field. Used by startard (lucene) and eDisMax parser
      */
     df: string | undefined;
+
+    /*
+     * Query fields. Used by DisMax and eDisMax query parser.
+     */
+    qf: Array<string>;
 
     indent: boolean;
 
@@ -173,8 +183,11 @@ export interface FacetFilterQuery {
 
 export const initialSearchQuery: SearchQuery = {
     collection: "tei4", // default collection
-    q: "*%3A*", // match all
+    defType: "edismax",
+    q: "*", // match all in edismax
     fq: undefined,
+    df: undefined,
+    qf: [],
     _fq_id: undefined,
     _fq_faceted: {} as FacetFilterQuery,
     q_op: "OR",
@@ -206,9 +219,33 @@ export function solrSearchQuery(
 ): string {
     var rc: string = "";
 
-    rc += "?q=" + query.q;
+    rc += "?defType=" + (query?.defType ?? "lucene");
 
-    rc += "&q.op=" + query.q_op;
+    rc += "&q=" + query.q;
+
+    if (
+        query.defType == "lucene" ||
+        !query.defType ||
+        query.defType == "edismax"
+    ) {
+        rc += "&q.op=" + query.q_op;
+    }
+
+    if (
+        (query.defType == "dismax" || query.defType == "edismax") &&
+        query.qf.length > 0
+    ) {
+        rc += "&qf=";
+        const l: number = query.qf.length - 1;
+        query.qf.forEach((field: string, i: number) => {
+            rc += field;
+            if (i < l) rc += " ";
+        });
+    }
+
+    if (query.defType == "dismax") {
+        rc += "&q.alt=*";
+    }
 
     // Apply facet filters and select fields if and only if the query
     // is not for a single document. Reason: We want all fields if we
@@ -226,8 +263,10 @@ export function solrSearchQuery(
             query.fl.forEach((f) => (rc += f + ","));
         }
 
-        if (query.df !== undefined) {
-            rc += "&df=" + query.df;
+        if (!query.defType || query.defType == "lucene") {
+            if (query.df !== undefined) {
+                rc += "&df=" + query.df;
+            }
         }
 
         if (query.fq !== undefined) {
@@ -263,5 +302,5 @@ export function solrSearchQuery(
 
     rc += "&params=" + query.params;
 
-    return rc;
+    return encodeURI(rc);
 }

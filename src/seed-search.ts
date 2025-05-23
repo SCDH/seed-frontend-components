@@ -1,6 +1,6 @@
 import { html, css, HTMLTemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
-import { UnknownAction } from "@reduxjs/toolkit";
+import { UnknownAction, UnsubscribeListener } from "@reduxjs/toolkit";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState, addAppListener } from "./redux/seed-store";
@@ -9,8 +9,7 @@ import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
 import {
     simpleQuery,
     resetQuery,
-    setDefaultField,
-    resetDefaultField,
+    setQueryFields,
 } from "./redux/searchQuerySlice";
 import { SeedStore } from "./redux/seed-store";
 
@@ -35,13 +34,47 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @query("#search")
     input!: HTMLInputElement;
 
-    @property()
-    field!: string;
+    @property({ attribute: "query-field-pattern" })
+    queryFieldPattern!: string;
+
+    @property({ attribute: "query-fields", reflect: true })
+    queryFields!: Array<string>;
 
     override subscribeStore() {
         log.debug("subscribing seed-search");
         if (this.store === undefined) {
-            log.debug("no store yet for element with Id ", this.id);
+            log.error("no store yet for", this);
+            return;
+        }
+        // Setting up query fields (qf):
+        // If the field names in the search index were already
+        // requested, take them from the redux store and set up the
+        // fields property.
+        if (
+            this.store
+                ?.getState()
+                ?.searchApi?.queries?.hasOwnProperty(this.fieldsQueryId()) ??
+            false
+        ) {
+            this.setQueryFields(this.store?.getState());
+        } else {
+            // If not already in the request, initiate a request and
+            // set up a listener, that sets the fields property.
+            log.debug("initiating fields query", this.collection);
+            this.store?.dispatch(
+                searchApi.endpoints.fields.initiate(this.collection),
+            );
+            const unsubscriber = this.store?.dispatch(
+                addAppListener({
+                    matcher: searchApi.endpoints.fields.matchFulfilled,
+                    effect: async (_action, listenerApi) => {
+                        this.setQueryFields(listenerApi.getState());
+                    },
+                }),
+            );
+            this._unsubscribers.push(
+                unsubscriber as unknown as UnsubscribeListener,
+            );
         }
         // updating the search query on changes of the search query
         // slice of thestore is required to get facets etc.
@@ -84,6 +117,37 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         // }
     }
 
+    /*
+     * Make the query name, which is `fields("COLLECTION")` where
+     * `COLLECTION` is the collection parameter passed to the `fields`
+     * endpoint.
+     */
+    private fieldsQueryId(): string {
+        return (
+            searchApi.endpoints.fields.name + '(\"' + this.collection + '\")'
+        );
+    }
+
+    // get name of facets from store: 1) get all field names, 2) filter with this.pattern
+    private setQueryFields(state: SeedState): void {
+        const pattern: RegExp = new RegExp(this.queryFieldPattern);
+        const flds: Array<string> =
+            (state.searchApi?.queries?.[this.fieldsQueryId()]
+                ?.data as Array<string>) ?? [];
+        // store facet fields as local state
+        this.queryFields = flds.filter((f) => f.match(pattern));
+        log.debug(
+            "search query fields: selecting matching fields from",
+            flds,
+            "based on regex",
+            this.queryFieldPattern,
+            ": ",
+            this.queryFields,
+        );
+        // add facet fields to search query
+        this.store?.dispatch(setQueryFields(this.queryFields));
+    }
+
     render(): HTMLTemplateResult {
         return html`<host>
 <div class="search-form-wrapper">
@@ -118,11 +182,6 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
             this.store?.dispatch(resetQuery());
         } else {
             this.store?.dispatch(simpleQuery(this.input.value));
-        }
-        if (this.field) {
-            this.store?.dispatch(setDefaultField(this.field));
-        } else {
-            this.store?.dispatch(resetDefaultField());
         }
         this.store?.dispatch(
             searchApi.endpoints.documents.initiate(this.query),

@@ -103,7 +103,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
             const queryId: string =
                 searchApi.endpoints.document.name +
                 '("' +
-                solrSearchQuery(q).replaceAll('"', '\\"') +
+                solrSearchQuery(q) +
                 '")';
             if (
                 this.store?.getState().searchApi.queries.hasOwnProperty(queryId)

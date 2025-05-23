@@ -2,6 +2,8 @@ import { expect, test } from "vitest";
 
 import { SearchQuery, initialSearchQuery } from "../../src/redux/searchTypes";
 import reducer, {
+    setDefType,
+    setQueryFields,
     addFilter,
     removeFilter,
     addFl,
@@ -84,4 +86,20 @@ test("should add and remove id filter", () => {
     expect(newState._fq_id).toContain("dial911");
     newState = reducer(newState, removeSingleDocFilter());
     expect(newState._fq_id).toBe(undefined);
+});
+
+test("should set the query parser", () => {
+    var newState: SearchQuery = reducer(undefined, { type: "unknown" });
+    expect(newState.defType).toEqual("edismax");
+    newState = reducer(newState, setDefType("dismax"));
+    expect(newState.defType).toBe("dismax");
+    newState = reducer(
+        newState,
+        setQueryFields(["html_hts_de", "html_hts_en^2.718"]),
+    );
+    expect(newState.qf.length).toBe(2);
+    expect(newState.qf).toContain("html_hts_de");
+    expect(newState.qf).toContain("html_hts_en^2.718");
+    newState = reducer(newState, setQueryFields([]));
+    expect(newState.qf.length).toBe(0);
 });

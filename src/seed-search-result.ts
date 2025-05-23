@@ -75,7 +75,7 @@ export class SeedSearchResult extends SearchResultElement {
         const queryId: string =
             endpoint +
             '("' +
-            solrSearchQuery(s.searchQuery).replaceAll('"', '\\"') +
+            solrSearchQuery(s.searchQuery) +
             '")';
         log.debug(
             "updating search result",
