@@ -81,10 +81,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
         return (
             searchApi.endpoints.facetTerms.name +
             '("' +
-            solrSearchQuery(state.searchQuery, false, true).replaceAll(
-                '"',
-                '\\"',
-            ) +
+            solrSearchQuery(state.searchQuery, false, true) +
             '")'
         );
     }

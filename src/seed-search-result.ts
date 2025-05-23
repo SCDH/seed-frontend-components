@@ -72,15 +72,13 @@ export class SeedSearchResult extends SearchResultElement {
             (state.searchApi?.queries?.[this.fieldsQueryId()]
                 ?.data as Array<string>) ?? [];
         const regex: RegExp = new RegExp(this.fieldPattern);
+        log.debug("setting search result fields", flds);
         return flds.filter((f) => f.match(regex));
     }
 
     override updateEffect(endpoint: string, s: SeedState): void {
         const queryId: string =
-            endpoint +
-            '("' +
-            solrSearchQuery(s.searchQuery) +
-            '")';
+            endpoint + '("' + solrSearchQuery(s.searchQuery) + '")';
         log.debug(
             "updating search result",
             queryId,
