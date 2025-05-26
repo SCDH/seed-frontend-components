@@ -33,8 +33,11 @@ export class SeedKWiC extends StoreConsumerElement<SeedState, any> {
 
     renderField(_field: string, value: Array<string>): HTMLTemplateResult {
         return html`<div>
-            ${value.map((v) => {
-                return html`<div class="snippet" .innerHTML="${v}">text</div>`;
+            ${value.map((v, i) => {
+                const even: string = i % 2 ? "even" : "uneven";
+                return html`<div class="snippet ${even}" .innerHTML="${v}">
+                    text
+                </div>`;
             })}
         </div>`;
     }
@@ -45,6 +48,12 @@ export class SeedKWiC extends StoreConsumerElement<SeedState, any> {
             }
             em {
                 background-color: var(--seed-highlight-background, yellow);
+            }
+            .uneven {
+                background-color: #eaeaea;
+            }
+            .snippet:hover {
+                background-color: #d8d8d8;
             }
         `,
     ];
