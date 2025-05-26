@@ -7,10 +7,6 @@ export {
     seedWidgetWidthMinimizedContext,
 } from "./seed-context.ts";
 export {
-    StoreConsumerElement,
-    reduxStoreContext,
-} from "./store-consumer-mixin.ts";
-export {
     windowMixin,
     windowStyles,
     isWindow,

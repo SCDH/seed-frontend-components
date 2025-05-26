@@ -2,6 +2,7 @@ import { html, CSSResultGroup, css } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { addListener, UnknownAction } from "@reduxjs/toolkit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { TextViewsSlice } from "./redux/textViewsSlice";
 import { SeedState } from "./redux/seed-store";
@@ -10,7 +11,6 @@ import log from "./logging";
 import { SeedTextView } from "./seed-text-view";
 import { windowStyles } from "./window-mixin";
 import { seedTextViewContext } from "./seed-context";
-import { StoreConsumerElement } from "./store-consumer-mixin";
 
 /*
  * `seed-state-scroll-position` is a custom HTML element to be used in
