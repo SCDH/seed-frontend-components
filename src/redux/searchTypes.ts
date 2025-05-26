@@ -7,6 +7,8 @@ export interface SearchResponse {
     response: Response;
 
     facet_counts: undefined | FacetCounts;
+
+    highlighting: undefined | Highlighting;
 }
 
 /*
@@ -94,6 +96,10 @@ export function toTermCountTuples(
     return rc;
 }
 
+export interface Highlighting {
+    [id: string]: Document;
+}
+
 export const initialResponseHeader = {
     zkConnected: false,
     status: 0,
@@ -112,22 +118,23 @@ export const initialSearchResponse = {
     responseHeader: initialResponseHeader,
     response: initialResponse,
     facet_counts: undefined,
+    highlighting: undefined,
 };
 
-/*
+/**
  * The parameters of a search query are stored in an extra slice.
  *
  * TODO: same as Parameters + collection
  */
 export interface SearchQuery {
-    /*
+    /**
      * The collection to search in. Note: If we want a search that can
      * search multiple collections, we should consider making this a
      * property name!
      */
     collection: string;
 
-    /*
+    /**
      * Selects the query parser.
      */
     defType: string;
@@ -136,12 +143,12 @@ export interface SearchQuery {
 
     fq: string | undefined;
 
-    /*
+    /**
      * Use for setting up facet filtering via the fq parameter.
      */
     _fq_faceted: FacetFilterQuery | undefined;
 
-    /*
+    /**
      * Use for restricting result to a single document!
      */
     _fq_id: string | undefined;
@@ -150,7 +157,7 @@ export interface SearchQuery {
 
     fl: Array<string>;
 
-    /*
+    /**
      * Specifies a default searchable field. Used by startard (lucene) and eDisMax parser
      */
     df: string | undefined;
@@ -162,12 +169,12 @@ export interface SearchQuery {
 
     indent: boolean;
 
-    /*
+    /**
      * If set to `true`, this parameter enables facet counts in the query response.
      */
     facet: boolean;
 
-    /*
+    /**
      * Identifies a field that should be treated as a facet. This
      * parameter can be specified multiple times in a query to select
      * multiple facet fields.
@@ -175,6 +182,26 @@ export interface SearchQuery {
     facet_fields: Array<string>;
 
     params: string;
+
+    /**
+     * Use this parameter to enable or disable highlighting. If you
+     * want to use highlighting, you must set this to tru.
+     * See [Solr docs](https://solr.apache.org/guide/solr/latest/query-guide/highlighting.html)!
+     */
+    hl: boolean;
+
+    /**
+     * Specifies a list of fields to highlight, either comma- or
+     * space-delimited.
+     */
+    hl_fl: Array<string>;
+
+    /**
+     * Specifies maximum number of highlighted snippets to generate
+     * per field. It is possible for any number of snippets from zero
+     * to this value to be generated.
+     */
+    hl_snippets: number;
 }
 
 export interface FacetFilterQuery {
@@ -196,6 +223,9 @@ export const initialSearchQuery: SearchQuery = {
     facet: true,
     facet_fields: [],
     params: "",
+    hl: false,
+    hl_fl: [],
+    hl_snippets: 1,
 };
 
 /*
@@ -297,6 +327,12 @@ export function solrSearchQuery(
             query.facet_fields.forEach((f) => {
                 rc += "&facet.field=" + f;
             });
+        }
+
+        // highlighting
+        if (query.hl) {
+            rc += "&hl=true";
+            rc += "&hl.snippets=" + query.hl_snippets;
         }
     }
 

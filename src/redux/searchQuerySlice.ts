@@ -102,6 +102,18 @@ export const searchQuerySlice = createSlice({
         ) => {
             state._fq_id = undefined;
         },
+        setHighlighting: (
+            state: SearchQuery,
+            action: PayloadAction<boolean>,
+        ) => {
+            state.hl = action.payload;
+        },
+        setHighlightingSnippets: (
+            state: SearchQuery,
+            action: PayloadAction<number>,
+        ) => {
+            state.hl_snippets = action.payload;
+        },
     },
 });
 
@@ -120,6 +132,8 @@ export const {
     removeFilter,
     addSingleDocFilter,
     removeSingleDocFilter,
+    setHighlighting,
+    setHighlightingSnippets,
 } = searchQuerySlice.actions;
 
 export default searchQuerySlice.reducer;

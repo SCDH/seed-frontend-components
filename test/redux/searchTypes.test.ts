@@ -109,3 +109,15 @@ test("should have default field or query fields depending on parameter defType",
     //expect(qs5).not.toContain("&qf=");
     expect(qs5).toContain("&df=about_hts_de");
 });
+
+test("should switch highlighting", () => {
+    var query6 = initialSearchQuery;
+    query6.hl_snippets = 10;
+    var qs6 = solrSearchQuery(query6);
+    expect(qs6).not.toContain("&hl=");
+    expect(qs6).not.toContain("&hl.snippets=");
+    query6.hl = true;
+    qs6 = solrSearchQuery(query6);
+    expect(qs6).toContain("&hl=true");
+    expect(qs6).toContain("&hl.snippets=10");
+});
