@@ -25,6 +25,7 @@ export { SeedSearch } from "./seed-search.ts";
 export { SeedSearchResult } from "./seed-search-result.ts";
 export { SeedSearchResultCount } from "./seed-search-result-count.ts";
 export { SeedResultDoc } from "./seed-result-doc.ts";
+export { SeedKWiC } from "./seed-kwic.ts";
 export { SeedFacet } from "./seed-facet.ts";
 export { SeedFacets } from "./seed-facets.ts";
 export { SeedFacetTerm } from "./seed-facet-term.ts";
