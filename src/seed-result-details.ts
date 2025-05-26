@@ -1,10 +1,10 @@
 import { HTMLTemplateResult, html, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+import { matched } from "@scdh/lit-redux-consumer";
 
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { StoreConsumerElement } from "./store-consumer-mixin";
-import { matched } from "./store-consumer-decorators";
 import { setCollection } from "./redux/searchQuerySlice";
 import {
     SearchResponse,

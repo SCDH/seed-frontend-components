@@ -1,8 +1,8 @@
 import { PropertyValues, html } from "lit";
 import { property } from "lit/decorators.js";
 import { customElement } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { fetchText } from "./redux/textsSlice";
 // import { fetchAnnotationsPerSegment } from './redux/textViewsSlice';

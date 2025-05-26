@@ -1,7 +1,6 @@
 import { html } from "lit";
 import { property } from "lit/decorators.js";
 import { customElement } from "lit/decorators.js";
-
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState } from "./redux/seed-store";
