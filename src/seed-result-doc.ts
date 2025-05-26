@@ -18,6 +18,9 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
     @property({ type: Object })
     document!: Document;
 
+    @property({ type: Object })
+    highlight!: Document;
+
     @property()
     pattern: string = "^(meta|author|title)";
 
@@ -27,17 +30,19 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
             (f) => f.match(regex),
         );
         return html`<div class="fields">
-            ${fields.map((f) => this.renderField(f, this.document))}
+            ${fields.map((f) =>
+                this.renderField(f, this.highlight ? [f] : this.document[f]),
+            )}
         </div>`;
     }
 
-    renderField(field: string, document: Document): HTMLTemplateResult {
+    renderField(field: string, value: string): HTMLTemplateResult {
         return html`<div class="field">
             <span class="field-name">
                 <span class="name"><seed-data-label key="${field}"><seed-data-label></span
                 ><span class="field-name-value-sep">: </span>
             </span>
-            <span class="field-value">${document[field]}</span>
+            <span class="field-value">${value}</span>
         </div>`;
     }
 

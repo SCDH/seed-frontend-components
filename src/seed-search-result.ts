@@ -4,8 +4,17 @@ import { customElement, state, property } from "lit/decorators.js";
 import { SearchResultElement } from "./search-result-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { SearchResponse, Document, solrSearchQuery } from "./redux/searchTypes";
-import { setFl } from "./redux/searchQuerySlice";
+import {
+    SearchResponse,
+    Document,
+    solrSearchQuery,
+    Highlighting,
+} from "./redux/searchTypes";
+import {
+    setFl,
+    setHighlighting,
+    setHighlightingSnippets,
+} from "./redux/searchQuerySlice";
 
 import log from "./logging";
 
@@ -20,6 +29,15 @@ export class SeedSearchResult extends SearchResultElement {
     @property({ attribute: "field-pattern" })
     fieldPattern: string = "^(meta|author|title)";
 
+    @property({ type: Boolean })
+    highlighting: boolean = false;
+
+    @property({ attribute: "highlighting-snippets", type: Number })
+    highlightingSnippets: number = 1;
+
+    @property({ attribute: "kwic-pattern" })
+    kwicPattern: string = "^(html_hts_)";
+
     /*
      * Path segment to search, used for in the path to details
      * view. This is passed through to all the links to detail pages.
@@ -29,6 +47,9 @@ export class SeedSearchResult extends SearchResultElement {
 
     @state()
     documents: Array<Document> = [];
+
+    @state()
+    highlightedDocuments: Highlighting = {};
 
     @state()
     document_count: number = 0;
@@ -60,6 +81,10 @@ export class SeedSearchResult extends SearchResultElement {
                 }),
             );
         }
+        this.store?.dispatch(setHighlighting(this.highlighting));
+        this.store?.dispatch(
+            setHighlightingSnippets(this.highlightingSnippets),
+        );
         super.subscribeStore();
     }
 
@@ -90,6 +115,7 @@ export class SeedSearchResult extends SearchResultElement {
             this.document_count = data.response.numFound;
             this.document_start = data.response.start;
             this.documents = data.response.docs;
+            this.highlightedDocuments = data?.highlighting ?? {};
         }
     }
 
@@ -98,7 +124,12 @@ export class SeedSearchResult extends SearchResultElement {
             ${this.renderDocumentCount()}
             <div class="result-documents">
                 ${this.documents.map((d) =>
-                    this.renderDocument(d, this.fieldPattern),
+                    this.renderDocument(
+                        d,
+                        this.fieldPattern,
+                        this.highlightedDocuments[d.id],
+                        this.kwicPattern,
+                    ),
                 )}
             </div>
         </div>`;
@@ -110,7 +141,12 @@ export class SeedSearchResult extends SearchResultElement {
         </div>`;
     }
 
-    renderDocument(doc: Document, fieldPattern: string): HTMLTemplateResult {
+    renderDocument(
+        doc: Document,
+        fieldPattern: string,
+        highlightedDoc: Document,
+        kwicPattern: string,
+    ): HTMLTemplateResult {
         // Mind the dot!
         return html`<div class="result-document">
             <seed-result-doc
@@ -119,6 +155,12 @@ export class SeedSearchResult extends SearchResultElement {
                 .document="${doc}"
                 pattern="${fieldPattern}"
             ></seed-result-doc>
+            <seed-kwic
+                collection="${this.collection}"
+                doc-id="${doc.id}"
+                .highlight="${highlightedDoc}"
+                pattern="${kwicPattern}"
+            ></seed-kwic>
             <seed-result-details-link
                 collection="${this.collection}"
                 doc-id="${doc.id}"
