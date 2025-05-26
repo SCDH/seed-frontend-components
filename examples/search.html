@@ -12,6 +12,7 @@
     <script type="module" src="/src/seed-search.ts"></script>
     <script type="module" src="/src/seed-search-result.ts"></script>
     <script type="module" src="/src/seed-result-doc.ts"></script>
+    <script type="module" src="/src/seed-kwic.ts"></script>
     <script type="module" src="/src/seed-facets.ts"></script>
     <script type="module" src="/src/seed-facet.ts"></script>
     <script type="module" src="/src/seed-facet-term.ts"></script>
@@ -46,7 +47,7 @@
 	<div>
 	  <seed-search collection="tei4" initial-all="true" query-field-pattern="html_hts_[a-z]+"></seed-search>
 	  <seed-search-filters></seed-search-filters>
-	  <seed-search-result collection="tei4"></seed-search-result>
+	  <seed-search-result collection="tei4" highlighting="true" highlighting-snippets="5"></seed-search-result>
 	  <div>
 	</div>
     </seed-app>
