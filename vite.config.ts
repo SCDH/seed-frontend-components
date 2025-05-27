@@ -1,9 +1,12 @@
 // https://github.com/vitejs/vite/discussions/4085
 // https://dev.to/leon/vite-lit-and-storybook-43f
-import { resolve } from "path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig, normalizePath } from "vite";
 import dts from "vite-plugin-dts";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -17,9 +20,9 @@ export default defineConfig(({ command, mode }) => {
                     fileName: "main",
                     formats: ["es"],
                 },
-                rollupOptions: {
-                    // 	external: mode === "production" ? "" : /^lit/,
-                },
+                // rollupOptions: {
+                //     external: ['lit'],
+                // },
             },
             plugins: [dts({ include: ["src/redux"] })],
         };
@@ -32,10 +35,11 @@ export default defineConfig(({ command, mode }) => {
                 fileName: "main",
                 formats: ["es"],
             },
-            rollupOptions: {
-                // 	external: mode === "production" ? "" : /^lit/,
-            },
+            // rollupOptions: {
+            //     external: ['lit'],
+            // },
         },
+        define: { "process.env.NODE_ENV": '"production"' },
         plugins: [dts({ include: ["src"] })],
     };
 });
