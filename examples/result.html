@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/public/scdh.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+    <script type="module" src="/node_modules/anylogger-console/anylogger-console.js"></script>
+    <script type="module" src="/src/main.ts"></script>
+    <style type="text/css">
+      .search {
+	  display: flex;
+	  flex-direction: row;
+      }
+      .search * {
+	  margin: 5px;
+
+      }
+      .facets {
+	  width: 20em;
+      }
+    </style>
+  </head>
+  <body>
+    <seed-app>
+      <seed-config
+	data-labels="/examples/data-labels.json"></seed-config>
+      <div class="search">
+	<seed-result-details collection="tei4" doc-id="blumenbach_naturgeschichte_1782"></seed-result-details>
+      </div>
+    </seed-app>
+  </body>
+
+  <script>
+    // // Create IE + others compatible event handler
+    // var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+    // var eventer = window[eventMethod];
+    // var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+    // // Listen to message from child window
+    // eventer(messageEvent,function(e) {
+    // 	console.log("parent received message from " + e.origin + ": ", e.data);
+    // },false);
+    </script>
+</html>
