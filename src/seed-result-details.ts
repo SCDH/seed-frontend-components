@@ -2,7 +2,7 @@ import { HTMLTemplateResult, html, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { UnsubscribeListener } from "@reduxjs/toolkit";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
-import { matched } from "@scdh/lit-redux-consumer";
+import { matched, useQuery } from "@scdh/lit-redux-consumer";
 
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
@@ -45,6 +45,13 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "text-pattern" })
     textPattern: string = "^(html_htm_)";
 
+    // @ts-ignore
+    @useQuery<SeedState, SeedResultDetails, any, Array<String>>(
+        searchApi.endpoints.fields,
+        (_s, c) => c?.collection ?? "unknown",
+    )
+    indexFields!: Array<String>;
+
     @matched<SeedState, SeedResultDetails, SearchResponse | undefined>(
         searchApi.endpoints.document.matchFulfilled,
         (s, c) => {
@@ -79,7 +86,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     //     super.disconnectedCallback();
     // }
 
-    protected override subscribeStore(): void {
+    override subscribeStore(): void {
         if (this.store === undefined) {
             log.error("no store yet for element", this);
             return;
@@ -101,10 +108,10 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
         } else {
             // If not already in the request, initiate a request and
             // set up a listener, that sets the fields property.
-            log.debug("initiating fields query", this.collection);
-            this.store?.dispatch(
-                searchApi.endpoints.fields.initiate(this.collection),
-            );
+            // log.debug("initiating fields query", this.collection);
+            // this.store?.dispatch(
+            //     searchApi.endpoints.fields.initiate(this.collection),
+            // );
             const unsubscriber = this.store?.dispatch(
                 this.addAppListener({
                     matcher: searchApi.endpoints.fields.matchFulfilled,
@@ -173,7 +180,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     }
 
     protected override render(): HTMLTemplateResult {
-        log.error("result", this.result);
+        log.error("result", this?.result);
         if (this.result?.response?.numFound != 1) {
             return html`Getting document with ID ${this.documentId} ...
             ${this.result}`;
@@ -190,6 +197,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 .highlight="${this.highlighting}"
                 pattern="${this.fieldPattern}"
             ></seed-result-doc>
+            <div>${this.indexFields}</div>
         </div>`;
     }
 }
