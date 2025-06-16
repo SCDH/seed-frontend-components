@@ -32,7 +32,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     @state()
     terms: Array<TermCountTuple> = [];
 
-    protected override subscribeStore() {
+    override subscribeStore() {
         log.debug("subscribing seed-facet");
         if (this.store === undefined) {
             log.error("no store yet for element", this);

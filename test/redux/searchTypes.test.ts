@@ -3,10 +3,18 @@ import { expect, test } from "vitest";
 import {
     initialSearchQuery,
     solrSearchQuery,
+    solrSearchInSingleDoc,
+    isAllDocumentsQuery,
 } from "../../src/redux/searchTypes";
 
+import type { SearchQuery } from "../../src/redux/searchTypes";
+
+function dcq(q: SearchQuery): SearchQuery {
+    return JSON.parse(JSON.stringify(q));
+}
+
 test("should return default query", () => {
-    var qs = solrSearchQuery(initialSearchQuery);
+    var qs = solrSearchQuery(dcq(initialSearchQuery));
     expect(qs).toContain("?defType=edismax");
     expect(qs).toContain("&q=*");
     expect(qs).toContain("&q.op=OR");
@@ -18,7 +26,7 @@ test("should return default query", () => {
 });
 
 test("should have filter query parameter from fq property", () => {
-    var query = initialSearchQuery;
+    var query = dcq(initialSearchQuery);
     query.fq = "pi:3.14";
     var qs = solrSearchQuery(query);
     expect(qs).toContain("&fq=");
@@ -26,7 +34,7 @@ test("should have filter query parameter from fq property", () => {
 });
 
 test("should have filter query parameter from _fq_facets parameter", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major", "Sergant"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
@@ -37,7 +45,7 @@ test("should have filter query parameter from _fq_facets parameter", () => {
 });
 
 test("should have filter query parameter from _fq_facets parameter with single term", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
@@ -48,7 +56,7 @@ test("should have filter query parameter from _fq_facets parameter with single t
 });
 
 test("should have filter query parameter from _fq_facets parameter with multiple facets", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major"], places: ["Kairo"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
@@ -62,7 +70,7 @@ test("should have filter query parameter from _fq_facets parameter with multiple
 });
 
 test("should have filter query parameter from _fq_id", () => {
-    var query3 = initialSearchQuery;
+    var query3 = dcq(initialSearchQuery);
     var qs3 = solrSearchQuery(query3);
     expect(qs3).not.toContain("fq=id:dial911");
     query3._fq_id = "dial911";
@@ -81,7 +89,7 @@ test("should have filter query parameter from _fq_id", () => {
 });
 
 test("should change query parser parameter defType", () => {
-    var query4 = initialSearchQuery;
+    var query4 = dcq(initialSearchQuery);
     var qs4 = solrSearchQuery(query4);
     expect(qs4).toContain("?defType=edismax");
     query4.defType = "dismax";
@@ -90,7 +98,7 @@ test("should change query parser parameter defType", () => {
 });
 
 test("should have default field or query fields depending on parameter defType", () => {
-    var query5 = initialSearchQuery;
+    var query5 = dcq(initialSearchQuery);
     query5.defType = undefined; // why needed? initialSearchQuery set by test before?
     var qs5 = solrSearchQuery(query5);
     expect(qs5).toContain("?defType=lucene");
@@ -111,7 +119,7 @@ test("should have default field or query fields depending on parameter defType",
 });
 
 test("should switch highlighting", () => {
-    var query6 = initialSearchQuery;
+    var query6 = dcq(initialSearchQuery);
     query6.hl_snippets = 10;
     var qs6 = solrSearchQuery(query6);
     expect(qs6).not.toContain("&hl=");
@@ -120,4 +128,31 @@ test("should switch highlighting", () => {
     qs6 = solrSearchQuery(query6);
     expect(qs6).toContain("&hl=true");
     expect(qs6).toContain("&hl.snippets=10");
+});
+
+test("should be an all documents query first", () => {
+    var qinit = dcq(initialSearchQuery);
+    var qall = isAllDocumentsQuery(qinit);
+    expect(qall).toBeTruthy();
+    qinit.q = "nix";
+    expect(isAllDocumentsQuery(qinit)).not.toBeTruthy();
+});
+
+test("should not have highlighting query", () => {
+    var q = dcq(initialSearchQuery);
+    var qs = solrSearchInSingleDoc(q, "d1");
+    expect(qs).toContain("&q=id:d1&");
+    expect(qs).not.toContain("&hl=true&");
+    expect(qs).not.toContain("&hl.fl=*&");
+    expect(qs).not.toContain("&hl.maxAnalyzedChars=21");
+});
+
+test("should have highlighting query", () => {
+    var q = dcq(initialSearchQuery);
+    q.q = "Geschichte";
+    var qs = solrSearchInSingleDoc(q, "d1");
+    expect(qs).toContain("&q=id:d1&");
+    expect(qs).toContain("&hl=true&");
+    expect(qs).toContain("&hl.fl=*&");
+    expect(qs).toContain("&hl.maxAnalyzedChars=21");
 });

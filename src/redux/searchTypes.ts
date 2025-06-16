@@ -1,3 +1,5 @@
+const LUCENE_MAX_ANALYZED_CHARS: number = 2147483646;
+
 /*
  * The type for a Solr response data object returned on `/solr/COLLECTION/select?...`
  */
@@ -228,6 +230,18 @@ export const initialSearchQuery: SearchQuery = {
     hl_snippets: 1,
 };
 
+/**
+ * Predicate function that returns true, if the given query is an all
+ * documents query.
+ */
+export function isAllDocumentsQuery(query: SearchQuery) {
+    if (query.defType == "dismax" || query.defType == "edismax") {
+        return query.q == "*";
+    } else {
+        return query.q == "*:*";
+    }
+}
+
 /*
  * Make a Solr search query from the given `SearchQuery` object.
  *
@@ -322,12 +336,7 @@ export function solrSearchQuery(
             }
         }
 
-        if (query.facet || facetSetup) {
-            rc += "&facet=true";
-            query.facet_fields.forEach((f) => {
-                rc += "&facet.field=" + f;
-            });
-        }
+        rc += solrQueryPartFacets(query);
 
         // highlighting
         if (query.hl) {
@@ -339,4 +348,44 @@ export function solrSearchQuery(
     rc += "&params=" + query.params;
 
     return encodeURI(rc);
+}
+
+function solrQueryPartFacets(query: SearchQuery): string {
+    var rc = "";
+    if (query.facet) {
+        rc += "&facet=true";
+        query.facet_fields.forEach((f) => {
+            rc += "&facet.field=" + f;
+        });
+    }
+    return rc;
+}
+
+export function solrSearchInSingleDoc(
+    query: SearchQuery,
+    singleDocumentId: string | false,
+): string {
+    var rc: string = "";
+
+    rc += "?defType=" + (query?.defType ?? "lucene");
+
+    rc += "&q=id:" + singleDocumentId;
+
+    if (!isAllDocumentsQuery(query)) {
+        rc += "&hl=true";
+
+        rc += "&hl.fl=*";
+
+        // rc += "&hl.qparser=edismax";
+
+        rc += "&hl.maxAnalyzedChars=" + LUCENE_MAX_ANALYZED_CHARS.toString();
+
+        rc += "&hl.q=" + query.q;
+    }
+
+    rc += solrQueryPartFacets(query);
+
+    rc += "&params=";
+
+    return rc;
 }
