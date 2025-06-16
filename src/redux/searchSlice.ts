@@ -10,7 +10,7 @@ import type {
 import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
 
 import type { SearchResponse, SearchQuery } from "./searchTypes";
-import { solrSearchQuery } from "./searchTypes";
+import { solrSearchQuery, solrSearchInSingleDoc } from "./searchTypes";
 
 /*
  * The `searchApi` slice is the redux slice we get from running
@@ -43,10 +43,10 @@ export const searchApi = createApi({
         // get a single document matching the search query. _fq_id should be set in the query.
         document: builder.query<
             SearchResponse,
-            { query: SearchQuery; documentId: string | undefined }
+            { query: SearchQuery; documentId: string }
         >({
             query: ({ query: qry, documentId: docId }) =>
-                `/solr/${qry.collection}/select${solrSearchQuery(qry, docId)}`,
+                `/solr/${qry.collection}/select${solrSearchInSingleDoc(qry, docId)}`,
             serializeQueryArgs: serializeQueryArgsDict,
         }),
         facetTerms: builder.query<SearchResponse, SearchQuery>({
@@ -92,7 +92,15 @@ function serializeQueryArgsDict(args: {
     endpointDefinition: any;
     endpointName: string;
 }) {
-    const qs = solrSearchQuery(args.queryArgs.query, args.queryArgs.documentId);
+    let qs: string;
+    if (args.queryArgs.documentId) {
+        qs = solrSearchInSingleDoc(
+            args.queryArgs.query,
+            args.queryArgs.documentId,
+        );
+    } else {
+        qs = solrSearchQuery(args.queryArgs.query);
+    }
     return defaultSerializeQueryArgs({
         queryArgs: qs,
         endpointDefinition: args.endpointDefinition,
@@ -144,7 +152,7 @@ export type SearchState = CombinedState<
             "searchApi"
         >;
         document: QueryDefinition<
-            { query: SearchQuery; documentId: string | undefined },
+            { query: SearchQuery; documentId: string },
             BaseQueryFn<
                 string | FetchArgs,
                 unknown,
