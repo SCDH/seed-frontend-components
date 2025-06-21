@@ -30,3 +30,4 @@ export { SeedSearchFilter } from "./seed-search-filter.ts";
 export { SeedSearchFilters } from "./seed-search-filters.ts";
 export { SeedResultDetailsLink } from "./seed-result-details-link.ts";
 export { SeedResultDetails } from "./seed-result-details.ts";
+export { SeedTextWidget } from "./seed-text-widget.ts";
