@@ -95,12 +95,8 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     ): void {
         super.willUpdate(changedProperties);
         if (changedProperties.has("indexFields") && this.store) {
-            log.debug("indexFields updated");
             this.setFields();
-            log.debug(
-                "setting query fields for details view",
-                this.fields.concat(this.textFields),
-            );
+            log.debug("setting query fields for details view", this);
             // set qf for next search query
             this.store?.dispatch(
                 setQueryFields(this.fields.concat(this.textFields)),
@@ -116,11 +112,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
         // When the result comes in, also set the `document` property
         // from the result.
         if (changedProperties.has("result")) {
-            log.debug(
-                "result was updated",
-                changedProperties.get("result"),
-                this.result,
-            );
+            log.debug("search result was updated", this);
             if (this.result?.data) {
                 this.document = this.result.data.response.docs[0];
                 this.highlighting = this.result.data.highlighting
@@ -145,20 +137,35 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     }
 
     protected override render(): HTMLTemplateResult {
-        log.info(
-            "renderiing seed-result-details",
-            this?.indexFields,
-            this?.result,
-        );
+        log.debug("rendering seed-result-details", this);
+        if (this.result?.error !== undefined) {
+            log.error(this.result.error);
+            let code: string | number | undefined;
+            let message: string | undefined;
+            if (this.result.error.hasOwnProperty("status")) {
+                // @ts-ignore
+                code = this.result.error["status"] ?? "";
+                // @ts-ignore
+                message = this.result.error?.error ?? "unknown error";
+            } else {
+                // @ts-ignore
+                code = this.result.error["code"] ?? "";
+                // @ts-ignore
+                message = this.result.error?.message ?? "unknown error";
+            }
+            return html`<ds-error .code="${code}">${message}</ds-error>`;
+        }
         if (this.result?.data == undefined) {
-            return html`Getting document with ID ${this.documentId} ...
-            ${this.result?.status ?? "not yet initialized"}`;
+            return html`<ds-waiting
+                status="${this.result?.status ?? "uninitialized"}"
+                >Getting document with ID ${this.documentId}</ds-waiting
+            >`;
         }
         return html`<div>
-            <div>
+            <!--div>
                 ${this.result.data.response.numFound ?? "failed"}
                 ${this.document.id}
-            </div>
+            </div-->
             <seed-result-doc
                 collection="${this.collection}"
                 doc-id="${this.documentId}"
@@ -166,7 +173,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 .highlight="${this.highlighting}"
                 pattern="${this.fieldPattern}"
             ></seed-result-doc>
-            <div>${this.indexFields}</div>
+            <!--div>${this.indexFields}</div-->
             <div class="text"><seed-text-widget></seed-text-widget></div>
         </div>`;
     }
