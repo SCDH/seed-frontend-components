@@ -31,7 +31,7 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
         );
         return html`<div class="fields">
             ${fields.map((f) =>
-                this.renderField(f, this.highlight ? [f] : this.document[f]),
+                this.renderField(f, this.highlight[f] ?? this.document[f]),
             )}
         </div>`;
     }
