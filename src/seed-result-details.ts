@@ -112,7 +112,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
         // When the result comes in, also set the `document` property
         // from the result.
         if (changedProperties.has("result")) {
-            log.debug("search result was updated", this);
+            log.debug("search result was updated", this, this.result);
             if (this.result?.data) {
                 this.document = this.result.data.response.docs[0];
                 this.highlighting = this.result.data.highlighting
