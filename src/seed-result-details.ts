@@ -49,35 +49,23 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     textFields!: Array<string>;
 
     @useQuery<SeedState, SeedResultDetails, string, Array<String>>(
-        // @ts-ignore: TODO: Why compile error?
         searchApi.endpoints.fields,
-        (_s, c) => c?.collection ?? "unkonwn",
+        (_s, c) => c.collection ?? "unkonwn",
     )
-    indexFields!: Array<String>;
+    indexFields!: Array<string>;
 
     @state()
     @watch<SeedState, SeedResultDetails, RTKQResponse<SearchResponse>>(
         (s, c) =>
             searchApi.endpoints.document.select({
                 query: s.searchQuery,
-                documentId: c?.documentId ?? "?",
+                documentId: c.documentId ?? "?",
             })(s),
         {
-            predicatePrecondition: (s, c): boolean => {
-                log.debug("testing precondition");
-                if (
-                    c?.documentId != undefined &&
-                    s.searchQuery != undefined &&
-                    c.indexFields
-                ) {
-                    log.debug("precondition fulfilled");
-                    return (
-                        c?.documentId != undefined && s.searchQuery != undefined
-                    );
-                } else {
-                    return false;
-                }
-            },
+            precondition: (s, c): boolean =>
+                c.documentId != undefined &&
+                s.searchQuery != undefined &&
+                c.indexFields != undefined,
         },
     )
     result!: RTKQResponse<SearchResponse>;
@@ -88,25 +76,11 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @state()
     highlighting!: Document | undefined;
 
-    private setFields(state: SeedState): void {
-        const flds: Array<string> =
-            (state.searchApi.queries?.[this.fieldsQueryId()]
-                ?.data as Array<string>) ?? [];
+    private setFields(): void {
         const fldRegex: RegExp = new RegExp(this.fieldPattern);
         const txtRegex: RegExp = new RegExp(this.textPattern);
-        this.fields = flds.filter((f) => f.match(fldRegex));
-        this.textFields = flds.filter((f) => f.match(txtRegex));
-        log.debug(
-            "setting query fields for details view",
-            this.fields.concat(this.textFields),
-        );
-        this.store?.dispatch(
-            setQueryFields(this.fields.concat(this.textFields)),
-        );
-    }
-
-    private fieldsQueryId(): string {
-        return searchApi.endpoints.fields.name + '("' + this.collection + '")';
+        this.fields = this.indexFields.filter((f) => f.match(fldRegex));
+        this.textFields = this.indexFields.filter((f) => f.match(txtRegex));
     }
 
     protected override willUpdate(
@@ -115,7 +89,15 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
         super.willUpdate(changedProperties);
         if (changedProperties.has("indexFields") && this.store) {
             log.debug("indexFields updated");
-            this.setFields(this.store.getState());
+            this.setFields();
+            log.debug(
+                "setting query fields for details view",
+                this.fields.concat(this.textFields),
+            );
+            // set qf for next search query
+            this.store?.dispatch(
+                setQueryFields(this.fields.concat(this.textFields)),
+            );
             // initiate query for document
             this.store?.dispatch(
                 searchApi.endpoints.document.initiate({
