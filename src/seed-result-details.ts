@@ -1,5 +1,6 @@
 import { HTMLTemplateResult, html, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { provide } from "@lit/context";
 import {
     StoreConsumerElement,
     useQuery,
@@ -7,6 +8,8 @@ import {
 } from "@scdh/lit-redux-consumer";
 import type { RTKQResponse } from "@scdh/lit-redux-consumer";
 
+import type { SeedText } from "./types";
+import { seedTextContext } from "./seed-context";
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { setQueryFields } from "./redux/searchQuerySlice";
@@ -76,6 +79,10 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @state()
     highlighting!: Document | undefined;
 
+    @state()
+    @provide({ context: seedTextContext })
+    text!: SeedText;
+
     private setFields(): void {
         const fldRegex: RegExp = new RegExp(this.fieldPattern);
         const txtRegex: RegExp = new RegExp(this.textPattern);
@@ -118,7 +125,21 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 this.document = this.result.data.response.docs[0];
                 this.highlighting = this.result.data.highlighting
                     ? [this.documentId]
-                    : undefined;
+                    : this.document;
+                if (this.highlighting !== undefined) {
+                    const txtRegex: RegExp = new RegExp(this.textPattern);
+                    const txtFld: string | undefined = Object.keys(
+                        this.highlighting,
+                    )
+                        .filter((f) => f.match(txtRegex))
+                        .find((x) => x !== undefined);
+                    if (txtFld !== undefined) {
+                        this.text = {
+                            text: this.highlighting[txtFld],
+                            id: this.documentId,
+                        };
+                    }
+                }
             }
         }
     }
@@ -146,6 +167,7 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 pattern="${this.fieldPattern}"
             ></seed-result-doc>
             <div>${this.indexFields}</div>
+            <div class="text"><seed-text-widget></seed-text-widget></div>
         </div>`;
     }
 }
