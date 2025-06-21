@@ -1,9 +1,7 @@
-import { html, css, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { LitElement, html, css, CSSResultGroup, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { Document } from "./redux/searchTypes";
-import { SeedState } from "./redux/seed-store";
 
 //import log from "./logging";
 
@@ -14,10 +12,16 @@ import { SeedState } from "./redux/seed-store";
  * filter the fields in passed in `document`.
  */
 @customElement("seed-result-doc")
-export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
+export class SeedResultDoc extends LitElement {
+    /**
+     * The document as search result.
+     */
     @property({ type: Object })
     document!: Document;
 
+    /**
+     * The document as search result with highlighened search terms.
+     */
     @property({ type: Object })
     highlight!: Document;
 
