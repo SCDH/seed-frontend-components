@@ -153,6 +153,7 @@ export class SeedSearchResult extends SearchResultElement {
                 collection="${this.collection}"
                 doc-id="${doc.id}"
                 .document="${doc}"
+                .highlight="${highlightedDoc}"
                 pattern="${fieldPattern}"
             ></seed-result-doc>
             <seed-kwic
