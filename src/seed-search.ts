@@ -8,10 +8,15 @@ import {
 import { customElement, property, state, query } from "lit/decorators.js";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 import { useQuery, watch } from "@scdh/lit-redux-consumer";
+import type { RTKQResponse } from "@scdh/lit-redux-consumer";
 
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
+import {
+    SearchQuery,
+    initialSearchQuery,
+    SearchResponse,
+} from "./redux/searchTypes";
 import {
     simpleQuery,
     resetQuery,
@@ -78,7 +83,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         changedProperties: PropertyValues<this>,
     ): void {
         super.willUpdate(changedProperties);
-        if (changedProperties.has("indexFields") && this.store) {
+        if (changedProperties.has("indexFields")) {
             // filter fields
             const pattern: RegExp = new RegExp(this.queryFieldPattern);
             var queryFields: Array<string> = this.indexFields.filter((f) =>
@@ -89,11 +94,24 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
             this.store?.dispatch(setQueryFields(queryFields));
             // ready to file queries with search terms
             this.ready = true;
-            // file initial all-query
+        }
+        if (changedProperties.has("ready") && this.ready) {
             if (this.initiateEmpty) {
+                // File initial all-query. We are reforcing a refetch
+                // because only the event of the incoming result will
+                // make the result occur in the search results view.
                 log.debug("running initial query for all documents");
-                this.store?.dispatch(
-                    searchApi.endpoints.documents.initiate(this.query),
+                // @ts-ignore, it's really a promise
+                let promise: Promise<RTKQResponse<SearchResponse>> =
+                    this.store?.dispatch(
+                        searchApi.endpoints.documents.initiate(this.query, {
+                            forceRefetch: true,
+                        }),
+                    );
+                this._queryUnsubscribers.add(
+                    "initialEmptyAll",
+                    // @ts-ignore, the promise really has the unsubscribe
+                    promise?.unsubscribe,
                 );
             }
         }
