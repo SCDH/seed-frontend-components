@@ -105,12 +105,18 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
             this.store?.dispatch(
                 setQueryFields(this.fields.concat(this.textFields)),
             );
-            // initiate query for document
+            // initiate query for document and add unsubscriber
+            let promise: Promise<RTKQResponse<SearchResponse>> = // @ts-ignore
             this.store?.dispatch(
                 searchApi.endpoints.document.initiate({
                     query: this.store.getState().searchQuery,
                     documentId: this.documentId,
                 }),
+            );
+            this._queryUnsubscribers.add(
+                "result",
+                // @ts-ignore
+                promise?.unsubscribe,
             );
         }
         // When the result comes in, also set the `document` property
