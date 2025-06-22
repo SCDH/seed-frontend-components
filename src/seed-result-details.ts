@@ -115,9 +115,9 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
             log.debug("search result was updated", this, this.result);
             if (this.result?.data) {
                 this.document = this.result.data.response.docs[0];
-                this.highlighting = this.result.data.highlighting
-                    ? [this.documentId]
-                    : this.document;
+                this.highlighting =
+                    this.result.data.highlighting?.[this.documentId] ??
+                    this.document;
                 if (this.highlighting !== undefined) {
                     const txtRegex: RegExp = new RegExp(this.textPattern);
                     const txtFld: string | undefined = Object.keys(
