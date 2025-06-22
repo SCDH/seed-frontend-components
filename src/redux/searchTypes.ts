@@ -361,6 +361,30 @@ function solrQueryPartFacets(query: SearchQuery): string {
     return rc;
 }
 
+/**
+ * Make a search query for a single document by its ID. The {@link
+ * SearchQuery} given as the first parameter is used for highlighting
+ * etc. The main search however is done by `q=id:<singleDocumentId>`.
+ *
+ * @remarks
+ * To get highlighting out of Solr, the following parameters are
+ * required:
+ *
+ * - `defType=edismax`
+ * - `q=id:IDENTIFIER`
+ * - `qf=LIST` It's enough to have just an arbitray field but `id`, e.g. `title_txt`; `id` may be in the list beside other field names.
+ * - `hl=true`
+ * - `hl.fl=*`  This way all fields with occurrences of TERM are in highlighting results
+ * - `hp.q=TERM`
+ * - `hl.fragsize=0`  to get the whole field
+ * - `hl.maxAnalyzedChars=2147483646`
+ *
+ * @example
+ * ```
+ * curl https://editions-pilot.scdh.uni-muenster.de/solr/tei-examples/select?defType=edismax&hl.fl=*&hl.fragsize=0&hl.highlightMultiTerm=false&hl.maxAnalyzedChars=2147483646&hl.q=Geschichte&hl.requireFieldMatch=false&hl.usePhraseHighLighter=false&hl=true&indent=true&q.op=OR&q=id%3Adroysen_historik_1868&qf=html_htm_de&useParams=
+ * ```
+ *
+ */
 export function solrSearchInSingleDoc(
     query: SearchQuery,
     singleDocumentId: string | false,
@@ -371,12 +395,26 @@ export function solrSearchInSingleDoc(
 
     rc += "&q=id:" + singleDocumentId;
 
+    if (
+        (query.defType == "dismax" || query.defType == "edismax") &&
+        query.qf.length > 0
+    ) {
+        rc += "&qf=";
+        const l: number = query.qf.length - 1;
+        query.qf.forEach((field: string, i: number) => {
+            rc += field;
+            if (i < l) rc += " ";
+        });
+    }
+
     if (!isAllDocumentsQuery(query)) {
         rc += "&hl=true";
 
         rc += "&hl.fl=*";
 
         // rc += "&hl.qparser=edismax";
+
+        rc += "&hl.fragsize=0";
 
         rc += "&hl.maxAnalyzedChars=" + LUCENE_MAX_ANALYZED_CHARS.toString();
 
