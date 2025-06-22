@@ -20,6 +20,10 @@ import log from "./logging";
  */
 @customElement("seed-search")
 export class SeedSearch extends StoreConsumerElement<SeedState, any> {
+    /**
+     * If true, an query without search term is filed initially, which
+     * means, that we start with all documents in the index.
+     */
     @property({ attribute: "initial-all", type: Boolean })
     initiateEmpty: boolean = false;
 
@@ -34,6 +38,12 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @query("#search")
     input!: HTMLInputElement;
 
+    /**
+     * This property determines which fields are queried. It is a
+     * regular expression which is a applied as a filter to the list
+     * of all fields in the index/schema. It also effects which fields
+     * occur in the highlighting result.
+     */
     @property({ attribute: "query-field-pattern" })
     queryFieldPattern!: string;
 
