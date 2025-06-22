@@ -46,7 +46,7 @@ export class SeedResultDoc extends LitElement {
                 <span class="name"><seed-data-label key="${field}"><seed-data-label></span
                 ><span class="field-name-value-sep">: </span>
             </span>
-            <span class="field-value">${value}</span>
+            <span class="field-value" .innerHTML="${value}"></span>
         </div>`;
     }
 
@@ -64,6 +64,9 @@ export class SeedResultDoc extends LitElement {
             .field-name-value-sep:after {
                 content: "";
                 margin-right: 0.5em;
+            }
+            em {
+                background-color: var(--seed-highlight-background, yellow);
             }
         `,
     ];
