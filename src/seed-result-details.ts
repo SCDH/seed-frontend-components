@@ -86,8 +86,12 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     private setFields(): void {
         const fldRegex: RegExp = new RegExp(this.fieldPattern);
         const txtRegex: RegExp = new RegExp(this.textPattern);
-        this.fields = this.indexFields.filter((f) => f.match(fldRegex));
-        this.textFields = this.indexFields.filter((f) => f.match(txtRegex));
+        this.fields = this.indexFields
+            .filter((f) => f.match(fldRegex))
+            .map((f) => f.trim());
+        this.textFields = this.indexFields
+            .filter((f) => f.match(txtRegex))
+            .map((f) => f.trim());
     }
 
     protected override willUpdate(

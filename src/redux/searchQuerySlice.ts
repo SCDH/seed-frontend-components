@@ -31,7 +31,8 @@ export const searchQuerySlice = createSlice({
             state: SearchQuery,
             action: PayloadAction<Array<string>>,
         ) => {
-            state.qf = action.payload;
+            // there have some spaces around fields, so we strip them
+            state.qf = action.payload.map((f) => f.trim());
         },
         setDefaultField: (
             state: SearchQuery,
