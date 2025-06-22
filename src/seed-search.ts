@@ -1,9 +1,15 @@
-import { html, css, HTMLTemplateResult, CSSResultGroup } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
-import { UnknownAction, UnsubscribeListener } from "@reduxjs/toolkit";
+import {
+    html,
+    css,
+    HTMLTemplateResult,
+    CSSResultGroup,
+    PropertyValues,
+} from "lit";
+import { customElement, property, state, query } from "lit/decorators.js";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+import { useQuery, watch } from "@scdh/lit-redux-consumer";
 
-import { SeedState, addAppListener } from "./redux/seed-store";
+import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { SearchQuery, initialSearchQuery } from "./redux/searchTypes";
 import {
@@ -11,7 +17,6 @@ import {
     resetQuery,
     setQueryFields,
 } from "./redux/searchQuerySlice";
-import { SeedStore } from "./redux/seed-store";
 
 import log from "./logging";
 
@@ -30,9 +35,8 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @property()
     collection!: string;
 
-    @property()
-    delay: number = 500;
-
+    // @state() // no need to re-render if query changes
+    @watch<SeedState, SeedSearch, SearchQuery>((s, _c) => s.searchQuery)
     query: SearchQuery = initialSearchQuery;
 
     @query("#search")
@@ -47,124 +51,72 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "query-field-pattern" })
     queryFieldPattern!: string;
 
-    @property({ attribute: "query-fields", reflect: true })
-    queryFields!: Array<string>;
-
-    override subscribeStore() {
-        log.debug("subscribing seed-search");
-        if (this.store === undefined) {
-            log.error("no store yet for", this);
-            return;
-        }
-        // Setting up query fields (qf):
-        // If the field names in the search index were already
-        // requested, take them from the redux store and set up the
-        // fields property.
-        if (
-            this.store
-                ?.getState()
-                ?.searchApi?.queries?.hasOwnProperty(this.fieldsQueryId()) ??
-            false
-        ) {
-            this.setQueryFields(this.store?.getState());
-        } else {
-            // If not already in the request, initiate a request and
-            // set up a listener, that sets the fields property.
-            log.debug("initiating fields query", this.collection);
-            this.store?.dispatch(
-                searchApi.endpoints.fields.initiate(this.collection),
-            );
-            const unsubscriber = this.store?.dispatch(
-                addAppListener({
-                    matcher: searchApi.endpoints.fields.matchFulfilled,
-                    effect: async (_action, listenerApi) => {
-                        this.setQueryFields(listenerApi.getState());
-                    },
-                }),
-            );
-            this._unsubscribers.push(
-                unsubscriber as unknown as UnsubscribeListener,
-            );
-        }
-        // updating the search query on changes of the search query
-        // slice of thestore is required to get facets etc.
-        this.store?.dispatch(
-            addAppListener({
-                predicate: (
-                    _action: UnknownAction,
-                    currentState,
-                    previousState,
-                ): boolean => {
-                    return (
-                        currentState.searchQuery !== previousState.searchQuery
-                    );
-                },
-                effect: (_action, listenerApi) => {
-                    this.query = listenerApi.getState().searchQuery;
-                },
-            }),
-        );
-        // initiate document query
-        // TODO: This needs improval. Fixed delay time may be to
-        // early. Find a working sequence!
-        if (this.initiateEmpty) {
-            log.debug("running initial query for all documents");
-            //window.addEventListener("load", this.initialAll(this.store)); // too early!
-            window.setTimeout(this.initialAll(this.store), this.delay);
-        }
-        // not working replacement
-        // if (this.initiateEmpty) {
-        //     log.debug("initiating fields query", this.collection);
-        //     this.store?.dispatch(searchApi.endpoints.fields.initiate(this.collection));
-        //     // get name of facets from store: 1) get all field names, 2) filter with this.pattern
-        //     this.store?.dispatch(addAppListener({
-        // 	matcher: searchApi.endpoints.fields.matchFulfilled,
-        // 	effect: async (_action, listenerApi) => {
-        // 	    const q: SearchQuery = listenerApi.getState().searchQuery;
-        // 	    listenerApi.dispatch(searchApi.endpoints.documents.initiate(q));
-        // 	}
-        //     }));
-        // }
-    }
-
-    /*
-     * Make the query name, which is `fields("COLLECTION")` where
-     * `COLLECTION` is the collection parameter passed to the `fields`
-     * endpoint.
+    /**
+     * Stores the list of fields in the index.
      */
-    private fieldsQueryId(): string {
-        return (
-            searchApi.endpoints.fields.name + '(\"' + this.collection + '\")'
-        );
+    @useQuery<SeedState, SeedSearch, string, Array<String>>(
+        searchApi.endpoints.fields,
+        (_s, c) => c.collection ?? "unknown",
+    )
+    indexFields!: Array<string>;
+
+    /**
+     * Only when this property is `true`, filing a query with a search
+     * term is possible. Reason: We need to set up query fields before
+     * filing the query.
+     */
+    @state()
+    ready: boolean = false;
+
+    /**
+     * Set up the query and the form as soon as the list of fields in
+     * the index is present.
+     *
+     * @inheritdoc
+     */
+    protected override willUpdate(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.willUpdate(changedProperties);
+        if (changedProperties.has("indexFields") && this.store) {
+            // filter fields
+            const pattern: RegExp = new RegExp(this.queryFieldPattern);
+            var queryFields: Array<string> = this.indexFields.filter((f) =>
+                f.match(pattern),
+            );
+            log.debug("setting query fields for details view", this);
+            // Setting up query fields (qf):
+            this.store?.dispatch(setQueryFields(queryFields));
+            // ready to file queries with search terms
+            this.ready = true;
+            // file initial all-query
+            if (this.initiateEmpty) {
+                log.debug("running initial query for all documents");
+                this.store?.dispatch(
+                    searchApi.endpoints.documents.initiate(this.query),
+                );
+            }
+        }
     }
 
-    // get name of facets from store: 1) get all field names, 2) filter with this.pattern
-    private setQueryFields(state: SeedState): void {
-        const pattern: RegExp = new RegExp(this.queryFieldPattern);
-        const flds: Array<string> =
-            (state.searchApi?.queries?.[this.fieldsQueryId()]
-                ?.data as Array<string>) ?? [];
-        // store facet fields as local state
-        this.queryFields = flds.filter((f) => f.match(pattern));
-        log.debug(
-            "search query fields: selecting matching fields from",
-            flds,
-            "based on regex",
-            this.queryFieldPattern,
-            ": ",
-            this.queryFields,
-        );
-        // add facet fields to search query
-        this.store?.dispatch(setQueryFields(this.queryFields));
+    /**
+     * @inheritdoc
+     */
+    protected override render(): HTMLTemplateResult {
+        return html`
+            <div class="search-form-wrapper">
+                <input id="search" name="search" type="text" placeholder="search"></input/>
+                ${this.renderSubmit()}
+            </div>`;
     }
 
-    render(): HTMLTemplateResult {
-        return html`<host>
-<div class="search-form-wrapper">
-<input id="search" name="search" type="text" placeholder="search"></input/>
-<button @click="${this.search}">🔍</button>
-</div>
-</host>`;
+    /**
+     * Have a submit button if the form is ready.
+     */
+    protected renderSubmit(): HTMLTemplateResult {
+        return this.ready
+            ? html`<button @click="${this.search}">🔍</button>`
+            : html``;
     }
 
     static styles: CSSResultGroup = [
@@ -186,26 +138,21 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         `,
     ];
 
-    search(): void {
+    /**
+     * Callback called from submit button.
+     */
+    protected search(): void {
         log.debug("Search button hit!");
+        // set or reset the search term
         if (this.input?.value === "" || this.input?.value === undefined) {
             this.store?.dispatch(resetQuery());
         } else {
             this.store?.dispatch(simpleQuery(this.input.value));
         }
+        // file the query
         this.store?.dispatch(
             searchApi.endpoints.documents.initiate(this.query),
         );
-    }
-
-    initialAll(store: SeedStore | undefined) {
-        return () => {
-            // We have to get the current query from the store,
-            // because it contains the facet fields.
-            const query: SearchQuery =
-                store?.getState()?.searchQuery ?? initialSearchQuery;
-            store?.dispatch(searchApi.endpoints.documents.initiate(query));
-        };
     }
 }
 
