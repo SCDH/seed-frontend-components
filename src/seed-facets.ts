@@ -73,14 +73,35 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
      * @inheritdoc
      */
     protected override render() {
-        return html`<div class="facets">
-            <div class="title">
+        if (
+            this._rtkqErrors.hasOwnProperty("indexFields") &&
+            this._rtkqErrors["indexFields"]?.error !== undefined
+        ) {
+            const error = this._rtkqErrors.indexFields.error;
+            console.error(error);
+            let code: string | number | undefined;
+            let message: string | undefined;
+            if (error.hasOwnProperty("status")) {
+                // @ts-ignore
+                code = error["status"] ?? "";
+                // @ts-ignore
+                message = error?.error ?? "unknown error";
+            } else {
+                // @ts-ignore
+                code = error["code"] ?? "";
+                // @ts-ignore
+                message = error?.message ?? "unknown error";
+            }
+            return html`<ds-error code="${code}">${message}</ds-error>`;
+        }
+        return html`<ds-facets-group class="facets">
+            <div slot="title" class="title">
                 <slot name="title">Facets ${this.pattern}</slot>
             </div>
-            <div class="container">
+            <div slot="main" class="container">
                 ${this.fields.map((f) => this.renderFacet(f))}
             </div>
-        </div>`;
+        </ds-facets-group>`;
     }
 
     /**
