@@ -57,6 +57,7 @@ export const searchApi = createApi({
                 // https://redux-toolkit.js.org/rtk-query/api/fetchBaseQuery#parsing-a-response
                 responseHandler: (response) => response.text(),
             }),
+            serializeQueryArgs: serializeFieldsQuery,
             transformResponse: (
                 response: String,
                 _meta: FetchBaseQueryMeta | undefined,
@@ -113,6 +114,14 @@ function serializeFacetTerms(args: {
         endpointDefinition: args.endpointDefinition,
         endpointName: args.endpointName,
     });
+}
+
+function serializeFieldsQuery(args: {
+    queryArgs: SearchQuery;
+    endpointDefinition: any;
+    endpointName: string;
+}) {
+    return `${args.queryArgs.apiBaseUrl}/${args.endpointName}('${args.queryArgs.collection}')`;
 }
 
 //export type SearchState = typeof searchApi.reducer
