@@ -1,9 +1,9 @@
 //import { LitElement } from "lit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { addFilter, removeFilter } from "./redux/searchQuerySlice";
+import { addFilter, removeFilter, resetQuery } from "./redux/searchQuerySlice";
 import { SearchQuery, solrSearchQuery } from "./redux/searchTypes";
 
 import log from "./logging";
@@ -96,6 +96,18 @@ export abstract class SearchResultElement extends StoreConsumerElement<
                     ),
             }),
         );
+        // search reset
+        this.store?.dispatch(
+            addAppListener({
+                actionCreator: resetQuery,
+                effect: (_action, listenerApi) => {
+                    this.updateEffect(
+                        searchApi.endpoints.documents.name,
+                        listenerApi.getState(),
+                    );
+                },
+            }),
+        );
         // at the end:
         // call update effect, if the query was already processed
         const q: SearchQuery | undefined = this.store?.getState().searchQuery;
@@ -103,7 +115,7 @@ export abstract class SearchResultElement extends StoreConsumerElement<
             const queryId: string =
                 searchApi.endpoints.document.name +
                 '("' +
-                solrSearchQuery(q).replaceAll('"', '\\"') +
+                solrSearchQuery(q) +
                 '")';
             if (
                 this.store?.getState().searchApi.queries.hasOwnProperty(queryId)

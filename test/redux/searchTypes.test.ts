@@ -3,19 +3,30 @@ import { expect, test } from "vitest";
 import {
     initialSearchQuery,
     solrSearchQuery,
+    solrSearchInSingleDoc,
+    isAllDocumentsQuery,
 } from "../../src/redux/searchTypes";
 
+import type { SearchQuery } from "../../src/redux/searchTypes";
+
+function dcq(q: SearchQuery): SearchQuery {
+    return JSON.parse(JSON.stringify(q));
+}
+
 test("should return default query", () => {
-    var qs = solrSearchQuery(initialSearchQuery);
-    expect(qs).toContain("?q=*%3A*");
+    var qs = solrSearchQuery(dcq(initialSearchQuery));
+    expect(qs).toContain("?defType=edismax");
+    expect(qs).toContain("&q=*");
     expect(qs).toContain("&q.op=OR");
     expect(qs).toContain("&facet=true");
     expect(qs).toContain("&params=");
-    expect(qs).toEqual("?q=*%3A*&q.op=OR&fl=id,&facet=true&params=");
+    expect(qs).toEqual(
+        "?defType=edismax&q=*&q.op=OR&fl=id,&facet=true&params=",
+    );
 });
 
 test("should have filter query parameter from fq property", () => {
-    var query = initialSearchQuery;
+    var query = dcq(initialSearchQuery);
     query.fq = "pi:3.14";
     var qs = solrSearchQuery(query);
     expect(qs).toContain("&fq=");
@@ -23,43 +34,43 @@ test("should have filter query parameter from fq property", () => {
 });
 
 test("should have filter query parameter from _fq_facets parameter", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major", "Sergant"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
-    expect(qs).toContain(" OR ");
-    expect(qs).toContain('"Major"');
-    expect(qs).toContain('"Sergant"');
+    expect(qs).toContain("OR");
+    expect(qs).toContain("Major");
+    expect(qs).toContain("Sergant");
 });
 
 test("should have filter query parameter from _fq_facets parameter with single term", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
     expect(qs).not.toContain(" OR ");
-    expect(qs).toContain('"Major"');
-    expect(qs).toContain('&fq=persons:("Major")');
+    expect(qs).toContain("Major");
+    expect(qs).toContain("&fq=persons:(");
 });
 
 test("should have filter query parameter from _fq_facets parameter with multiple facets", () => {
-    var query2 = initialSearchQuery;
+    var query2 = dcq(initialSearchQuery);
     query2._fq_faceted = { persons: ["Major"], places: ["Kairo"] };
     var qs = solrSearchQuery(query2);
     expect(qs).toContain("&fq=");
     expect(qs).toContain("&fq=persons:(");
     expect(qs).not.toContain(" OR ");
-    expect(qs).toContain('"Major"');
-    expect(qs).toContain('&fq=persons:("Major")');
+    expect(qs).toContain("Major");
+    expect(qs).toContain("&fq=persons:(");
     expect(qs).toContain("&fq=places:(");
-    expect(qs).toContain('"Kairo"');
-    expect(qs).toContain('&fq=places:("Kairo")');
+    expect(qs).toContain("Kairo");
+    expect(qs).toContain("&fq=places:(");
 });
 
 test("should have filter query parameter from _fq_id", () => {
-    var query3 = initialSearchQuery;
+    var query3 = dcq(initialSearchQuery);
     var qs3 = solrSearchQuery(query3);
     expect(qs3).not.toContain("fq=id:dial911");
     query3._fq_id = "dial911";
@@ -75,4 +86,73 @@ test("should have filter query parameter from _fq_id", () => {
     // facets should be active again
     expect(qs3).not.toContain("fq=id:dial911");
     expect(qs3).toContain("Major");
+});
+
+test("should change query parser parameter defType", () => {
+    var query4 = dcq(initialSearchQuery);
+    var qs4 = solrSearchQuery(query4);
+    expect(qs4).toContain("?defType=edismax");
+    query4.defType = "dismax";
+    qs4 = solrSearchQuery(query4);
+    expect(qs4).toContain("?defType=dismax");
+});
+
+test("should have default field or query fields depending on parameter defType", () => {
+    var query5 = dcq(initialSearchQuery);
+    query5.defType = undefined; // why needed? initialSearchQuery set by test before?
+    var qs5 = solrSearchQuery(query5);
+    expect(qs5).toContain("?defType=lucene");
+    query5.defType = "dismax";
+    qs5 = solrSearchQuery(query5);
+    expect(qs5).toContain("?defType=dismax");
+    expect(qs5).not.toContain("&df=");
+    expect(qs5).not.toContain("&qf=");
+    query5.df = "about_hts_de";
+    query5.qf = ["about_hts_de", "about_hts_en^3.1515"];
+    qs5 = solrSearchQuery(query5);
+    //expect(qs5).toContain("&qf=\"about_hts_de about_hts_en^3.1515 \"");
+    expect(qs5).not.toContain("&df=");
+    query5.defType = "lucene";
+    qs5 = solrSearchQuery(query5);
+    //expect(qs5).not.toContain("&qf=");
+    expect(qs5).toContain("&df=about_hts_de");
+});
+
+test("should switch highlighting", () => {
+    var query6 = dcq(initialSearchQuery);
+    query6.hl_snippets = 10;
+    var qs6 = solrSearchQuery(query6);
+    expect(qs6).not.toContain("&hl=");
+    expect(qs6).not.toContain("&hl.snippets=");
+    query6.hl = true;
+    qs6 = solrSearchQuery(query6);
+    expect(qs6).toContain("&hl=true");
+    expect(qs6).toContain("&hl.snippets=10");
+});
+
+test("should be an all documents query first", () => {
+    var qinit = dcq(initialSearchQuery);
+    var qall = isAllDocumentsQuery(qinit);
+    expect(qall).toBeTruthy();
+    qinit.q = "nix";
+    expect(isAllDocumentsQuery(qinit)).not.toBeTruthy();
+});
+
+test("should not have highlighting query", () => {
+    var q = dcq(initialSearchQuery);
+    var qs = solrSearchInSingleDoc(q, "d1");
+    expect(qs).toContain("&q=id:d1&");
+    expect(qs).not.toContain("&hl=true&");
+    expect(qs).not.toContain("&hl.fl=*&");
+    expect(qs).not.toContain("&hl.maxAnalyzedChars=21");
+});
+
+test("should have highlighting query", () => {
+    var q = dcq(initialSearchQuery);
+    q.q = "Geschichte";
+    var qs = solrSearchInSingleDoc(q, "d1");
+    expect(qs).toContain("&q=id:d1&");
+    expect(qs).toContain("&hl=true&");
+    expect(qs).toContain("&hl.fl=*&");
+    expect(qs).toContain("&hl.maxAnalyzedChars=21");
 });

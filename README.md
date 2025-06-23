@@ -100,6 +100,7 @@ Run tests:
 ```shell
 npm run test
 ```
+
 #### Example Web Pages
 
 Running the [development server](#development) will bring up several
@@ -116,6 +117,19 @@ pages with usage examples. They are contained in the
 #### API Docs
 
 [https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/](https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-frontend-components/docs/)
+
+#### Installing all `@scdh/...` development versions from zivgitlab
+
+```shell
+export API_READ_TOKEN=<your private access token>
+```
+
+```shell
+rm .npmrc
+npm config set @scdh:registry=https://zivgitlab.uni-muenster.de/api/v4/groups/20204/-/packages/npm/
+npm config set -- //zivgitlab.uni-muenster.de/api/v4/groups/20204/-/packages/npm/:_authToken=$API_READ_TOKEN
+```
+
 
 
 ## Design Principles / Contributing

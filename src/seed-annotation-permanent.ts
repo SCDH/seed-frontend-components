@@ -1,10 +1,10 @@
 import { html, CSSResultGroup, HTMLTemplateResult, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+import { changed } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { Annotation } from "./redux/annotationsSlice";
-import { changed } from "./store-consumer-decorators";
 
 /*
  * The {SeedAnnotationPermanent} object is Lit web component for

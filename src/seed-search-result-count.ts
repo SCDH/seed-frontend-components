@@ -23,10 +23,7 @@ export class SeedSearchResultCount extends SearchResultElement {
 
     override updateEffect(endpoint: string, s: SeedState): void {
         const queryId: string =
-            endpoint +
-            '("' +
-            solrSearchQuery(s.searchQuery).replaceAll('"', '\\"') +
-            '")';
+            endpoint + '("' + solrSearchQuery(s.searchQuery) + '")';
         log.debug(
             "updating search result",
             queryId,

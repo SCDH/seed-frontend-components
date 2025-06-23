@@ -24,21 +24,10 @@
   <body>
     <seed-app>
       <seed-config
-	search-base-url="/solr"
-	search-collection="tei4"
 	data-labels="/examples/data-labels.json"></seed-config>
       <div class="search">
-	<div class="facets">
-	  <seed-facets collection="tei4" pattern="^about.*_ss$">
-	    <span slot="title">Speaking of</span>
-	  </seed-facets>
-	</div>
-	<div>
-	  <seed-search collection="tei4" initial-all="true" query-field-pattern="html_hts_[a-z]+"></seed-search>
-	  <seed-search-filters></seed-search-filters>
-	  <seed-search-result collection="tei4" highlighting="true" highlighting-snippets="5"></seed-search-result>
-	  <div>
-	</div>
+	<seed-result-details collection="tei4" doc-id="blumenbach_naturgeschichte_1782"></seed-result-details>
+      </div>
     </seed-app>
   </body>
 

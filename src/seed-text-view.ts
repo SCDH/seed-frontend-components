@@ -2,8 +2,9 @@ import { html, css, CSSResultGroup, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { UnsubscribeListener, UnknownAction } from "@reduxjs/toolkit";
 import { provide } from "@lit/context";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+import { changed } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { seedTextViewContext } from "./seed-context";
 import { addAppListener, SeedState } from "./redux/seed-store";
 import { initText, setText, TextState } from "./redux/textsSlice";
@@ -25,7 +26,6 @@ import { CSSDefinition } from "./redux/cssTypes";
 import { scrolled, syncOthers } from "./redux/synopsisSlice";
 import { scrolledTextViewThunk } from "./redux/synopsisActions";
 import { setScrollTarget } from "./redux/synopsisMiddleware";
-import { changed } from "./store-consumer-decorators";
 
 import log from "./logging";
 

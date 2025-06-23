@@ -1,17 +1,22 @@
 import { HTMLTemplateResult, html, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { provide } from "@lit/context";
+import {
+    StoreConsumerElement,
+    useQuery,
+    watch,
+} from "@scdh/lit-redux-consumer";
+import type { RTKQResponse } from "@scdh/lit-redux-consumer";
 
+import type { SeedText } from "./types";
+import { seedTextContext } from "./seed-context";
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { StoreConsumerElement } from "./store-consumer-mixin";
-import { matched } from "./store-consumer-decorators";
-import { setCollection } from "./redux/searchQuerySlice";
-import {
+import { setQueryFields } from "./redux/searchQuerySlice";
+import type {
     SearchResponse,
     Document,
     SearchQuery,
-    solrSearchQuery,
-    initialSearchQuery,
 } from "./redux/searchTypes";
 import log from "./logging";
 
@@ -38,74 +43,152 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "doc-id" })
     documentId!: string;
 
-    @matched<SeedState, SeedResultDetails, SearchResponse | undefined>(
-        searchApi.endpoints.document.matchFulfilled,
-        (s, _c) => {
-            const q: SearchQuery = s.searchQuery;
-            const queryId: string =
-                searchApi.endpoints.document.name +
-                '("' +
-                solrSearchQuery(q).replaceAll('"', '\\"') +
-                '")';
-            return s.searchApi.queries[queryId]?.data as
-                | SearchResponse
-                | undefined;
+    @property({ attribute: "field-pattern" })
+    fieldPattern: string = "^(meta|author|title)";
+
+    @state()
+    fields!: Array<string>;
+
+    @property({ attribute: "text-pattern" })
+    textPattern: string = "^(html_htm_)";
+
+    @state()
+    textFields!: Array<string>;
+
+    @useQuery<SeedState, SeedResultDetails, SearchQuery, Array<String>>(
+        searchApi.endpoints.fields,
+        (s, _c) => s.searchQuery,
+    )
+    indexFields!: Array<string>;
+
+    @state()
+    @watch<SeedState, SeedResultDetails, RTKQResponse<SearchResponse>>(
+        (s, c) =>
+            searchApi.endpoints.document.select({
+                query: s.searchQuery,
+                documentId: c.documentId ?? "?",
+            })(s),
+        {
+            precondition: (s, c): boolean =>
+                c.documentId != undefined &&
+                s.searchQuery != undefined &&
+                c.indexFields != undefined,
         },
     )
-    result!: SearchResponse;
+    result!: RTKQResponse<SearchResponse>;
 
     @state()
     document!: Document;
 
-    // override disconnectedCallback(): void {
-    //     // When the element is removed from the dom, the single
-    //     // document filter must be removed from the search query slice.
-    //     this.store?.dispatch(removeSingleDocFilter());
-    //     super.disconnectedCallback();
-    // }
+    @state()
+    highlighting!: Document | undefined;
 
-    /*
-     * Initiates a request for the document given by ID in the `documentId` property.
-     */
-    protected query() {
-        log.debug("initiate request for document", this.documentId);
-        // set up query
-        this.store?.dispatch(setCollection(this.collection));
-        //this.store?.dispatch(addSingleDocFilter(this.documentId));
-        // query at the time of subscription
-        const qry: SearchQuery =
-            this.store?.getState()?.searchQuery ?? initialSearchQuery;
-        // initiate this query
-        this.store?.dispatch(
-            searchApi.endpoints.document.initiate({
-                query: qry,
-                documentId: this.documentId,
-            }),
-        );
+    @state()
+    @provide({ context: seedTextContext })
+    text!: SeedText;
+
+    private setFields(): void {
+        const fldRegex: RegExp = new RegExp(this.fieldPattern);
+        const txtRegex: RegExp = new RegExp(this.textPattern);
+        this.fields = this.indexFields
+            .filter((f) => f.match(fldRegex))
+            .map((f) => f.trim());
+        this.textFields = this.indexFields
+            .filter((f) => f.match(txtRegex))
+            .map((f) => f.trim());
     }
 
     protected override willUpdate(
         changedProperties: PropertyValues<this>,
     ): void {
         super.willUpdate(changedProperties);
+        if (changedProperties.has("indexFields") && this.store) {
+            this.setFields();
+            log.debug("setting query fields for details view", this);
+            // set qf for next search query
+            this.store?.dispatch(
+                setQueryFields(this.fields.concat(this.textFields)),
+            );
+            // initiate query for document and add unsubscriber
+            let promise: Promise<RTKQResponse<SearchResponse>> = // @ts-ignore
+                this.store?.dispatch(
+                    searchApi.endpoints.document.initiate({
+                        query: this.store.getState().searchQuery,
+                        documentId: this.documentId,
+                    }),
+                );
+            this._queryUnsubscribers.add(
+                "result",
+                // @ts-ignore
+                promise?.unsubscribe,
+            );
+        }
         // When the result comes in, also set the `document` property
         // from the result.
         if (changedProperties.has("result")) {
-            this.document = this.result.response.docs[0];
-        }
-        // When the documentId property is updated, a new request is
-        // send.
-        if (changedProperties.has("documentId")) {
-            this.query();
+            log.debug("search result was updated", this, this.result);
+            if (this.result?.data) {
+                this.document = this.result.data.response.docs[0];
+                this.highlighting =
+                    this.result.data.highlighting?.[this.documentId] ??
+                    this.document;
+                if (this.highlighting !== undefined) {
+                    const txtRegex: RegExp = new RegExp(this.textPattern);
+                    const txtFld: string | undefined = Object.keys(
+                        this.highlighting,
+                    )
+                        .filter((f) => f.match(txtRegex))
+                        .find((x) => x !== undefined);
+                    if (txtFld !== undefined) {
+                        this.text = {
+                            text: this.highlighting[txtFld],
+                            id: this.documentId,
+                        };
+                    }
+                }
+            }
         }
     }
 
     protected override render(): HTMLTemplateResult {
-        if (this.result?.response?.numFound != 1) {
-            return html`Getting document with ID ${this.documentId} ...`;
+        log.debug("rendering seed-result-details", this);
+        if (this.result?.error !== undefined) {
+            log.error(this.result.error);
+            let code: string | number | undefined;
+            let message: string | undefined;
+            if (this.result.error.hasOwnProperty("status")) {
+                // @ts-ignore
+                code = this.result.error["status"] ?? "";
+                // @ts-ignore
+                message = this.result.error?.error ?? "unknown error";
+            } else {
+                // @ts-ignore
+                code = this.result.error["code"] ?? "";
+                // @ts-ignore
+                message = this.result.error?.message ?? "unknown error";
+            }
+            return html`<ds-error .code="${code}">${message}</ds-error>`;
+        }
+        if (this.result?.data == undefined) {
+            return html`<ds-waiting
+                status="${this.result?.status ?? "uninitialized"}"
+                >Getting document with ID ${this.documentId}</ds-waiting
+            >`;
         }
         return html`<div>
-            ${this.result?.response?.numFound ?? "failed"} ${this.document.id}
+            <!--div>
+                ${this.result.data.response.numFound ?? "failed"}
+                ${this.document.id}
+            </div-->
+            <seed-result-doc
+                collection="${this.collection}"
+                doc-id="${this.documentId}"
+                .document="${this.document}"
+                .highlight="${this.highlighting}"
+                pattern="${this.fieldPattern}"
+            ></seed-result-doc>
+            <!--div>${this.indexFields}</div-->
+            <div class="text"><seed-text-widget></seed-text-widget></div>
         </div>`;
     }
 }

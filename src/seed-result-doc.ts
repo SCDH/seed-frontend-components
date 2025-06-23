@@ -1,9 +1,7 @@
-import { html, css, CSSResultGroup, HTMLTemplateResult } from "lit";
+import { LitElement, html, css, CSSResultGroup, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { Document } from "./redux/searchTypes";
-import { SeedState } from "./redux/seed-store";
 
 //import log from "./logging";
 
@@ -14,9 +12,18 @@ import { SeedState } from "./redux/seed-store";
  * filter the fields in passed in `document`.
  */
 @customElement("seed-result-doc")
-export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
+export class SeedResultDoc extends LitElement {
+    /**
+     * The document as search result.
+     */
     @property({ type: Object })
     document!: Document;
+
+    /**
+     * The document as search result with highlighened search terms.
+     */
+    @property({ type: Object })
+    highlight!: Document;
 
     @property()
     pattern: string = "^(meta|author|title)";
@@ -27,17 +34,19 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
             (f) => f.match(regex),
         );
         return html`<div class="fields">
-            ${fields.map((f) => this.renderField(f, this.document))}
+            ${fields.map((f) =>
+                this.renderField(f, this.highlight?.[f] ?? this.document[f]),
+            )}
         </div>`;
     }
 
-    renderField(field: string, document: Document): HTMLTemplateResult {
+    renderField(field: string, value: string): HTMLTemplateResult {
         return html`<div class="field">
             <span class="field-name">
                 <span class="name"><seed-data-label key="${field}"><seed-data-label></span
                 ><span class="field-name-value-sep">: </span>
             </span>
-            <span class="field-value">${document[field]}</span>
+            <span class="field-value" .innerHTML="${value}"></span>
         </div>`;
     }
 
@@ -55,6 +64,9 @@ export class SeedResultDoc extends StoreConsumerElement<SeedState, any> {
             .field-name-value-sep:after {
                 content: "";
                 margin-right: 0.5em;
+            }
+            em {
+                background-color: var(--seed-highlight-background, yellow);
             }
         `,
     ];

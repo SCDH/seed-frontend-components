@@ -1,7 +1,7 @@
 import { HTMLTemplateResult, html, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState } from "./redux/seed-store";
 import { DataLabel } from "./redux/dataLabelSlice";
 

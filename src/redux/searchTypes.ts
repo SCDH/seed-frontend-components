@@ -1,3 +1,5 @@
+const LUCENE_MAX_ANALYZED_CHARS: number = 2147483646;
+
 /*
  * The type for a Solr response data object returned on `/solr/COLLECTION/select?...`
  */
@@ -7,6 +9,8 @@ export interface SearchResponse {
     response: Response;
 
     facet_counts: undefined | FacetCounts;
+
+    highlighting: undefined | Highlighting;
 }
 
 /*
@@ -94,6 +98,10 @@ export function toTermCountTuples(
     return rc;
 }
 
+export interface Highlighting {
+    [id: string]: Document;
+}
+
 export const initialResponseHeader = {
     zkConnected: false,
     status: 0,
@@ -112,31 +120,42 @@ export const initialSearchResponse = {
     responseHeader: initialResponseHeader,
     response: initialResponse,
     facet_counts: undefined,
+    highlighting: undefined,
 };
 
-/*
+/**
  * The parameters of a search query are stored in an extra slice.
  *
  * TODO: same as Parameters + collection
  */
 export interface SearchQuery {
-    /*
+    /**
+     * The base URL of the search API.
+     */
+    apiBaseUrl: string;
+
+    /**
      * The collection to search in. Note: If we want a search that can
      * search multiple collections, we should consider making this a
      * property name!
      */
     collection: string;
 
+    /**
+     * Selects the query parser.
+     */
+    defType: string;
+
     q: string;
 
     fq: string | undefined;
 
-    /*
+    /**
      * Use for setting up facet filtering via the fq parameter.
      */
     _fq_faceted: FacetFilterQuery | undefined;
 
-    /*
+    /**
      * Use for restricting result to a single document!
      */
     _fq_id: string | undefined;
@@ -145,14 +164,24 @@ export interface SearchQuery {
 
     fl: Array<string>;
 
-    indent: boolean;
+    /**
+     * Specifies a default searchable field. Used by startard (lucene) and eDisMax parser
+     */
+    df: string | undefined;
 
     /*
+     * Query fields. Used by DisMax and eDisMax query parser.
+     */
+    qf: Array<string>;
+
+    indent: boolean;
+
+    /**
      * If set to `true`, this parameter enables facet counts in the query response.
      */
     facet: boolean;
 
-    /*
+    /**
      * Identifies a field that should be treated as a facet. This
      * parameter can be specified multiple times in a query to select
      * multiple facet fields.
@@ -160,6 +189,26 @@ export interface SearchQuery {
     facet_fields: Array<string>;
 
     params: string;
+
+    /**
+     * Use this parameter to enable or disable highlighting. If you
+     * want to use highlighting, you must set this to tru.
+     * See [Solr docs](https://solr.apache.org/guide/solr/latest/query-guide/highlighting.html)!
+     */
+    hl: boolean;
+
+    /**
+     * Specifies a list of fields to highlight, either comma- or
+     * space-delimited.
+     */
+    hl_fl: Array<string>;
+
+    /**
+     * Specifies maximum number of highlighted snippets to generate
+     * per field. It is possible for any number of snippets from zero
+     * to this value to be generated.
+     */
+    hl_snippets: number;
 }
 
 export interface FacetFilterQuery {
@@ -167,9 +216,13 @@ export interface FacetFilterQuery {
 }
 
 export const initialSearchQuery: SearchQuery = {
-    collection: "tei4", // default collection
-    q: "*%3A*", // match all
+    apiBaseUrl: "/solr",
+    collection: "tei-examples", // default collection
+    defType: "edismax",
+    q: "*", // match all in edismax
     fq: undefined,
+    df: undefined,
+    qf: [],
     _fq_id: undefined,
     _fq_faceted: {} as FacetFilterQuery,
     q_op: "OR",
@@ -178,7 +231,22 @@ export const initialSearchQuery: SearchQuery = {
     facet: true,
     facet_fields: [],
     params: "",
+    hl: false,
+    hl_fl: [],
+    hl_snippets: 1,
 };
+
+/**
+ * Predicate function that returns true, if the given query is an all
+ * documents query.
+ */
+export function isAllDocumentsQuery(query: SearchQuery) {
+    if (query.defType == "dismax" || query.defType == "edismax") {
+        return query.q == "*";
+    } else {
+        return query.q == "*:*";
+    }
+}
 
 /*
  * Make a Solr search query from the given `SearchQuery` object.
@@ -201,9 +269,33 @@ export function solrSearchQuery(
 ): string {
     var rc: string = "";
 
-    rc += "?q=" + query.q;
+    rc += "?defType=" + (query?.defType ?? "lucene");
 
-    rc += "&q.op=" + query.q_op;
+    rc += "&q=" + query.q;
+
+    if (
+        query.defType == "lucene" ||
+        !query.defType ||
+        query.defType == "edismax"
+    ) {
+        rc += "&q.op=" + query.q_op;
+    }
+
+    if (
+        (query.defType == "dismax" || query.defType == "edismax") &&
+        query.qf.length > 0
+    ) {
+        rc += "&qf=";
+        const l: number = query.qf.length - 1;
+        query.qf.forEach((field: string, i: number) => {
+            rc += field;
+            if (i < l) rc += " ";
+        });
+    }
+
+    if (query.defType == "dismax") {
+        rc += "&q.alt=*";
+    }
 
     // Apply facet filters and select fields if and only if the query
     // is not for a single document. Reason: We want all fields if we
@@ -219,6 +311,12 @@ export function solrSearchQuery(
         if (query.fl.length > 0) {
             rc += "&fl=";
             query.fl.forEach((f) => (rc += f + ","));
+        }
+
+        if (!query.defType || query.defType == "lucene") {
+            if (query.df !== undefined) {
+                rc += "&df=" + query.df;
+            }
         }
 
         if (query.fq !== undefined) {
@@ -244,15 +342,94 @@ export function solrSearchQuery(
             }
         }
 
-        if (query.facet || facetSetup) {
-            rc += "&facet=true";
-            query.facet_fields.forEach((f) => {
-                rc += "&facet.field=" + f;
-            });
+        rc += solrQueryPartFacets(query);
+
+        // highlighting
+        if (query.hl) {
+            rc += "&hl=true";
+            rc += "&hl.snippets=" + query.hl_snippets;
         }
     }
 
     rc += "&params=" + query.params;
+
+    return encodeURI(rc);
+}
+
+function solrQueryPartFacets(query: SearchQuery): string {
+    var rc = "";
+    if (query.facet) {
+        rc += "&facet=true";
+        query.facet_fields.forEach((f) => {
+            rc += "&facet.field=" + f;
+        });
+    }
+    return rc;
+}
+
+/**
+ * Make a search query for a single document by its ID. The {@link
+ * SearchQuery} given as the first parameter is used for highlighting
+ * etc. The main search however is done by `q=id:<singleDocumentId>`.
+ *
+ * @remarks
+ * To get highlighting out of Solr, the following parameters are
+ * required:
+ *
+ * - `defType=edismax`
+ * - `q=id:IDENTIFIER`
+ * - `qf=LIST` It's enough to have just an arbitray field but `id`, e.g. `title_txt`; `id` may be in the list beside other field names.
+ * - `hl=true`
+ * - `hl.fl=*`  This way all fields with occurrences of TERM are in highlighting results
+ * - `hp.q=TERM`
+ * - `hl.fragsize=0`  to get the whole field
+ * - `hl.maxAnalyzedChars=2147483646`
+ *
+ * @example
+ * ```
+ * curl https://editions-pilot.scdh.uni-muenster.de/solr/tei-examples/select?defType=edismax&hl.fl=*&hl.fragsize=0&hl.highlightMultiTerm=false&hl.maxAnalyzedChars=2147483646&hl.q=Geschichte&hl.requireFieldMatch=false&hl.usePhraseHighLighter=false&hl=true&indent=true&q.op=OR&q=id%3Adroysen_historik_1868&qf=html_htm_de&useParams=
+ * ```
+ *
+ */
+export function solrSearchInSingleDoc(
+    query: SearchQuery,
+    singleDocumentId: string | false,
+): string {
+    var rc: string = "";
+
+    rc += "?defType=" + (query?.defType ?? "lucene");
+
+    rc += "&q=id:" + singleDocumentId;
+
+    if (
+        (query.defType == "dismax" || query.defType == "edismax") &&
+        query.qf.length > 0
+    ) {
+        rc += "&qf=";
+        const l: number = query.qf.length - 1;
+        query.qf.forEach((field: string, i: number) => {
+            rc += field;
+            if (i < l) rc += " ";
+        });
+    }
+
+    if (!isAllDocumentsQuery(query)) {
+        rc += "&hl=true";
+
+        rc += "&hl.fl=*";
+
+        // rc += "&hl.qparser=edismax";
+
+        rc += "&hl.fragsize=0";
+
+        rc += "&hl.maxAnalyzedChars=" + LUCENE_MAX_ANALYZED_CHARS.toString();
+
+        rc += "&hl.q=" + query.q;
+    }
+
+    rc += solrQueryPartFacets(query);
+
+    rc += "&params=";
 
     return rc;
 }

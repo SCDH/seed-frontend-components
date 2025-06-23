@@ -5,8 +5,14 @@ export const searchQuerySlice = createSlice({
     name: "searchQuery",
     initialState: initialSearchQuery,
     reducers: {
+        setApiBaseUrl: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.apiBaseUrl = action.payload;
+        },
         setCollection: (state: SearchQuery, action: PayloadAction<string>) => {
             state.collection = action.payload;
+        },
+        setDefType: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.defType = action.payload;
         },
         addFl: (state: SearchQuery, action: PayloadAction<Array<string>>) => {
             state.fl = state.fl.concat(action.payload);
@@ -17,6 +23,31 @@ export const searchQuerySlice = createSlice({
             } else {
                 state.fl = [...action.payload, "id"];
             }
+        },
+        simpleQuery: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.q = action.payload;
+        },
+        resetQuery: (state: SearchQuery, _action: PayloadAction<void>) => {
+            state.q = initialSearchQuery.q;
+        },
+        setQueryFields: (
+            state: SearchQuery,
+            action: PayloadAction<Array<string>>,
+        ) => {
+            // there have some spaces around fields, so we strip them
+            state.qf = action.payload.map((f) => f.trim());
+        },
+        setDefaultField: (
+            state: SearchQuery,
+            action: PayloadAction<string>,
+        ) => {
+            state.df = action.payload;
+        },
+        resetDefaultField: (
+            state: SearchQuery,
+            _action: PayloadAction<void>,
+        ) => {
+            state.df = undefined;
         },
         addFacetFields: (
             state: SearchQuery,
@@ -75,18 +106,39 @@ export const searchQuerySlice = createSlice({
         ) => {
             state._fq_id = undefined;
         },
+        setHighlighting: (
+            state: SearchQuery,
+            action: PayloadAction<boolean>,
+        ) => {
+            state.hl = action.payload;
+        },
+        setHighlightingSnippets: (
+            state: SearchQuery,
+            action: PayloadAction<number>,
+        ) => {
+            state.hl_snippets = action.payload;
+        },
     },
 });
 
 export const {
+    setApiBaseUrl,
     setCollection,
+    setDefType,
     addFl,
     setFl,
+    simpleQuery,
+    resetQuery,
+    setQueryFields,
+    setDefaultField,
+    resetDefaultField,
     addFacetFields,
     addFilter,
     removeFilter,
     addSingleDocFilter,
     removeSingleDocFilter,
+    setHighlighting,
+    setHighlightingSnippets,
 } = searchQuerySlice.actions;
 
 export default searchQuerySlice.reducer;

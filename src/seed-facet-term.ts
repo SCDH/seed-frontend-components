@@ -8,8 +8,8 @@ import {
 } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UnsubscribeListener } from "@reduxjs/toolkit";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { addFilter, removeFilter } from "./redux/searchQuerySlice";
@@ -52,7 +52,7 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
             addAppListener({
                 actionCreator: addFilter,
                 effect: async (action, _listenerApi) => {
-                    log.debug("facet term added", action.payload);
+                    // log.debug("facet term added", action.payload);
                     if (
                         action.payload.field == this.field &&
                         action.payload.term == this.term
@@ -103,13 +103,17 @@ export class SeedFacetTerm extends StoreConsumerElement<SeedState, any> {
     }
 
     render(): HTMLTemplateResult {
-        return html`<div class="term">
-	    <input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
-	    <label for="${this.inputId()}">
-		<seed-data-label class="label-content" key="${this.term}"></seed-data-label>
-	    </label>
-	    <span class="count">${this.count}</span>
-	</div>`;
+        if (this.count > 0) {
+            return html`<div class="term">
+<input type="checkbox" id="${this.inputId()}" name="${this.inputId()}" @change="${this.changed}" ?checked="${this.active || nothing}"></input>
+<label for="${this.inputId()}">
+<seed-data-label class="label-content" key="${this.term}"></seed-data-label>
+</label>
+<span class="count">${this.count}</span>
+</div>`;
+        } else {
+            return html``;
+        }
     }
 
     isChecked(): HTMLTemplateResult {

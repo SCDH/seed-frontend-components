@@ -7,10 +7,6 @@ export {
     seedWidgetWidthMinimizedContext,
 } from "./seed-context.ts";
 export {
-    StoreConsumerElement,
-    reduxStoreContext,
-} from "./store-consumer-mixin.ts";
-export {
     windowMixin,
     windowStyles,
     isWindow,
@@ -25,6 +21,7 @@ export { SeedSearch } from "./seed-search.ts";
 export { SeedSearchResult } from "./seed-search-result.ts";
 export { SeedSearchResultCount } from "./seed-search-result-count.ts";
 export { SeedResultDoc } from "./seed-result-doc.ts";
+export { SeedKWiC } from "./seed-kwic.ts";
 export { SeedFacet } from "./seed-facet.ts";
 export { SeedFacets } from "./seed-facets.ts";
 export { SeedFacetTerm } from "./seed-facet-term.ts";
@@ -33,3 +30,4 @@ export { SeedSearchFilter } from "./seed-search-filter.ts";
 export { SeedSearchFilters } from "./seed-search-filters.ts";
 export { SeedResultDetailsLink } from "./seed-result-details-link.ts";
 export { SeedResultDetails } from "./seed-result-details.ts";
+export { SeedTextWidget } from "./seed-text-widget.ts";

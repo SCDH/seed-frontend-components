@@ -1,10 +1,10 @@
 import { html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
-import { StoreConsumerElement } from "./store-consumer-mixin";
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-//import { addFilter, removeFilter } from './redux/searchQuerySlice';
+import { resetQuery } from "./redux/searchQuerySlice";
 import {
     FacetTerms,
     SearchResponse,
@@ -32,7 +32,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     @state()
     terms: Array<TermCountTuple> = [];
 
-    protected override subscribeStore() {
+    override subscribeStore() {
         log.debug("subscribing seed-facet");
         if (this.store === undefined) {
             log.error("no store yet for element", this);
@@ -46,7 +46,10 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                 .getState()
                 .searchApi.queries.hasOwnProperty(
                     this.facetTermsQuery(this.store.getState()),
-                )
+                ) &&
+            this.store.getState().searchApi.queries[
+                this.facetTermsQuery(this.store.getState())
+            ]?.status == "fulfilled"
         ) {
             this.setTerms(this.store.getState());
         } else {
@@ -71,6 +74,26 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                 ),
             );
         }
+        this.store.dispatch(
+            this.addAppListener({
+                matcher: searchApi.endpoints.documents.matchFulfilled,
+                effect: (_action, listenerApi) => {
+                    listenerApi.dispatch(
+                        searchApi.endpoints.facetTerms.initiate(
+                            listenerApi.getState().searchQuery,
+                        ),
+                    );
+                },
+            }),
+        );
+        this.store.dispatch(
+            this.addAppListener({
+                actionCreator: resetQuery,
+                effect: (_action, listenerApi) => {
+                    this.setTerms(listenerApi.getState());
+                },
+            }),
+        );
     }
 
     /*
@@ -81,10 +104,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
         return (
             searchApi.endpoints.facetTerms.name +
             '("' +
-            solrSearchQuery(state.searchQuery, false, true).replaceAll(
-                '"',
-                '\\"',
-            ) +
+            solrSearchQuery(state.searchQuery, false, true) +
             '")'
         );
     }
