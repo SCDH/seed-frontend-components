@@ -11,7 +11,11 @@ import {
 import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
 import { fetchDataLabels } from "./redux/dataLabelSlice";
-import { setDefType } from "./redux/searchQuerySlice";
+import {
+    setApiBaseUrl,
+    setCollection,
+    setDefType,
+} from "./redux/searchQuerySlice";
 
 @customElement("seed-config")
 export class SeedConfig extends StoreConsumerElement<SeedState, any> {
@@ -30,12 +34,22 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
     @property({ attribute: "data-labels" })
     dataLabels!: string;
 
+    @property({ attribute: "search-base-url" })
+    searchBaseUrl!: string;
+
+    @property({ attribute: "search-collection" })
+    searchCollection!: string;
+
     @property({ attribute: "solr-query-parser" })
     solrQueryParser!: string;
 
     override subscribeStore(): void {
         // Dispatch actions so that config properties are propagated
         // to the redux store.
+        if (this.searchBaseUrl)
+            this.store?.dispatch(setApiBaseUrl(this.searchBaseUrl));
+        if (this.searchCollection)
+            this.store?.dispatch(setCollection(this.searchCollection));
         if (this.solrQueryParser)
             this.store?.dispatch(setDefType(this.solrQueryParser));
         if (this.annotationsUrl)

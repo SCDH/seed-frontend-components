@@ -59,9 +59,9 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     /**
      * Stores the list of fields in the index.
      */
-    @useQuery<SeedState, SeedSearch, string, Array<String>>(
+    @useQuery<SeedState, SeedSearch, SearchQuery, Array<String>>(
         searchApi.endpoints.fields,
-        (_s, c) => c.collection ?? "unknown",
+        (s, _c) => s.searchQuery,
     )
     indexFields!: Array<string>;
 
@@ -97,24 +97,34 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         }
         if (changedProperties.has("ready") && this.ready) {
             if (this.initiateEmpty) {
-                // File initial all-query. We are reforcing a refetch
-                // because only the event of the incoming result will
-                // make the result occur in the search results view.
-                log.debug("running initial query for all documents");
-                // @ts-ignore, it's really a promise
-                let promise: Promise<RTKQResponse<SearchResponse>> =
-                    this.store?.dispatch(
-                        searchApi.endpoints.documents.initiate(this.query, {
-                            forceRefetch: true,
-                        }),
-                    );
-                this._queryUnsubscribers.add(
-                    "initialEmptyAll",
-                    // @ts-ignore, the promise really has the unsubscribe
-                    promise?.unsubscribe,
-                );
+                // after time out in order to fix variing search query
+                setTimeout(() => this.initialAll(), 500);
             }
         }
+    }
+
+    /**
+     * File query. This is used for initial all-query, but could
+     * be used with any search query.
+     *
+     * We are reforcing a refetch because only the event of the
+     * incoming result will make the result occur in the search
+     * results view.
+     */
+    protected initialAll(): void {
+        log.debug("running initial query for all documents");
+        // @ts-ignore, it's really a promise
+        let promise: Promise<RTKQResponse<SearchResponse>> =
+            this.store?.dispatch(
+                searchApi.endpoints.documents.initiate(this.query, {
+                    forceRefetch: true,
+                }),
+            );
+        this._queryUnsubscribers.add(
+            "initialEmptyAll",
+            // @ts-ignore, the promise really has the unsubscribe
+            promise?.unsubscribe,
+        );
     }
 
     /**

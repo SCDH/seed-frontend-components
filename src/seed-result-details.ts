@@ -13,7 +13,11 @@ import { seedTextContext } from "./seed-context";
 import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import { setQueryFields } from "./redux/searchQuerySlice";
-import { SearchResponse, Document } from "./redux/searchTypes";
+import type {
+    SearchResponse,
+    Document,
+    SearchQuery,
+} from "./redux/searchTypes";
 import log from "./logging";
 
 /*
@@ -51,9 +55,9 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
     @state()
     textFields!: Array<string>;
 
-    @useQuery<SeedState, SeedResultDetails, string, Array<String>>(
+    @useQuery<SeedState, SeedResultDetails, SearchQuery, Array<String>>(
         searchApi.endpoints.fields,
-        (_s, c) => c.collection ?? "unkonwn",
+        (s, _c) => s.searchQuery,
     )
     indexFields!: Array<string>;
 
@@ -107,12 +111,12 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
             );
             // initiate query for document and add unsubscriber
             let promise: Promise<RTKQResponse<SearchResponse>> = // @ts-ignore
-            this.store?.dispatch(
-                searchApi.endpoints.document.initiate({
-                    query: this.store.getState().searchQuery,
-                    documentId: this.documentId,
-                }),
-            );
+                this.store?.dispatch(
+                    searchApi.endpoints.document.initiate({
+                        query: this.store.getState().searchQuery,
+                        documentId: this.documentId,
+                    }),
+                );
             this._queryUnsubscribers.add(
                 "result",
                 // @ts-ignore

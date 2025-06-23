@@ -1,9 +1,9 @@
-import { html, css, CSSResultGroup } from "lit";
+import { html, css, CSSResultGroup, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { UnsubscribeListener } from "@reduxjs/toolkit";
-import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
+import { StoreConsumerElement, useQuery } from "@scdh/lit-redux-consumer";
 
-import { SeedState, addAppListener } from "./redux/seed-store";
+import { SeedState } from "./redux/seed-store";
+import type { SearchQuery } from "./redux/searchTypes";
 import { searchApi } from "./redux/searchSlice";
 import { addFacetFields } from "./redux/searchQuerySlice";
 
@@ -32,76 +32,47 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
     @property()
     pattern: string = ".*_ss$";
 
+    /**
+     * The list of fields to make facets from.
+     */
     @state()
     fields: Array<string> = [];
 
     @property()
     collection!: string;
 
-    override subscribeStore() {
-        log.debug("subscribing seed-facets");
-        if (this.store === undefined) {
-            log.error("no store yet for element", this);
-            return;
-        }
-        // If the field name in the search index were already
-        // requested, take them from the redux store and set up the
-        // fields property.
-        if (
-            this.store
-                .getState()
-                .searchApi.queries.hasOwnProperty(this.queryName()) &&
-            this.store.getState().searchApi.queries[this.queryName()]?.status ==
-                "fulfilled"
-        ) {
-            log.debug("fields ALREAD queried when setting up facets");
-            this.setFields(this.store?.getState());
-        } else {
-            // If not already in the request, initiate a request and
-            // set up a listener, that sets the fields property.
-            log.debug("initiating fields query", this.collection);
-            this.store?.dispatch(
-                searchApi.endpoints.fields.initiate(this.collection),
-            );
-            const unsubscriber = this.store?.dispatch(
-                addAppListener({
-                    matcher: searchApi.endpoints.fields.matchFulfilled,
-                    effect: async (_action, listenerApi) => {
-                        this.setFields(listenerApi.getState());
-                    },
-                }),
-            );
-            this._unsubscribers.push(
-                unsubscriber as unknown as UnsubscribeListener,
-            );
-        }
-    }
-
-    // get name of facets from store: 1) get all field names, 2) filter with this.pattern
-    private setFields(state: SeedState): void {
-        const pattern: RegExp = new RegExp(this.pattern);
-        const flds: Array<string> =
-            (state.searchApi?.queries?.[this.queryName()]
-                ?.data as Array<string>) ?? [];
-        log.debug("facet fields", flds);
-        // store facet fields as local state
-        this.fields = flds.filter((f) => f.match(pattern));
-        // add facet fields to search query
-        this.store?.dispatch(addFacetFields(this.fields));
-    }
-
-    /*
-     * Make the query name, which is `fields("COLLECTION")` where
-     * `COLLECTION` is the collection parameter passed to the `fields`
-     * endpoint.
+    /**
+     * Gets and stores the fields of the index/collection.
      */
-    private queryName(): string {
-        return (
-            searchApi.endpoints.fields.name + '(\"' + this.collection + '\")'
-        );
+    @useQuery<SeedState, SeedFacets, SearchQuery, Array<String>>(
+        searchApi.endpoints.fields,
+        (s, _c) => s.searchQuery,
+    )
+    indexFields!: Array<string>;
+
+    /**
+     * @inheritdoc
+     */
+    protected override willUpdate(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.willUpdate(changedProperties);
+        if (changedProperties.has("indexFields") && this.store) {
+            // set fields property
+            const pattern: RegExp = new RegExp(this.pattern);
+            this.fields = this.indexFields
+                .filter((f) => f.match(pattern))
+                .map((f) => f.trim());
+            log.debug("setting up facets", this, this.fields);
+            // set fields as facet fields
+            this.store?.dispatch(addFacetFields(this.fields));
+        }
     }
 
-    override render() {
+    /**
+     * @inheritdoc
+     */
+    protected override render() {
         return html`<div class="facets">
             <div class="title">
                 <slot name="title">Facets ${this.pattern}</slot>
@@ -112,7 +83,10 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
         </div>`;
     }
 
-    renderFacet(field: string) {
+    /**
+     * Render a single facet.
+     */
+    protected renderFacet(field: string) {
         log.debug("rendering facet", field);
         return html`<seed-facet
             collection="${this.collection}"

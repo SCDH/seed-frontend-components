@@ -130,6 +130,11 @@ export const initialSearchResponse = {
  */
 export interface SearchQuery {
     /**
+     * The base URL of the search API.
+     */
+    apiBaseUrl: string;
+
+    /**
      * The collection to search in. Note: If we want a search that can
      * search multiple collections, we should consider making this a
      * property name!
@@ -211,7 +216,8 @@ export interface FacetFilterQuery {
 }
 
 export const initialSearchQuery: SearchQuery = {
-    collection: "tei4", // default collection
+    apiBaseUrl: "/solr",
+    collection: "tei-examples", // default collection
     defType: "edismax",
     q: "*", // match all in edismax
     fq: undefined,

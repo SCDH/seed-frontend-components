@@ -1,19 +1,33 @@
-import { html, HTMLTemplateResult, css, CSSResultGroup } from "lit";
+import {
+    html,
+    HTMLTemplateResult,
+    css,
+    CSSResultGroup,
+    PropertyValues,
+} from "lit";
 import { customElement, state, property } from "lit/decorators.js";
+import {
+    StoreConsumerElement,
+    useQuery,
+    matched,
+} from "@scdh/lit-redux-consumer";
+import type { RTKQResponse } from "@scdh/lit-redux-consumer";
 
-import { SearchResultElement } from "./search-result-mixin";
-import { SeedState, addAppListener } from "./redux/seed-store";
+import { SeedState } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
 import {
     SearchResponse,
     Document,
-    solrSearchQuery,
+    SearchQuery,
     Highlighting,
 } from "./redux/searchTypes";
 import {
     setFl,
     setHighlighting,
     setHighlightingSnippets,
+    addFilter,
+    removeFilter,
+    resetQuery,
 } from "./redux/searchQuerySlice";
 
 import log from "./logging";
@@ -22,10 +36,29 @@ import log from "./logging";
  * A web component for displaying search results.
  */
 @customElement("seed-search-result")
-export class SeedSearchResult extends SearchResultElement {
+export class SeedSearchResult extends StoreConsumerElement<SeedState, any> {
     @property()
     collection!: string;
 
+    /**
+     * The fields which should be presented in the fielded result view.
+     */
+    @state()
+    fields: Array<string> = [];
+
+    /**
+     * Queries and stores the list of all fields in the index/schema.
+     */
+    @useQuery<SeedState, SeedSearchResult, SearchQuery, Array<String>>(
+        searchApi.endpoints.fields,
+        (s, _c) => s.searchQuery,
+    )
+    indexFields!: Array<string>;
+
+    /**
+     * The `fieldPattern` attribute takes a regex which is used to
+     * filter out the fields (categories) for the `fields` property.
+     */
     @property({ attribute: "field-pattern" })
     fieldPattern: string = "^(meta|author|title)";
 
@@ -46,6 +79,43 @@ export class SeedSearchResult extends SearchResultElement {
     searchPath: string = "/search/";
 
     @state()
+    @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+        searchApi.endpoints.documents.matchFulfilled,
+        (s, _c) => searchApi.endpoints.documents.select(s.searchQuery)(s),
+    )
+    // @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+    // 	searchApi.endpoints.facetTerms.matchFulfilled,
+    // 	(s, _c) => searchApi.endpoints.facetTerms.select(s.searchQuery)(s))
+    // get result when a filter was applied and the query was initiated
+    @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+        searchApi.endpoints.filter.matchFulfilled,
+        (s, _c) => searchApi.endpoints.filter.select(s.searchQuery)(s),
+    )
+    // get result for search queries already initiated
+    // 1. filter removed, result already present from document(...) query, i.e., all filters were removed
+    @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+        removeFilter.match,
+        (s, _c) => searchApi.endpoints.documents.select(s.searchQuery)(s),
+    )
+    // 2. filter removed, result already present from filter(...) query
+    @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+        addFilter.match,
+        (s, _c) => searchApi.endpoints.filter.select(s.searchQuery)(s),
+    )
+    // search reset
+    @matched<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+        resetQuery.match,
+        (s, _c) => searchApi.endpoints.documents.select(s.searchQuery)(s),
+    )
+    // @watch<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+    // 	(s, _c) => searchApi.endpoints.documents.select(s.searchQuery)(s)
+    // )
+    // @watch<SeedState, SeedSearchResult, RTKQResponse<SearchResponse>>(
+    // 	(s, _c) => searchApi.endpoints.facetTerms.select(s.searchQuery)(s)
+    // )
+    result!: RTKQResponse<SearchResponse>;
+
+    @state()
     documents: Array<Document> = [];
 
     @state()
@@ -58,64 +128,35 @@ export class SeedSearchResult extends SearchResultElement {
     document_start: number = 0;
 
     override subscribeStore(): void {
-        // add fields to be included in the response, by adding them to the query parameter fl.
-        // Note that the query may already have been initiated, but not been yet fulfilled.
-        if (
-            this.store
-                ?.getState()
-                .searchApi.queries.hasOwnProperty(this.fieldsQueryId()) &&
-            this.store?.getState()?.searchApi?.queries[this.fieldsQueryId()]
-                ?.status == "fulfilled"
-        ) {
-            log.debug("fields query already fulfilled");
-            this.store.dispatch(setFl(this.setFields(this.store.getState())));
-        } else {
-            this.store?.dispatch(
-                addAppListener({
-                    matcher: searchApi.endpoints.fields.matchFulfilled,
-                    effect: (_action, listenerApi) => {
-                        listenerApi.dispatch(
-                            setFl(this.setFields(listenerApi.getState())),
-                        );
-                    },
-                }),
-            );
-        }
         this.store?.dispatch(setHighlighting(this.highlighting));
         this.store?.dispatch(
             setHighlightingSnippets(this.highlightingSnippets),
         );
-        super.subscribeStore();
     }
 
-    private fieldsQueryId(): string {
-        return searchApi.endpoints.fields.name + '("' + this.collection + '")';
-    }
-
-    private setFields(state: SeedState): Array<string> {
-        const flds: Array<string> =
-            (state.searchApi?.queries?.[this.fieldsQueryId()]
-                ?.data as Array<string>) ?? [];
-        const regex: RegExp = new RegExp(this.fieldPattern);
-        log.debug("setting search result fields", flds);
-        return flds.filter((f) => f.match(regex));
-    }
-
-    override updateEffect(endpoint: string, s: SeedState): void {
-        const queryId: string =
-            endpoint + '("' + solrSearchQuery(s.searchQuery) + '")';
-        log.debug(
-            "updating search result",
-            queryId,
-            s.searchApi.queries.hasOwnProperty(queryId),
-        );
-        const data: SearchResponse | undefined = s.searchApi.queries[queryId]
-            ?.data as SearchResponse | undefined;
-        if (data !== undefined) {
-            this.document_count = data.response.numFound;
-            this.document_start = data.response.start;
-            this.documents = data.response.docs;
-            this.highlightedDocuments = data?.highlighting ?? {};
+    protected override willUpdate(
+        changedProperties: PropertyValues<this>,
+    ): void {
+        super.willUpdate(changedProperties);
+        if (changedProperties.has("indexFields")) {
+            // set fields from indexFields
+            const regex: RegExp = new RegExp(this.fieldPattern);
+            this.fields = this.indexFields.filter((f) => f.match(regex));
+        }
+        if (changedProperties.has("fields") && this.store) {
+            // set fl query parameter
+            this.store.dispatch(setFl(this.fields));
+        }
+        if (changedProperties.has("result")) {
+            // updating search result
+            log.debug("search result updated", this.result);
+            if (this.result.data !== undefined) {
+                this.document_count = this.result.data.response.numFound;
+                this.document_start = this.result.data.response.start;
+                this.documents = this.result.data.response.docs;
+                this.highlightedDocuments =
+                    this.result.data?.highlighting ?? {};
+            }
         }
     }
 
