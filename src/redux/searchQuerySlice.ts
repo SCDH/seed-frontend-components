@@ -5,6 +5,9 @@ export const searchQuerySlice = createSlice({
     name: "searchQuery",
     initialState: initialSearchQuery,
     reducers: {
+        setApiBaseUrl: (state: SearchQuery, action: PayloadAction<string>) => {
+            state.apiBaseUrl = action.payload;
+        },
         setCollection: (state: SearchQuery, action: PayloadAction<string>) => {
             state.collection = action.payload;
         },
@@ -119,6 +122,7 @@ export const searchQuerySlice = createSlice({
 });
 
 export const {
+    setApiBaseUrl,
     setCollection,
     setDefType,
     addFl,
