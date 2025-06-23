@@ -5,7 +5,7 @@ import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
 import { SeedState, addAppListener } from "./redux/seed-store";
 import { searchApi } from "./redux/searchSlice";
-import { addFacetFields } from "./redux/searchQuerySlice";
+import { setCollection, addFacetFields } from "./redux/searchQuerySlice";
 
 import log from "./logging";
 
@@ -60,8 +60,11 @@ export class SeedFacets extends StoreConsumerElement<SeedState, any> {
             // If not already in the request, initiate a request and
             // set up a listener, that sets the fields property.
             log.debug("initiating fields query", this.collection);
+            this.store.dispatch(setCollection(this.collection));
             this.store?.dispatch(
-                searchApi.endpoints.fields.initiate(this.collection),
+                searchApi.endpoints.fields.initiate(
+                    this.store.getState().searchQuery,
+                ),
             );
             const unsubscriber = this.store?.dispatch(
                 addAppListener({

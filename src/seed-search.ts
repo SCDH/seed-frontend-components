@@ -59,9 +59,9 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     /**
      * Stores the list of fields in the index.
      */
-    @useQuery<SeedState, SeedSearch, string, Array<String>>(
+    @useQuery<SeedState, SeedSearch, SearchQuery, Array<String>>(
         searchApi.endpoints.fields,
-        (_s, c) => c.collection ?? "unknown",
+        (s, _c) => s.searchQuery,
     )
     indexFields!: Array<string>;
 
