@@ -2,7 +2,8 @@ import { LitElement, HTMLTemplateResult, html, CSSResultArray, css } from "lit";
 import { customElement, query, property, state } from "lit/decorators.js";
 import SimpleKeyboard from "simple-keyboard";
 
-import * as keyboardStyles from "simple-keyboard/build/css/index.css";
+//import * as keyboardStyles from "simple-keyboard/build/css/index.css";
+import { keyboardStyles } from "./css/simple-keyboard.styles";
 import log from "./logging";
 
 @customElement("seed-keyboard")
