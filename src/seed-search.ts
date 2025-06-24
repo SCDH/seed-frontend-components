@@ -134,6 +134,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         return html`
             <div class="search-form-wrapper">
                 <input id="search" name="search" type="text" placeholder="search"></input/>
+                <slot name="form-adds"></slot>
                 ${this.renderSubmit()}
             </div>`;
     }
