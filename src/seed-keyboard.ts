@@ -102,14 +102,41 @@ export class SeedKeyboard extends LitElement {
             // setup keyboard
             const layout = new SimpleKeyboardLayouts().get(lang.layout);
             this.keyboard = new SimpleKeyboard(this.keyboardContainer, {
-                onChange: log.info,
-                onKeyPress: log.info,
+                onChange: (input) => {
+                    let inputEvent = new CustomEvent("input", {
+                        detail: { message: input },
+                        bubbles: true,
+                        composed: true,
+                    });
+                    this.dispatchEvent(inputEvent);
+                    this.changed(input);
+                },
+                onKeyPress: (key) => {
+                    if (key == "{enter}") this.destroyKeyboard();
+                    this.keyPressed(key);
+                },
                 ...layout,
             });
             log.debug("keyboard set up", this.keyboard.keyboardDOM);
             // show keyboard
             this.keyboardContainer.style.display = "block";
         };
+    }
+
+    /**
+     * A callback called on every keypress with the complete input as
+     * argument.
+     */
+    protected changed(input: string): void {
+        log.debug("input", input);
+    }
+
+    /**
+     * A callback called on every keypress with the key as
+     * argument.
+     */
+    protected keyPressed(key: string): void {
+        log.debug("key", key);
     }
 
     /**
