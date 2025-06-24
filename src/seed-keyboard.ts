@@ -2,23 +2,39 @@ import { LitElement, HTMLTemplateResult, html, CSSResultArray, css } from "lit";
 import { customElement, query, property, state } from "lit/decorators.js";
 import SimpleKeyboard from "simple-keyboard";
 
+import { SimpleKeyboardLayouts } from "simple-keyboard-layouts";
+
 //import * as keyboardStyles from "simple-keyboard/build/css/index.css";
 import { keyboardStyles } from "./css/simple-keyboard.styles";
 import log from "./logging";
 
+/**
+ * The `<seed-keyboard>` custom element allows users to type on a
+ * virtual keyboard based on the famous simple-keyboard. Languages are
+ * determined by `<seed-keyboard-language>` child elements in the
+ * *main* slot.
+ *
+ * The the shown keyboard icon can be changed by passing content to
+ * the `toggle` slot.
+ *
+ */
 @customElement("seed-keyboard")
 export class SeedKeyboard extends LitElement {
     @query("#language-chooser")
-    langChooser!: HTMLUListElement;
+    private langChooser!: HTMLUListElement;
 
     @query("#keyboard")
-    keyboardContainer!: HTMLDivElement;
+    private keyboardContainer!: HTMLDivElement;
 
     private keyboard: SimpleKeyboard | undefined = undefined;
 
     @state()
-    languages: Array<SeedKeyboardLanguage> = [];
+    private languages: Array<SeedKeyboardLanguage> = [];
 
+    /**
+     * Callback called whenever the language chooser button is
+     * clicked.
+     */
     private toggleLangChooser() {
         // also use this method to destroy an open keyboard
         if (this.keyboard !== undefined) {
@@ -30,6 +46,9 @@ export class SeedKeyboard extends LitElement {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     protected render(): HTMLTemplateResult {
         const ls: Array<Element> | undefined = this.shadowRoot
             ?.querySelector("slot")
@@ -41,19 +60,21 @@ export class SeedKeyboard extends LitElement {
             this.shadowRoot?.querySelector("slot"),
         );
         return html`
-            <button class="btn unicode-icon" @click="${this.toggleLangChooser}">
-                ⌨&nbsp;⏷
+            <button
+                class="btn unicode-icon keyboard-language-chooser"
+                @click="${this.toggleLangChooser}"
+            >
+                <slot name="toggle">⌨&nbsp;⏷</slot>
             </button>
             <ul id="language-chooser" style="display:none" class="dropdown">
-                <li>arabic</li>
                 ${this.languages.map((l) => {
                     return html`<li>
-                        <a @click="${this.showKeyboard(l)}">${l.innerHTML}</a>
+                        <a @click="${this.createKeyboard(l)}">${l.innerHTML}</a>
                     </li>`;
                 })}
             </ul>
             <div id="keyboard" style="display:none" class="keyboard"></div>
-            <slot @slotchange="${this.setupLanguages}"></slot>
+            <slot id="languageSlot" @slotchange="${this.setupLanguages}"></slot>
         `;
     }
 
@@ -73,17 +94,19 @@ export class SeedKeyboard extends LitElement {
      *
      * This is called when a language has been selected.
      */
-    protected showKeyboard(lang: SeedKeyboardLanguage) {
+    protected createKeyboard(lang: SeedKeyboardLanguage) {
         return (e: Event) => {
             log.debug("setting up keyboard", e.target, lang);
             // hide language chooser
             this.langChooser.style.display = "none";
             // setup keyboard
+            const layout = new SimpleKeyboardLayouts().get(lang.layout);
             this.keyboard = new SimpleKeyboard(this.keyboardContainer, {
                 onChange: log.info,
                 onKeyPress: log.info,
+                ...layout,
             });
-            log.info("keyboard set up", this.keyboard.keyboardDOM);
+            log.debug("keyboard set up", this.keyboard.keyboardDOM);
             // show keyboard
             this.keyboardContainer.style.display = "block";
         };
@@ -105,7 +128,7 @@ export class SeedKeyboard extends LitElement {
     static styles: CSSResultArray = [
         keyboardStyles,
         css`
-            slot {
+            #languageSlot {
                 display: none;
             }
             .btn {
@@ -140,8 +163,16 @@ export class SeedKeyboard extends LitElement {
     ];
 }
 
+/**
+ * The `<seed-keyboard-language>` is a child element for
+ * `<seed-keyboard>` and used for setting the languages of the
+ * keyboards.
+ */
 @customElement("seed-keyboard-language")
 export class SeedKeyboardLanguage extends LitElement {
+    /**
+     * The layout.
+     */
     @property()
     layout!: string;
 }
