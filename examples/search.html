@@ -35,7 +35,17 @@
 	  </seed-facets>
 	</div>
 	<div>
-	  <seed-search collection="tei4" initial-all="true" query-field-pattern="html_hts_[a-z]+"></seed-search>
+	  <seed-search collection="tei4" initial-all="true" query-field-pattern="html_hts_[a-z]+">
+	    <span slot="form-adds">
+	      <seed-keyboard>
+		<seed-keyboard-language layout="arabic">Arabic</seed-keyboard-language>
+		<seed-keyboard-language layout="turkish">Turkish</seed-keyboard-language>
+		<seed-keyboard-language layout="english">English (QWERTY)</seed-keyboard-language>
+		<seed-keyboard-language layout="german">Germang (QWERTZ)</seed-keyboard-language>
+		<p>nix</p>
+	      </seed-keyboard>
+	    </span>
+	  </seed-search>
 	  <seed-search-filters></seed-search-filters>
 	  <seed-search-result collection="tei4" highlighting="true" highlighting-snippets="5"></seed-search-result>
 	  <div>

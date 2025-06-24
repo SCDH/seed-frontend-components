@@ -74,6 +74,19 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     ready: boolean = false;
 
     /**
+     * @inheritdoc
+     */
+    constructor() {
+        super();
+        // listen to input events from keyboard child
+        this.addEventListener("input", (e: Event) => {
+            log.debug("input received", (e as CustomEvent).detail.message);
+            this.input.value = (e as CustomEvent).detail.message;
+            e.stopPropagation();
+        });
+    }
+
+    /**
      * Set up the query and the form as soon as the list of fields in
      * the index is present.
      *
@@ -134,6 +147,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         return html`
             <div class="search-form-wrapper">
                 <input id="search" name="search" type="text" placeholder="search"></input/>
+                <slot name="form-adds"></slot>
                 ${this.renderSubmit()}
             </div>`;
     }
