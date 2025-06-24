@@ -125,9 +125,9 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     }
 
     render() {
-        return html`<div class="facet">
-            <div class="category">Facet: ${this.field}</div>
-            <div>${this.terms.map((t) => this.renderTerm(t))}</div>
+        return html`<ds-facet class="facet">
+            <div slot="title" class="category">${this.field}</div>
+            <div slot="main">${this.terms.map((t) => this.renderTerm(t))}</div>
         </div>`;
     }
 
