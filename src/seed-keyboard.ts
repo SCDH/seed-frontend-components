@@ -103,7 +103,7 @@ export class SeedKeyboard extends LitElement {
             const layout = new SimpleKeyboardLayouts().get(lang.layout);
             this.keyboard = new SimpleKeyboard(this.keyboardContainer, {
                 onChange: (input) => {
-                    let inputEvent = new CustomEvent("input", {
+                    let inputEvent = new CustomEvent("virtual-input", {
                         detail: { message: input },
                         bubbles: true,
                         composed: true,

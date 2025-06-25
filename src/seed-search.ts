@@ -79,7 +79,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     constructor() {
         super();
         // listen to input events from keyboard child
-        this.addEventListener("input", (e: Event) => {
+        this.addEventListener("virtual-input", (e: Event) => {
             log.debug("input received", (e as CustomEvent).detail.message);
             this.input.value = (e as CustomEvent).detail.message;
             e.stopPropagation();
