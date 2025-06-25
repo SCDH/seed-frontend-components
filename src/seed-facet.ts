@@ -128,7 +128,7 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
         return html`<ds-facet class="facet">
             <div slot="title" class="category">${this.field}</div>
             <div slot="main">${this.terms.map((t) => this.renderTerm(t))}</div>
-        </div>`;
+        </ds-facet>`;
     }
 
     renderTerm(t: TermCountTuple) {
