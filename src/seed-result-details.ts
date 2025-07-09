@@ -1,4 +1,10 @@
-import { HTMLTemplateResult, html, PropertyValues } from "lit";
+import {
+    HTMLTemplateResult,
+    html,
+    PropertyValues,
+    css,
+    CSSResultArray,
+} from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
 import {
@@ -191,6 +197,18 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
             <div class="text"><seed-text-widget></seed-text-widget></div>
         </div>`;
     }
+
+    static styles: CSSResultArray = [
+        css`
+            :host {
+                width: 100%;
+                height: 100%;
+            }
+            #text {
+                min-height: 60ex;
+            }
+        `,
+    ];
 }
 
 declare global {

@@ -1,4 +1,4 @@
-import { LitElement, html, HTMLTemplateResult } from "lit";
+import { LitElement, html, HTMLTemplateResult, css, CSSResultArray } from "lit";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 
@@ -24,15 +24,23 @@ export class SeedTextWidget extends LitElement {
         if (this.text === undefined) {
             return html`<host><ds-waiting></ds-waiting></host>`;
         } else {
-            return html`<host
-                ><iframe
-                    width="98%"
-                    height="100%"
-                    .srcdoc="${this.text.text}"
-                ></iframe
-            ></host>`;
+            return html`<iframe
+                width="98%"
+                height="100%"
+                .srcdoc="${this.text.text}"
+            ></iframe>`;
         }
     }
+
+    static styles: CSSResultArray = [
+        css`
+            :host {
+                width: 100%;
+                height: 100%;
+                min-height: 40ex;
+            }
+        `,
+    ];
 }
 
 declare global {
