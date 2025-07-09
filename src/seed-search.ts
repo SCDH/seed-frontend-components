@@ -144,9 +144,11 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
      * @inheritdoc
      */
     protected override render(): HTMLTemplateResult {
+        var value: string = this.query.q;
+        if (value == "*") value = "";
         return html`
             <div class="search-form-wrapper">
-                <input id="search" name="search" type="text" placeholder="search"></input/>
+<input id="search" name="search" type="text" placeholder="search" value="${value}"></input/>
                 <slot name="form-adds"></slot>
                 ${this.renderSubmit()}
             </div>`;
