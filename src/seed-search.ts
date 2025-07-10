@@ -183,12 +183,12 @@ ${this.renderSubmit()}
 
     static styles: CSSResultGroup = [
         css`
-            host {
+            :host {
             }
             .search-form-wrapper {
                 display: flex;
                 flex-direction: row;
-                border: 1px solid red;
+                border: 1px solid var(--window-border-color, lightblue);
                 border-radius: 25px;
                 padding: 6px 12px;
             }
@@ -196,6 +196,9 @@ ${this.renderSubmit()}
             .search-form-wrapper button {
                 border: none;
                 background-color: inherit;
+            }
+            .unicode-icon {
+                font-family: var(--icon-font, Helvetica, Arial, sans-serif);
             }
         `,
     ];
