@@ -1,4 +1,4 @@
-import { html, HTMLTemplateResult } from "lit";
+import { html, HTMLTemplateResult, css, CSSResultArray } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { StoreConsumerElement } from "@scdh/lit-redux-consumer";
 
@@ -24,7 +24,7 @@ export class SeedSearchFilter extends StoreConsumerElement<SeedState, any> {
             @click="${this.rmFilter}"
             title="remove this filter"
         >
-            <span class="remove-filter-symbol dispose">&#x1F5D9;</span>
+            <span class="unicode-icon dispose">&#x1F5D9;</span>
             <seed-data-label key="${this.field}"></seed-data-label
             ><span class="field-term-sep">:</span>
             <seed-data-label key="${this.term}"></seed-data-label>
@@ -50,6 +50,14 @@ export class SeedSearchFilter extends StoreConsumerElement<SeedState, any> {
             );
         }
     }
+
+    static styles: CSSResultArray = [
+        css`
+            .unicode-icon {
+                font-family: var(--icon-font, Helvetica, Arial, sans-serif);
+            }
+        `,
+    ];
 }
 
 declare global {
