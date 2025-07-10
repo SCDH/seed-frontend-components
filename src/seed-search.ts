@@ -199,6 +199,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     static styles: CSSResultGroup = [
         css`
             :host {
+                display: inline-block;
             }
             .search-form-wrapper {
                 display: flex;
