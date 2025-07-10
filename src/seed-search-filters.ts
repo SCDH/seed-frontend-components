@@ -72,7 +72,7 @@ export class SeedSearchFilters extends StoreConsumerElement<SeedState, any> {
         log.debug("rendering search filters:", this.filters);
         return html`<div class="search-filters">
             <div class="title">
-                <slot name="title">Search filters (${this.count})</slot>
+                <slot name="title">Applied filters (${this.count})</slot>
             </div>
             <div class="filters">${this.filters.map(this.renderFilter)}</div>
         </div>`;
