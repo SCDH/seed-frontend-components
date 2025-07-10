@@ -155,15 +155,19 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     protected override render(): HTMLTemplateResult {
         var value: string = this.query.q;
         if (value == "*") value = "";
-        return html`
-<div class="search-form-wrapper">
-<form id="search-form" name="search-form">
-<input id="search" name="search" type="text" placeholder="search" value="${value}"></input/>
-<slot name="form-adds"></slot>
-${this.renderSubmit()}
-</form>
-
-            </div>`;
+        return html` <div class="search-form-wrapper">
+            <form id="search-form" name="search-form">
+                <input
+                    id="search"
+                    name="search"
+                    type="text"
+                    placeholder="search"
+                    value="${value}"
+                />
+                ${this.renderReset()}<slot name="form-adds"> </slot
+                >${this.renderSubmit()}
+            </form>
+        </div>`;
     }
 
     /**
@@ -171,13 +175,24 @@ ${this.renderSubmit()}
      */
     protected renderSubmit(): HTMLTemplateResult {
         return this.ready
-            ? html`<button
+            ? html`<input
                   id="search-submit"
                   class="unicode-icon"
                   type="submit"
-              >
-                  🔍
-              </button>`
+                  value="🔍"
+              />`
+            : html``;
+    }
+
+    protected renderReset(): HTMLTemplateResult {
+        return this.ready
+            ? html`<input
+                  id="search-reset"
+                  class="unicode-icon reset-symbol dispose"
+                  value="&#x1F5D9;"
+                  alt="Clear the search form"
+                  type="reset"
+              />`
             : html``;
     }
 
@@ -196,9 +211,20 @@ ${this.renderSubmit()}
             .search-form-wrapper button {
                 border: none;
                 background-color: inherit;
+                padding: 0;
+                margin: 0;
+            }
+            input {
+                font-size: 0.9em;
+            }
+            input:focus {
+                outline: none;
             }
             .unicode-icon {
                 font-family: var(--icon-font, Helvetica, Arial, sans-serif);
+            }
+            .unicode-icon:hover {
+                color: red;
             }
         `,
     ];
