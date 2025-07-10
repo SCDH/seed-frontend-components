@@ -127,7 +127,9 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
     render() {
         return html`<ds-facet class="facet">
             <div slot="title" class="category">${this.field}</div>
-            <div slot="main">${this.terms.map((t) => this.renderTerm(t))}</div>
+            <div class="main" slot="main">
+                ${this.terms.map((t) => this.renderTerm(t))}
+            </div>
         </ds-facet>`;
     }
 
@@ -147,6 +149,9 @@ export class SeedFacet extends StoreConsumerElement<SeedState, any> {
                 display: flex;
                 flex-direction: column;
                 flex-wrap: nowrap;
+            }
+            .main {
+                overflow-x: hidden;
             }
         `,
     ];
