@@ -47,6 +47,9 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     @query("#search")
     input!: HTMLInputElement;
 
+    @query("form")
+    form!: HTMLFormElement;
+
     /**
      * This property determines which fields are queried. It is a
      * regular expression which is a applied as a filter to the list
@@ -96,6 +99,11 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         changedProperties: PropertyValues<this>,
     ): void {
         super.willUpdate(changedProperties);
+        // TODO: changedProperties.has("form") does not work. Why?
+        if (this.form && !changedProperties.has("form")) {
+            log.info("registering submit search button event handler");
+            this.form.addEventListener("submit", this.search());
+        }
         if (changedProperties.has("indexFields")) {
             // filter fields
             const pattern: RegExp = new RegExp(this.queryFieldPattern);
@@ -114,6 +122,7 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
                 setTimeout(() => this.initialAll(), 500);
             }
         }
+        log.info("willUpdate from search");
     }
 
     /**
@@ -147,10 +156,13 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
         var value: string = this.query.q;
         if (value == "*") value = "";
         return html`
-            <div class="search-form-wrapper">
+<div class="search-form-wrapper">
+<form id="search-form" name="search-form">
 <input id="search" name="search" type="text" placeholder="search" value="${value}"></input/>
-                <slot name="form-adds"></slot>
-                ${this.renderSubmit()}
+<slot name="form-adds"></slot>
+${this.renderSubmit()}
+</form>
+
             </div>`;
     }
 
@@ -159,7 +171,13 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
      */
     protected renderSubmit(): HTMLTemplateResult {
         return this.ready
-            ? html`<button @click="${this.search}">🔍</button>`
+            ? html`<button
+                  id="search-submit"
+                  class="unicode-icon"
+                  type="submit"
+              >
+                  🔍
+              </button>`
             : html``;
     }
 
@@ -185,18 +203,23 @@ export class SeedSearch extends StoreConsumerElement<SeedState, any> {
     /**
      * Callback called from submit button.
      */
-    protected search(): void {
-        log.debug("Search button hit!");
-        // set or reset the search term
-        if (this.input?.value === "" || this.input?.value === undefined) {
-            this.store?.dispatch(resetQuery());
-        } else {
-            this.store?.dispatch(simpleQuery(this.input.value));
-        }
-        // file the query
-        this.store?.dispatch(
-            searchApi.endpoints.documents.initiate(this.query),
-        );
+    protected search(): (e: SubmitEvent) => void {
+        return (event: SubmitEvent): void => {
+            log.debug("search button hit!");
+            // set or reset the search term
+            if (this.input?.value === "" || this.input?.value === undefined) {
+                this.store?.dispatch(resetQuery());
+            } else {
+                this.store?.dispatch(simpleQuery(this.input.value));
+            }
+            // file the query
+            this.store?.dispatch(
+                searchApi.endpoints.documents.initiate(this.query),
+            );
+            // do not submit get or post query, see example in
+            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event
+            event.preventDefault();
+        };
     }
 }
 
