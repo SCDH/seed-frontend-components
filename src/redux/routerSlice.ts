@@ -23,7 +23,6 @@ export const routerSlice = createSlice({
         to: (state, action: PayloadAction<Route>) => {
             state.previousRoute = state.currentRoute;
             state.currentRoute = action.payload;
-            return state;
         },
     },
 });
