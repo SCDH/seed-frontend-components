@@ -33,3 +33,4 @@ export { SeedResultDetails } from "./seed-result-details.ts";
 export { SeedTextWidget } from "./seed-text-widget.ts";
 export { SeedKeyboard, SeedKeyboardLanguage } from "./seed-keyboard.ts";
 export { SeedSnippet } from "./seed-snippet.ts";
+export { SeedNavItem } from "./seed-nav-item.ts";
