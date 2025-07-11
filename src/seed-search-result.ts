@@ -214,12 +214,17 @@ export class SeedSearchResult extends StoreConsumerElement<SeedState, any> {
     static styles: CSSResultGroup = [
         css`
             .result-document {
-                margin: 5px;
+                margin: var(--search-result-margin, 15px) 0;
                 border: var(
                     --search-result-border,
-                    5px solid var(--window-border-color, lightblue)
+                    3px solid var(--window-border-color, lightblue)
                 );
-                padding: 5px;
+                border-radius: var(--search-result-border-radius, 10px);
+                background-color: var(
+                    --search-result-background-color,
+                    aliceblue
+                );
+                padding: var(--search-result-padding, 10px);
             }
         `,
     ];
