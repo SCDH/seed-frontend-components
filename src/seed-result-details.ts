@@ -204,9 +204,6 @@ export class SeedResultDetails extends StoreConsumerElement<SeedState, any> {
                 width: 100%;
                 height: 100%;
             }
-            #text {
-                min-height: 60ex;
-            }
         `,
     ];
 }
