@@ -2,11 +2,11 @@
  * A JSON-LD graph, consisting of a default graph `@graph` and a
  * `@context`.
  */
-export interface JsonLD {
+export interface JsonLD<T> {
     /**
      * The default graph.
      */
-    "@graph": Array<Object>;
+    "@graph": Array<T>;
 
     /**
      * The context object.
@@ -23,18 +23,15 @@ export interface JsonLD {
  *
  * @param idKey - the property of the graph's object to use as keys of the resulting object.
  */
-export function graphToResourceObjects(
-    input: JsonLD,
-    idKey: string,
-): { [key: string]: Object } {
-    var output: { [key: string]: Object } = {};
-    input["@graph"].forEach((obj: Object) => {
-        if (
-            obj.hasOwnProperty(idKey) &&
-            typeof obj[idKey as keyof typeof obj] === "string"
-        ) {
+export function graphToResourceObjects<T extends Object>(
+    input: JsonLD<T>,
+    idKey: keyof T & string,
+): { [key: string]: T } {
+    var output: { [key: string]: T } = {};
+    input["@graph"].forEach((obj: T) => {
+        if (obj.hasOwnProperty(idKey)) {
             // @ts-ignore
-            const ident: string = obj[idKey as keyof typeof obj];
+            const ident: string = obj[idKey];
             output[ident] = obj;
         }
     });
