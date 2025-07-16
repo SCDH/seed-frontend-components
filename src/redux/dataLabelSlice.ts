@@ -1,9 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { deepmerge } from "deepmerge-ts";
+import type { JsonLD } from "./jsonld";
+import { graphToResourceObjects } from "./jsonld";
 
 import log from "./logging";
 
-/*
+/**
  * A data label is a label for an identifier used in the data.
  *
  * @example
@@ -15,7 +17,7 @@ import log from "./logging";
  * names, to the user in the frontend.
  */
 export interface DataLabel {
-    /*
+    /**
      * The default label (fallback). Used, when current language is
      * not provided or no language is provided at all.
      */
@@ -28,13 +30,13 @@ export interface DataLabel {
 }
 
 export interface DataLabelSlice {
-    /*
+    /**
      * A mapping of identifiers to data labels.
      */
     [id: string]: DataLabel;
 }
 
-/*
+/**
  * Make a `DataLabel` with a default label only or "unknown".
  *
  * @param s - optionally the default label
@@ -49,7 +51,7 @@ export function mkDefaultLabel(s?: string): DataLabel {
 
 const initialState: DataLabelSlice = {};
 
-/*
+/**
  * An async thunk for fetching the data labels from a URL.
  *
  * @example
@@ -66,6 +68,35 @@ export const fetchDataLabels = createAsyncThunk<DataLabelSlice, string>(
             .json()
             .then((result) => {
                 return result as DataLabelSlice;
+            })
+            .catch(() => {
+                log.error("failed to fetch data labels from ", url);
+                return {};
+            });
+    },
+);
+
+/**
+ * An async thunk for fetching the data labels from a URL, where data
+ * labels are given as a JSON-LD graph.
+ *
+ * @example
+ * ```
+ * dispatch(fetchDataLabels(MyURL))
+ * ```
+ */
+export const fetchDataLabelsJsonLD = createAsyncThunk<DataLabelSlice, string>(
+    "dataLabels/fetchDataLabelsJsonLD",
+    async (url): Promise<DataLabelSlice> => {
+        log.info("Fetching data labels as JSON-LD from", url);
+        const response = await fetch(url);
+        return response
+            .json()
+            .then((result: JsonLD<DataLabel & { "@id": string }>) => {
+                return graphToResourceObjects<DataLabel & { "@id": string }>(
+                    result,
+                    "@id",
+                ) as DataLabelSlice;
             })
             .catch(() => {
                 log.error("failed to fetch data labels from ", url);
@@ -92,6 +123,15 @@ export const dataLabelSlice = createSlice({
                 },
             )
             .addCase(fetchDataLabels.rejected, () => {
+                log.error("failed to fetch data labels");
+            })
+            .addCase(
+                fetchDataLabelsJsonLD.fulfilled,
+                (state, action: PayloadAction<DataLabelSlice>) => {
+                    return deepmerge(state, action.payload);
+                },
+            )
+            .addCase(fetchDataLabelsJsonLD.rejected, () => {
                 log.error("failed to fetch data labels");
             });
     },
