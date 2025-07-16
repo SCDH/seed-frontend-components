@@ -2,7 +2,7 @@ export { store } from "./store";
 export type { RootState, AppDispatch } from "./store";
 export { searchApi } from "./searchSlice";
 export type { SearchState } from "./searchSlice";
-export { fetchDataLabels } from "./dataLabelSlice";
+export { fetchDataLabels, fetchDataLabelsJsonLD } from "./dataLabelSlice";
 export * from "./searchTypes";
 export * from "./searchQuerySlice";
 export type {
