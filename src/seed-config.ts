@@ -10,7 +10,7 @@ import {
 } from "./redux/synopsisSlice";
 import { fetchAnnotations } from "./redux/annotationsSlice";
 import { fetchResourceCenteredJson } from "./redux/ontologySlice";
-import { fetchDataLabels } from "./redux/dataLabelSlice";
+import { fetchDataLabels, fetchDataLabelsJsonLD } from "./redux/dataLabelSlice";
 import {
     setApiBaseUrl,
     setCollection,
@@ -33,6 +33,9 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
 
     @property({ attribute: "data-labels" })
     dataLabels!: string;
+
+    @property({ attribute: "data-labels-jsonld" })
+    dataLabelsJsonLD!: string;
 
     @property({ attribute: "search-base-url" })
     searchBaseUrl!: string;
@@ -60,6 +63,8 @@ export class SeedConfig extends StoreConsumerElement<SeedState, any> {
             this.store?.dispatch(fetchMappingAlignment(this.mappingAlignment));
         if (this.dataLabels)
             this.store?.dispatch(fetchDataLabels(this.dataLabels));
+        if (this.dataLabelsJsonLD)
+            this.store?.dispatch(fetchDataLabelsJsonLD(this.dataLabelsJsonLD));
         if (this.ontologyUrls)
             this.store?.dispatch(fetchResourceCenteredJson(this.ontologyUrls));
     }
