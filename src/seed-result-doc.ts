@@ -3,7 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 
 import { Document } from "./redux/searchTypes";
 
-//import log from "./logging";
+import log from "./logging";
 
 /*
  * This web component displays text fields of a document in search
@@ -35,19 +35,47 @@ export class SeedResultDoc extends LitElement {
         );
         return html`<div class="fields">
             ${fields.map((f) =>
-                this.renderField(f, this.highlight?.[f] ?? this.document[f]),
+                this.renderField(
+                    this,
+                    f,
+                    this.highlight?.[f] ?? this.document[f],
+                ),
             )}
         </div>`;
     }
 
-    renderField(field: string, value: string): HTMLTemplateResult {
+    renderField(
+        thisExpr: this,
+        field: string,
+        value: string | Array<string>,
+    ): HTMLTemplateResult {
+        log.info("Solr document field value", value);
+        if (!Array.isArray(value)) value = [value];
         return html`<div class="field">
             <span class="field-name">
-                <span class="name"><seed-data-label key="${field}"><seed-data-label></span
+                <span class="name"
+                    ><seed-data-label key="${field}"></seed-data-label></span
                 ><span class="field-name-value-sep">: </span>
             </span>
-            <span class="field-value" .innerHTML="${value}"></span>
+            <span class="field-value"
+                >${value.map((v) => thisExpr.renderValue(thisExpr, v))}</span
+            >
         </div>`;
+    }
+
+    noLabelRegex: RegExp = /\s/;
+
+    renderValue(thisExpr: this, value: string) {
+        if (typeof value !== "string")
+            console.log("type", typeof value, value, thisExpr.noLabelRegex);
+        return typeof value !== "string" || value.match(thisExpr.noLabelRegex)
+            ? html`<span
+                  class="field-single-value"
+                  .innerHTML="${value}"
+              ></span>`
+            : html`<span class="field-single-value"
+                  ><seed-data-label key="${value}"></seed-data-label
+              ></span>`;
     }
 
     static styles: CSSResultGroup = [
@@ -67,6 +95,9 @@ export class SeedResultDoc extends LitElement {
             }
             em {
                 background-color: var(--seed-highlight-background, yellow);
+            }
+            .field-single-value:nth-child(n + 2) {
+                margin-left: 1em;
             }
         `,
     ];
