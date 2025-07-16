@@ -1,5 +1,6 @@
 // https://github.com/vitejs/vite/discussions/4085
 // https://dev.to/leon/vite-lit-and-storybook-43f
+/// <reference types="vitest/config" />
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, normalizePath } from "vite";
@@ -50,6 +51,11 @@ export default defineConfig(({ command, mode }) => {
                     secure: false,
                 },
             },
+        },
+        test: {
+            include: ["test/**/*.test.ts"],
+            name: "SEED",
+            setup: ["test/**/*.setup.ts"],
         },
     };
 });
