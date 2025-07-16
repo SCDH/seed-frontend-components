@@ -11,7 +11,7 @@ export interface JsonLD<T> {
     /**
      * The context object.
      */
-    "@context"?: Object;
+    "@context"?: unknown;
 }
 
 /**
